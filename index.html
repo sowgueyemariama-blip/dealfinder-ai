@@ -1,0 +1,2117 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>DealFinder AI — Trouve. Compare. Économise.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F3F1EA;--surface:#FFFFFF;--surface2:#ECE9DF;--line:#E2DFD3;--text:#1C231E;--text2:#667068;--text3:#8B948C;--brand:#0E6B52;--brand-deep:#0A5240;--brand-soft:#E1EFE7;--brand-ink:#0B4634;--amber:#A85E17;--amber-soft:#F5E7D2;--red:#B23B2E;--red-soft:#F6E2DE;--shadow:0 8px 28px rgba(28,35,30,.09);--r:16px}
+html[data-theme="dark"]{--bg:#0F1310;--surface:#171C18;--surface2:#1F2620;--line:#283129;--text:#E9EEE8;--text2:#9AA59B;--text3:#6E7A70;--brand:#3FBD92;--brand-deep:#2F9E77;--brand-soft:#17261F;--brand-ink:#7ED9B8;--amber:#D9A05F;--amber-soft:#2E2416;--red:#E08577;--red-soft:#33201C;--shadow:0 8px 28px rgba(0,0,0,.4)}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{font-family:"Plus Jakarta Sans",sans-serif;background:#10221B;color:var(--text);-webkit-font-smoothing:antialiased}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+img{display:block}
+h1,h2,h3,.price{font-family:"Sora",sans-serif}
+html[dir="rtl"] .chev{margin-left:0;margin-right:auto}
+html[dir="rtl"] .search-bar{padding:6px 14px 6px 6px}
+.stage{min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:28px}
+.phone{width:412px;max-width:100%;height:min(880px,calc(100dvh - 40px));background:#0C0F0D;border-radius:40px;padding:9px;box-shadow:0 30px 80px rgba(0,0,0,.5);flex:none}
+.screen{width:100%;height:100%;background:var(--bg);border-radius:32px;overflow:hidden;display:flex;flex-direction:column;position:relative;transition:background .25s}
+.statusbar{flex:none;display:flex;justify-content:space-between;align-items:center;padding:9px 22px 4px;font-size:11.5px;font-weight:600;color:var(--text)}
+.statusbar .right{display:flex;align-items:center;gap:6px}
+.topbar{flex:none;display:flex;align-items:center;gap:9px;padding:10px 16px 9px;border-bottom:1px solid var(--line);background:var(--surface)}
+.brandline{display:flex;align-items:center;gap:8px;font-family:"Sora";font-weight:700;font-size:15.5px;letter-spacing:-.01em}
+.brandline .logo{color:var(--brand)}
+.topbar .grow{flex:1}
+.icon-btn{width:36px;height:36px;border-radius:11px;display:inline-flex;align-items:center;justify-content:center;color:var(--text2);transition:.15s;flex:none}
+.icon-btn:hover{background:var(--surface2);color:var(--text)}
+main{flex:1;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
+.view{display:none;padding:18px 16px 26px;animation:vin .25s ease}
+.view.active{display:block}
+@keyframes vin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.hero{padding:10px 2px 18px}
+.hero h1{font-size:26px;line-height:1.22;letter-spacing:-.02em}
+.hero h1 em{font-style:normal;color:var(--brand)}
+.hero p{margin-top:7px;color:var(--text2);font-size:13.5px;line-height:1.55;max-width:330px}
+.search-bar{display:flex;align-items:center;gap:8px;background:var(--surface);border:1.5px solid var(--line);border-radius:15px;padding:6px 6px 6px 14px;transition:.15s;box-shadow:var(--shadow)}
+.search-bar:focus-within{border-color:var(--brand)}
+.search-bar svg{color:var(--text3);flex:none}
+.search-bar input{flex:1;border:none;outline:none;background:none;font-size:14px;min-width:0}
+.search-bar input::placeholder{color:var(--text3)}
+.search-go{flex:none;width:40px;height:40px;border-radius:11px;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;transition:.15s}
+html[data-theme="dark"] .search-go{color:#0F1310}
+.search-go:hover{background:var(--brand-deep)}
+.img-search{margin-top:10px;width:100%;display:flex;align-items:center;justify-content:center;gap:9px;padding:12px;border:1.5px dashed var(--line);border-radius:15px;color:var(--text2);font-size:13.5px;font-weight:600;background:transparent;transition:.15s}
+.img-search:hover{border-color:var(--brand);color:var(--brand)}
+.sect{margin:24px 0 11px;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text3)}
+.cats{display:flex;flex-wrap:wrap;gap:8px}
+.cat-chip{display:inline-flex;align-items:center;gap:7px;padding:9px 13px;background:var(--surface);border:1px solid var(--line);border-radius:12px;font-size:13px;font-weight:600;color:var(--text);transition:.15s}
+.cat-chip svg{color:var(--brand)}
+.cat-chip:hover{border-color:var(--brand);background:var(--brand-soft)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.pop-chip{padding:8px 13px;border-radius:99px;border:1px solid var(--line);background:transparent;font-size:12.5px;color:var(--text2);transition:.15s}
+.pop-chip:hover{border-color:var(--brand);color:var(--brand)}
+.ad-slot{margin-top:26px;border:1px solid var(--line);border-radius:14px;padding:13px 15px;display:flex;align-items:center;gap:12px;background:var(--surface)}
+.ad-slot .tag{font-size:9.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);border:1px solid var(--line);border-radius:5px;padding:3px 6px;flex:none}
+.ad-slot p{font-size:12px;color:var(--text2);line-height:1.5}
+.ad-slot b{color:var(--text)}
+.search-head{display:flex;gap:9px;align-items:center}
+.search-head .search-bar{flex:1;box-shadow:none}
+.f-btn{position:relative;flex:none;height:46px;padding:0 13px;border:1.5px solid var(--line);border-radius:14px;background:var(--surface);display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;color:var(--text2);transition:.15s}
+.f-btn:hover{border-color:var(--brand);color:var(--brand)}
+.f-btn .cnt{position:absolute;top:-6px;right:-6px;min-width:18px;height:18px;border-radius:99px;background:var(--brand);color:#fff;font-size:10.5px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 5px}
+html[data-theme="dark"] .f-btn .cnt{color:#0F1310}
+.interp{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 4px}
+.interp span{font-size:11.5px;font-weight:600;color:var(--brand-ink);background:var(--brand-soft);border-radius:99px;padding:5px 10px}
+.ai-steps{margin:22px 2px;display:grid;gap:13px}
+.step{display:flex;align-items:center;gap:11px;font-size:13.5px;color:var(--text3);transition:.2s}
+.step .dot{width:9px;height:9px;border-radius:99px;background:var(--line);flex:none}
+.step.active{color:var(--text);font-weight:600}
+.step.active .dot{background:var(--brand);animation:pulse 1s infinite}
+.step.done{color:var(--text2)}
+.step.done .dot{background:var(--brand);position:relative}
+.step.done .dot::after{content:"";position:absolute;inset:2px;border-radius:99px;background:var(--surface)}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(14,107,82,.35)}70%{box-shadow:0 0 0 8px rgba(14,107,82,0)}100%{box-shadow:0 0 0 0 rgba(14,107,82,0)}}
+.ready-line{display:flex;align-items:center;gap:8px;margin:16px 2px 2px;font-size:13px;font-weight:600;color:var(--brand)}
+.meta-line{margin:4px 2px 12px;font-size:12px;color:var(--text3)}
+.clarify{margin:16px 0;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:17px;box-shadow:var(--shadow)}
+.clarify h3{font-size:15px;margin-bottom:6px}
+.clarify p{font-size:13px;color:var(--text2);line-height:1.55;margin-bottom:12px}
+.clarify .chips{margin-top:10px}
+.no-res{text-align:center;padding:38px 12px 20px}
+.no-res .ic{width:58px;height:58px;margin:0 auto 14px;border-radius:18px;background:var(--surface2);display:flex;align-items:center;justify-content:center;color:var(--text3)}
+.no-res h3{font-size:16px;margin-bottom:7px}
+.no-res p{font-size:13px;color:var(--text2);line-height:1.55;max-width:300px;margin:0 auto 16px}
+.p-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px;display:flex;gap:12px;margin-bottom:11px;cursor:pointer;transition:.15s}
+.p-card:hover{border-color:var(--brand)}
+.p-img{width:94px;height:94px;border-radius:12px;object-fit:cover;background:var(--surface2);flex:none}
+.p-body{flex:1;min-width:0;display:flex;flex-direction:column}
+.p-top{display:flex;justify-content:space-between;align-items:center}
+.p-cat{font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text3)}
+.fav-btn{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:var(--text3);transition:.15s;margin:-4px -4px 0 0}
+.fav-btn:hover{background:var(--brand-soft);color:var(--brand)}
+.fav-btn.on{color:var(--red)}
+.p-card h3{font-size:14px;line-height:1.32;margin:3px 0 2px;letter-spacing:-.01em}
+.p-specs{font-size:11.5px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lowest-lbl{margin-top:6px;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--brand)}
+.price-row{display:flex;align-items:baseline;gap:7px;flex-wrap:wrap}
+.price{font-size:16.5px;font-weight:700;color:var(--brand);letter-spacing:-.01em}
+.conv{font-size:11px;color:var(--text3)}
+.p-sub{font-size:11.5px;color:var(--text2);margin-top:1px}
+.p-sub .ok{color:var(--brand);font-weight:600}
+.p-actions{display:flex;gap:7px;margin-top:9px;align-items:center}
+.btn{border-radius:11px;padding:9px 14px;font-size:12.5px;font-weight:700;display:inline-flex;align-items:center;gap:7px;transition:.15s;justify-content:center}
+.btn-brand{background:var(--brand);color:#fff}
+html[data-theme="dark"] .btn-brand{color:#0F1310}
+.btn-brand:hover{background:var(--brand-deep)}
+.btn-ghost{border:1.5px solid var(--line);color:var(--text2)}
+.btn-ghost:hover{border-color:var(--brand);color:var(--brand)}
+.btn-block{width:100%}
+.p-actions .btn-brand{flex:1}
+.fav-item{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px;display:flex;gap:12px;margin-bottom:11px}
+.fav-item .btn{padding:7px 10px;font-size:11.5px}
+.fav-foot{display:flex;gap:7px;margin-top:9px}
+.bottom-nav{flex:none;display:flex;border-top:1px solid var(--line);background:var(--surface);padding:7px 8px calc(9px + env(safe-area-inset-bottom))}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0 3px;border-radius:12px;font-size:10.5px;font-weight:600;color:var(--text3);transition:.15s;position:relative}
+.nav-btn svg{transition:.15s}
+.nav-btn.active{color:var(--brand)}
+.nav-btn.active svg{transform:translateY(-1px)}
+.nav-btn .bub{position:absolute;top:2px;right:calc(50% - 20px);min-width:16px;height:16px;border-radius:99px;background:var(--red);color:#fff;font-size:9.5px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 4px}
+.view-title{font-size:21px;letter-spacing:-.02em;margin-bottom:15px}
+.acct{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:flex;gap:13px;align-items:center;margin-bottom:22px}
+.avatar{width:46px;height:46px;border-radius:14px;background:var(--brand-soft);color:var(--brand);display:flex;align-items:center;justify-content:center;font-family:"Sora";font-weight:700;font-size:16px;flex:none}
+.acct .grow{flex:1;min-width:0}
+.acct h3{font-size:14.5px}
+.acct p{font-size:12px;color:var(--text2);margin-top:3px;line-height:1.45;word-break:break-all}
+.p-group{margin-bottom:22px}
+.p-group>h3{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin-bottom:11px}
+.p-row{display:flex;align-items:center;gap:12px;padding:12px 2px;border-bottom:1px solid var(--line)}
+.p-row:last-child{border-bottom:none}
+.p-row .lbl{flex:1;font-size:13.5px;font-weight:600}
+.p-row .lbl small{display:block;font-weight:500;font-size:11.5px;color:var(--text3);margin-top:2px}
+.p-row select{background:var(--surface);border:1.5px solid var(--line);border-radius:10px;padding:8px 10px;font-size:13px;outline:none;max-width:180px}
+.seg{display:flex;border:1.5px solid var(--line);border-radius:11px;overflow:hidden}
+.seg button{padding:8px 13px;font-size:12.5px;font-weight:600;color:var(--text2);display:flex;align-items:center;gap:6px}
+.seg button.on{background:var(--brand);color:#fff}
+html[data-theme="dark"] .seg button.on{color:#0F1310}
+.sw{position:relative;width:44px;height:26px;flex:none}
+.sw input{opacity:0;position:absolute;inset:0;cursor:pointer;z-index:1}
+.sw i{position:absolute;inset:0;border-radius:99px;background:var(--line);transition:.2s}
+.sw i::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:99px;background:#fff;transition:.2s;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.sw input:checked+i{background:var(--brand)}
+.sw input:checked+i::after{transform:translateX(18px)}
+html[dir="rtl"] .sw input:checked+i::after{transform:translateX(-18px)}
+.stat-line{display:flex;gap:0;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 4px;margin-bottom:12px}
+.stat-line>div{flex:1;text-align:center}
+.stat-line b{display:block;font-family:"Sora";font-size:17px;color:var(--brand)}
+.stat-line span{font-size:10.5px;color:var(--text3)}
+.link-row{display:flex;align-items:center;gap:11px;width:100%;padding:13px 2px;border-bottom:1px solid var(--line);font-size:13.5px;font-weight:600;text-align:left;transition:.15s}
+.link-row:hover{color:var(--brand)}
+.link-row svg:first-child{color:var(--text3)}
+.link-row .chev{margin-left:auto}
+.version{text-align:center;font-size:11px;color:var(--text3);margin-top:6px}
+.btn-danger{border:1.5px solid var(--red);color:var(--red);width:100%;border-radius:11px;padding:10px;font-size:12.5px;font-weight:700;transition:.15s}
+.btn-danger:hover{background:var(--red-soft)}
+.btn-danger.armed{background:var(--red);color:#fff}
+.sheet-wrap{position:absolute;inset:0;z-index:50;visibility:hidden}
+.sheet-wrap.open{visibility:visible}
+.sheet-bg{position:absolute;inset:0;background:rgba(12,16,13,.5);opacity:0;transition:.22s}
+.sheet-wrap.open .sheet-bg{opacity:1}
+.sheet{position:absolute;left:0;right:0;bottom:0;max-height:88%;background:var(--bg);border-radius:24px 24px 0 0;transform:translateY(103%);transition:.26s cubic-bezier(.32,.72,.28,1);display:flex;flex-direction:column}
+.sheet-wrap.open .sheet{transform:none}
+.sheet-grab{width:40px;height:4px;border-radius:99px;background:var(--line);margin:10px auto 2px;flex:none}
+.sheet-head{flex:none;display:flex;align-items:center;gap:10px;padding:8px 16px 10px}
+.sheet-head h3{font-size:16px;letter-spacing:-.01em;flex:1}
+.sheet-x{width:32px;height:32px;border-radius:10px;background:var(--surface2);display:flex;align-items:center;justify-content:center;color:var(--text2)}
+.sheet-body{overflow-y:auto;padding:4px 16px 22px}
+.center{padding:22px 20px;text-align:center}
+.center .big-ic{width:56px;height:56px;margin:0 auto 14px;border-radius:18px;background:var(--brand-soft);color:var(--brand);display:flex;align-items:center;justify-content:center}
+.center h3{font-size:17px;margin-bottom:8px}
+.center p{font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:16px}
+.pd-img{width:100%;aspect-ratio:16/10;object-fit:cover;border-radius:14px;background:var(--surface2)}
+.pd-cat{margin-top:14px;font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--brand)}
+.pd-name{font-size:19px;line-height:1.28;margin:5px 0 10px;letter-spacing:-.015em}
+.pd-specs{display:grid;gap:7px;margin:4px 0 6px}
+.pd-specs div{display:flex;gap:9px;font-size:13px;color:var(--text2);align-items:flex-start}
+.pd-specs svg{color:var(--brand);flex:none;margin-top:2px}
+.offers-head{display:flex;align-items:baseline;justify-content:space-between;margin:20px 0 10px}
+.offers-head h3{font-size:14.5px}
+.offers-head span{font-size:11.5px;color:var(--text3)}
+.offer-row{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:9px}
+.offer-row.off{opacity:.62}
+.or-top{display:flex;gap:11px;align-items:center}
+.store-av{width:38px;height:38px;border-radius:11px;background:var(--brand-soft);color:var(--brand);display:flex;align-items:center;justify-content:center;font-family:"Sora";font-weight:700;font-size:15px;flex:none}
+.or-info{flex:1;min-width:0}
+.or-info b{font-size:13.5px;display:block}
+.or-meta{display:flex;flex-wrap:wrap;gap:4px 10px;margin-top:3px;font-size:11px;color:var(--text3)}
+.or-meta .ok{color:var(--brand);font-weight:600}
+.or-meta .ko{color:var(--red);font-weight:600}
+.or-price{text-align:right;flex:none}
+.or-price .price{font-size:15px}
+.or-badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--brand);background:var(--brand-soft);border-radius:6px;padding:3px 7px;margin-bottom:4px}
+.or-aff{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;color:var(--text3);border:1px solid var(--line);border-radius:6px;padding:3px 7px;margin-top:4px}
+.or-foot{display:flex;justify-content:flex-end;margin-top:9px}
+.or-foot .btn{padding:8px 13px;font-size:12px}
+.btn-disabled{background:var(--surface2)!important;color:var(--text3)!important;cursor:default}
+.pd-actions{position:sticky;bottom:0;background:var(--bg);margin:8px -16px -22px;padding:12px 16px calc(14px + env(safe-area-inset-bottom));border-top:1px solid var(--line);display:flex;gap:9px}
+.pd-actions .btn-brand{flex:1}
+.transparency{margin-top:16px;font-size:11.5px;color:var(--text3);line-height:1.6;border-top:1px dashed var(--line);padding-top:12px}
+.f-sect{margin-bottom:18px}
+.f-sect>h4{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:10px}
+.seg-col{display:flex;flex-wrap:wrap;gap:8px}
+.sort-pill{padding:8px 13px;border:1.5px solid var(--line);border-radius:99px;font-size:12.5px;font-weight:600;color:var(--text2);transition:.15s}
+.sort-pill.on{border-color:var(--brand);background:var(--brand-soft);color:var(--brand-ink)}
+.two-inp{display:flex;gap:10px}
+.two-inp label{flex:1;font-size:11.5px;color:var(--text3);font-weight:600}
+.two-inp input{width:100%;margin-top:5px;background:var(--surface);border:1.5px solid var(--line);border-radius:10px;padding:9px 11px;font-size:13.5px;outline:none}
+.two-inp input:focus{border-color:var(--brand)}
+.merch-list{display:grid;gap:4px}
+.merch-list label{display:flex;align-items:center;gap:10px;padding:8px 2px;font-size:13.5px;cursor:pointer}
+.merch-list input{width:17px;height:17px;accent-color:var(--brand)}
+.f-foot{flex:none;display:flex;gap:10px;padding:12px 16px calc(14px + env(safe-area-inset-bottom));border-top:1px solid var(--line);background:var(--bg)}
+.f-foot .btn{flex:1}
+.share-apps{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.share-app-btn{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 4px;background:var(--surface);border:1px solid var(--line);border-radius:12px;font-size:10.5px;font-weight:600;color:var(--text2);transition:.15s}
+.share-app-btn:hover{border-color:var(--brand);color:var(--brand)}
+.share-app-btn svg{color:var(--brand)}
+.auth-err{display:none;background:var(--red-soft);color:var(--red);font-size:12.5px;font-weight:600;border-radius:10px;padding:10px 12px;margin-bottom:12px;line-height:1.5}
+.auth-err.show{display:block}
+@keyframes shake{0%,100%{transform:none}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.shake{animation:shake .4s}
+.login-inp{width:100%;background:var(--surface);border:1.5px solid var(--line);border-radius:11px;padding:11px 13px;font-size:13.5px;outline:none;margin-bottom:10px}
+.login-inp:focus{border-color:var(--brand)}
+.auth-note{font-size:11.5px;color:var(--text3);line-height:1.6;margin-top:12px}
+.toasts{position:absolute;top:14px;left:14px;right:14px;z-index:99;display:grid;gap:8px;pointer-events:none}
+.toast{background:var(--text);color:var(--bg);border-radius:12px;padding:11px 14px;font-size:12.5px;font-weight:600;display:flex;gap:9px;align-items:center;box-shadow:var(--shadow);animation:tin .25s ease}
+html[data-theme="dark"] .toast{background:#E9EEE8;color:#0F1310}
+.toast svg{flex:none}
+@keyframes tin{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+.off-bar{position:absolute;top:0;left:0;right:0;z-index:60;background:var(--amber-soft);color:var(--amber);font-size:12px;font-weight:600;text-align:center;padding:7px 12px;display:none;align-items:center;justify-content:center;gap:8px}
+.off-bar.show{display:flex}
+.adm-wrap{position:absolute;inset:0;z-index:70;visibility:hidden}.adm-wrap.open{visibility:visible}
+.adm-bg{position:absolute;inset:0;background:rgba(12,16,13,.55);opacity:0;transition:.22s}.adm-wrap.open .adm-bg{opacity:1}
+.adm-panel{position:absolute;left:0;right:0;bottom:0;max-height:92%;background:var(--bg);border-radius:24px 24px 0 0;transform:translateY(103%);transition:.26s cubic-bezier(.32,.72,.28,1);display:flex;flex-direction:column}
+.adm-wrap.open .adm-panel{transform:none}
+.adm-body{overflow-y:auto;padding:0 16px 18px}
+.adm-tabs{display:flex;gap:6px;margin:2px 16px 12px;flex-wrap:wrap}
+.adm-tabs button{flex:1;padding:9px 6px;border:1.5px solid var(--line);border-radius:12px;background:var(--surface);font-weight:700;font-size:12px;color:var(--text2);min-width:70px}
+.adm-tabs button.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+html[data-theme="dark"] .adm-tabs button.on{color:#0F1310}
+.adm-f{display:grid;gap:8px;margin-bottom:14px}
+.adm-f input,.adm-f textarea{width:100%;background:var(--surface);border:1.5px solid var(--line);border-radius:10px;padding:9px 11px;font-size:13px;outline:none;font-family:inherit}
+.adm-f textarea{min-height:100px;resize:vertical;line-height:1.5}
+.adm-f input:focus,.adm-f textarea:focus{border-color:var(--brand)}
+.adm-r2{display:flex;gap:8px}.adm-r2>div{flex:1}
+.adm-item{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px;margin-bottom:8px}
+.adm-item b{font-size:13px;display:block}
+.adm-item small{color:var(--text3)}
+.adm-item .line{display:flex;gap:8px;align-items:center;margin-top:7px;flex-wrap:wrap}
+.adm-item input[type=number]{width:110px;background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:6px 8px;font-size:13px}
+.adm-item input[type=url]{flex:1 1 100%;background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:6px 8px;font-size:12px}
+.adm-mini{padding:7px 10px;border-radius:9px;font-size:12px;font-weight:700;border:1.5px solid var(--line);color:var(--text2)}
+.adm-mini.del{color:var(--red);border-color:var(--red)}
+.adm-mini.del.armed{background:var(--red);color:#fff}
+.adm-note{font-size:11.5px;color:var(--text3);line-height:1.55;margin:4px 0 12px}
+.adm-lbl{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin:2px 0 4px}
+@media (max-width:560px){.stage{padding:0}.phone{width:100%;height:100dvh;border-radius:0;padding:0;box-shadow:none}.screen{border-radius:0}}
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="phone"><div class="screen" id="screen">
+    <div class="off-bar" id="off-bar"></div>
+    <div class="statusbar"><span id="clock">--:--</span><span class="right">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0"/><circle cx="12" cy="19" r="1.4" fill="currentColor" stroke="none"/></svg>
+      <svg width="15" height="13" viewBox="0 0 26 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="8" width="18" height="9" rx="2.5"/><path d="M22.5 11v3" stroke-linecap="round"/><rect x="4.5" y="10.5" width="10" height="4" rx="1" fill="currentColor" stroke="none"/></svg>
+    </span></div>
+    <header class="topbar">
+      <div class="brandline">
+        <svg class="logo" width="24" height="24" viewBox="0 0 48 48" fill="none"><circle cx="20" cy="20" r="14.5" stroke="currentColor" stroke-width="3.6"/><line x1="30.5" y1="30.5" x2="42" y2="42" stroke="currentColor" stroke-width="4.4" stroke-linecap="round"/><path d="M14.5 15h6.2l6.8 6.8v6.2h-6.2L14.5 21.2Z" fill="currentColor"/><circle cx="17.6" cy="18.1" r="1.7" fill="var(--surface)"/></svg>
+        DealFinder&nbsp;AI
+      </div>
+      <span class="grow"></span>
+      <button class="icon-btn" id="theme-btn" aria-label="Changer de thème"></button>
+    </header>
+    <main id="main">
+      <section class="view active" id="view-home">
+        <div class="hero">
+          <h1 data-i18n="hero_title">Trouve. <em>Compare.</em> Économise.</h1>
+          <p data-i18n="hero_sub">Décrivez ce que vous cherchez en langage naturel : DealFinder AI compare les offres des boutiques partenaires.</p>
+        </div>
+        <form class="search-bar" id="home-form">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5 21 21"/></svg>
+          <input id="home-input" data-i18n-ph="search_ph" placeholder="Ex. téléphone Samsung à moins de 150 000 FCFA" autocomplete="off">
+          <button class="search-go" type="submit" aria-label="Rechercher"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+        </form>
+        <button class="img-search" id="img-btn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h2.6L8.8 5.4h6.4L17.4 8H20a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1Z"/><circle cx="12" cy="13.2" r="3.4"/></svg>
+          <span data-i18n="img_search">Rechercher avec une image</span>
+        </button>
+        <input type="file" id="img-input" accept="image/*" hidden>
+        <h2 class="sect" data-i18n="cats_title">Catégories</h2>
+        <div class="cats" id="cats"></div>
+        <h2 class="sect" data-i18n="popular_title">Recherches populaires</h2>
+        <div class="chips" id="popular"></div>
+        <div class="ad-slot">
+          <span class="tag" data-i18n="ad_label">Publicité</span>
+          <p><b>DealFinder AI</b> — <span data-i18n="ad_text">emplacement publicitaire natif et discret.</span></p>
+        </div>
+      </section>
+      <section class="view" id="view-search">
+        <div class="search-head">
+          <form class="search-bar" id="search-form">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5 21 21"/></svg>
+            <input id="search-input" autocomplete="off">
+          </form>
+          <button class="f-btn" id="filters-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/><circle cx="9.5" cy="7" r="2" fill="var(--surface)"/><circle cx="14.5" cy="12" r="2" fill="var(--surface)"/><circle cx="8" cy="17" r="2" fill="var(--surface)"/></svg>
+            <span data-i18n="filters">Filtres</span>
+            <span class="cnt" id="f-count" hidden>0</span>
+          </button>
+        </div>
+        <div class="interp" id="interp" hidden></div>
+        <div id="search-state"></div>
+        <div id="results-zone" hidden>
+          <div class="ready-line" id="ready-line" hidden>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 13l4 4L19 7"/></svg>
+            <span data-i18n="state_ready">Résultats prêts.</span>
+          </div>
+          <div class="meta-line" id="results-meta"></div>
+          <div id="results"></div>
+        </div>
+        <div id="no-results"></div>
+        <div id="idle-search"></div>
+        <div class="ad-slot" id="ad-results" hidden>
+          <span class="tag" data-i18n="ad_label">Publicité</span>
+          <p><b>DealFinder AI</b> — <span data-i18n="ad_text2">bannière modérée, jamais au-dessus des résultats.</span></p>
+        </div>
+      </section>
+      <section class="view" id="view-favs">
+        <h2 class="view-title" data-i18n="favs_title">Favoris</h2>
+        <div id="favs-list"></div>
+      </section>
+      <section class="view" id="view-profile">
+        <h2 class="view-title" data-i18n="prof_title">Profil</h2>
+        <div id="acct-card"></div>
+        <div class="p-group">
+          <h3 data-i18n="prof_history">Historique de recherches</h3>
+          <div class="chips" id="hist-chips"></div>
+        </div>
+        <button class="btn btn-brand btn-block" id="share-app-btn" style="padding:13px">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="12" r="2.6"/><circle cx="17.5" cy="5.5" r="2.6"/><circle cx="17.5" cy="18.5" r="2.6"/><path d="M8.3 10.8l6.9-4M8.3 13.2l6.9 4"/></svg>
+          <span data-i18n="prof_share_app">Partager DealFinder AI</span>
+        </button>
+        <div class="p-group" style="margin-top:22px">
+          <h3 data-i18n="prof_settings">Paramètres</h3>
+          <div class="p-row">
+            <span class="lbl" data-i18n="prof_lang">Langue</span>
+            <select id="set-lang">
+              <option value="fr">Français</option><option value="en">English</option>
+              <option value="es">Español</option><option value="pt">Português</option><option value="ar">العربية</option>
+            </select>
+          </div>
+          <div class="p-row">
+            <span class="lbl" data-i18n="prof_currency">Devise d'affichage</span>
+            <select id="set-cur"><option value="FCFA">FCFA / XOF</option><option value="EUR">EUR €</option><option value="USD">USD $</option><option value="GBP">GBP £</option></select>
+          </div>
+          <div class="p-row">
+            <span class="lbl" data-i18n="prof_theme">Thème</span>
+            <div class="seg" id="set-theme">
+              <button data-th="light"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5 5l1.5 1.5M17.5 17.5 19 19M19 5l-1.5 1.5M6.5 17.5 5 19"/></svg><span data-i18n="prof_light">Clair</span></button>
+              <button data-th="dark"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 13A8.5 8.5 0 1 1 11 3a7 7 0 0 0 10 10Z"/></svg><span data-i18n="prof_dark">Sombre</span></button>
+            </div>
+          </div>
+          <div class="p-row">
+            <span class="lbl" data-i18n="prof_notif">Alertes baisse de prix<small data-i18n="prof_notif_hint">Uniquement si une baisse réelle est détectée dans les données</small></span>
+            <span class="sw"><input type="checkbox" id="set-notif"><i></i></span>
+          </div>
+          <div class="p-row"><span class="lbl" style="font-size:11.5px;color:var(--text3)" id="cur-note"></span></div>
+        </div>
+        <div class="p-group">
+          <h3 data-i18n="prof_stats">Statistiques locales (anonymisées)</h3>
+          <div class="stat-line" id="stat-line"></div>
+          <button class="btn-danger" id="erase-btn" data-i18n="prof_erase">Effacer mes données locales</button>
+        </div>
+        <div class="p-group">
+          <h3 data-i18n="prof_legal">Informations</h3>
+          <button class="link-row" data-legal="cgu"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M7 3h7l4 4v14H7zM14 3v4h4M10 12h6M10 16h6"/></svg><span data-i18n="prof_cgu">Conditions générales d'utilisation</span><svg class="chev" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></button>
+          <button class="link-row" data-legal="privacy"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M12 3l7 2.8v5.4c0 4.6-3 7.6-7 9.3-4-1.7-7-4.7-7-9.3V5.8Z"/><path d="M9 12l2 2 4-4.5" stroke-linecap="round"/></svg><span data-i18n="prof_privacy">Politique de confidentialité</span><svg class="chev" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></button>
+          <button class="link-row" data-legal="about"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5v.5"/></svg><span data-i18n="prof_about">À propos</span><svg class="chev" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></button>
+        </div>
+        <p class="version">DealFinder AI · v1.8.4</p>
+      </section>
+    </main>
+    <nav class="bottom-nav">
+      <button class="nav-btn active" data-view="home"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10.5 12 3.5l8.5 7M5.5 9.5V20h4.5v-5.5h4V20h4.5V9.5"/></svg><span data-i18n="nav_home">Accueil</span></button>
+      <button class="nav-btn" data-view="search"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5 21 21"/></svg><span data-i18n="nav_search">Recherche</span></button>
+      <button class="nav-btn" data-view="favs"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M19 14c1.5-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.5 4.04 3 5.5l7 7Z"/></svg><span data-i18n="nav_favs">Favoris</span><span class="bub" id="fav-bub" hidden>0</span></button>
+      <button class="nav-btn" data-view="profile"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4.5 20.5c.7-3.6 3.8-5.5 7.5-5.5s6.8 1.9 7.5 5.5"/></svg><span data-i18n="nav_profile">Profil</span></button>
+    </nav>
+    <div class="toasts" id="toasts"></div>
+    <div class="sheet-wrap" id="sheet-product">
+      <div class="sheet-bg" data-close></div>
+      <div class="sheet"><div class="sheet-grab"></div>
+        <div class="sheet-head"><h3 data-i18n="details">Fiche produit</h3><button class="sheet-x" data-close><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+        <div class="sheet-body" id="pd-body"></div>
+      </div>
+    </div>
+    <div class="sheet-wrap" id="sheet-filters">
+      <div class="sheet-bg" data-close></div>
+      <div class="sheet"><div class="sheet-grab"></div>
+        <div class="sheet-head"><h3 data-i18n="filters">Filtres</h3><button class="sheet-x" data-close><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+        <div class="sheet-body" id="filters-body"></div>
+        <div class="f-foot"><button class="btn btn-ghost" id="f-reset" data-i18n="reset">Réinitialiser</button><button class="btn btn-brand" id="f-apply" data-i18n="apply">Appliquer</button></div>
+      </div>
+    </div>
+    <div class="sheet-wrap" id="sheet-redirect">
+      <div class="sheet-bg" data-close></div>
+      <div class="sheet"><div class="sheet-grab"></div>
+        <div class="sheet-body" id="redirect-body"></div>
+      </div>
+    </div>
+    <div class="sheet-wrap" id="sheet-share">
+      <div class="sheet-bg" data-close></div>
+      <div class="sheet"><div class="sheet-grab"></div>
+        <div class="sheet-head"><h3 data-i18n="share">Partager</h3><button class="sheet-x" data-close><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+        <div class="sheet-body">
+          <p style="font-size:12.5px;color:var(--text2);margin-bottom:12px" data-i18n="share_fb_hint">Choisissez une application pour envoyer à vos contacts, ou copiez le message :</p>
+          <div class="share-apps" id="share-apps"></div>
+          <textarea id="share-text" readonly style="width:100%;height:120px;background:var(--surface);border:1.5px solid var(--line);border-radius:12px;padding:12px;font-size:12.5px;line-height:1.6;resize:none;outline:none"></textarea>
+          <button class="btn btn-brand btn-block" id="share-copy" style="margin-top:10px;padding:12px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10" stroke-linecap="round"/></svg><span data-i18n="copy_msg">Copier le message</span></button>
+        </div>
+      </div>
+    </div>
+    <div class="sheet-wrap" id="sheet-login">
+      <div class="sheet-bg" data-close></div>
+      <div class="sheet"><div class="sheet-grab"></div>
+        <div class="sheet-head"><h3 data-i18n="login_title">Se connecter</h3><button class="sheet-x" data-close><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+        <div class="sheet-body">
+          <div class="auth-err" id="auth-err"></div>
+          <form id="auth-form" novalidate>
+            <input class="login-inp" id="a-name" data-i18n-ph="login_name" placeholder="Nom affiché" autocomplete="name">
+            <input class="login-inp" id="a-email" type="email" data-i18n-ph="login_email" placeholder="E-mail" autocomplete="email">
+            <button class="btn btn-brand btn-block" id="a-submit" type="submit" style="padding:12px;margin-top:4px" data-i18n="login_btn">Se connecter</button>
+          </form>
+          <p class="auth-note" data-i18n="auth_note">Votre nom et votre e-mail sont enregistrés pour votre compte. Vous pouvez vous déconnecter ou effacer vos données à tout moment.</p>
+        </div>
+      </div>
+    </div>
+    <div class="sheet-wrap" id="sheet-img">
+      <div class="sheet-bg" data-close></div>
+      <div class="sheet"><div class="sheet-grab"></div>
+        <div class="sheet-body" id="img-body"></div>
+      </div>
+    </div>
+    <div class="sheet-wrap" id="sheet-legal">
+      <div class="sheet-bg" data-close></div>
+      <div class="sheet"><div class="sheet-grab"></div>
+        <div class="sheet-head"><h3 id="legal-title"></h3><button class="sheet-x" data-close><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+        <div class="sheet-body" id="legal-body"></div>
+      </div>
+    </div>
+  </div></div>
+</div>
+
+<script>
+"use strict";
+/* ================================================================
+   DealFinder AI — v1.8.4
+   FIX : écran « Brancher le serveur » clarifié (anti-erreur :
+   explique que Chrome n'est PAS une adresse, guide vers Render).
+   ================================================================ */
+const API_BASE = "";
+let API_EFFECTIVE = null;
+async function detectBackend(){
+  const saved=store.get("api_base","");
+  const candidates=[];
+  if(saved)candidates.push(saved);
+  if(API_BASE)candidates.push(API_BASE);
+  if(!saved&&location.protocol&&location.protocol.startsWith("http"))candidates.push("");
+  candidates.push("https://dealfinder-backend-c758.onrender.com","http://127.0.0.1:3000");
+  for(const base of candidates){
+    try{
+      const ctrl=new AbortController();const to=setTimeout(()=>ctrl.abort(),3000);
+      const r=await fetch(base+"/api/health",{signal:ctrl.signal});
+      clearTimeout(to);
+      if(r.ok){API_EFFECTIVE=base;return true}
+    }catch(e){}
+  }
+  API_EFFECTIVE=null;
+  return false;
+}
+function authHeaders(){
+  const s = Auth.session();
+  const h = {"Content-Type":"application/json"};
+  if(s && s.token) h.Authorization = "Bearer " + s.token;
+  return h;
+}
+
+/* ---------- 1. i18n ---------- */
+const I18N = {
+fr:{
+  hero_title:'Trouve. <em>Compare.</em> Économise.',
+  hero_sub:'Décrivez ce que vous cherchez en langage naturel : DealFinder AI compare les offres des boutiques partenaires.',
+  search_ph:'Ex. téléphone Samsung à moins de 150 000 FCFA',
+  img_search:'Rechercher avec une image', cats_title:'Catégories', popular_title:'Recherches populaires',
+  nav_home:'Accueil', nav_search:'Recherche', nav_favs:'Favoris', nav_profile:'Profil',
+  filters:'Filtres', reset:'Réinitialiser', apply:'Appliquer',
+  sort:'Trier par', sort_rel:'Pertinence', sort_asc:'Prix croissant', sort_desc:'Prix décroissant', sort_new:'Nouveautés',
+  price_range:'Prix', price_min:'Prix min', price_max:'Prix max', merchants:'Boutiques', only_stock:'Uniquement les offres disponibles', known_ship:'Livraison connue uniquement',
+  view_offer:'Voir l\u2019offre', share:'Partager', details:'Fiche produit', best_offer:'Voir la meilleure offre',
+  state_analyze:'Analyse de votre demande…', state_search:'Recherche des produits…', state_compare:'Comparaison des offres…', state_ready:'Résultats prêts.',
+  meta:'{0} produits · {1} offres comparées',
+  interp_cat:'Catégorie : {0}', interp_brand:'Marque : {0}', interp_max:'Budget : ≤ {0}', interp_range:'Budget : {0} – {1}', interp_feat:'{0}', interp_qty:'Quantité : {0}',
+  clarify_title:'Précisons ensemble', clarify_body:'Je n\u2019ai pas identifié de produit dans votre recherche. Quel type de produit cherchez-vous ?',
+  clarify_budget:'Quel budget maximum souhaitez-vous ?', clarify_keep:'Votre budget de {0} sera conservé.',
+  no_res_title:'Aucun produit trouvé pour « {0} »', no_res_body:'Ce produit n\u2019est pas encore disponible dans nos sources. Voici des suggestions de notre sélection :',
+  widen:'Voir au-delà du budget', new_search:'Modifier la recherche',
+  sugg_title:'Suggestions de notre sélection', sugg_empty:'Les produits réels apparaîtront ici dès qu\u2019une source officielle de produits sera connectée.',
+  stock_in:'Disponible', stock_out:'Rupture de stock', ship_free:'Livraison gratuite', ship_fee:'Livraison : {0}', ship_unknown:'Livraison non communiquée',
+  updated_h:'il y a {0} h', updated_d:'il y a {0} j',
+  lowest_lbl:'Prix le plus bas trouvé', offers_n:'{0} offres comparées', offers_matching:'Offres correspondant à votre recherche', in_merch:'chez {0}',
+  aff_badge:'Lien partenaire', transparency:'Certains liens présents dans DealFinder AI peuvent être des liens affiliés. Si vous effectuez un achat via certains de ces liens, nous pouvons recevoir une commission, sans coût supplémentaire pour vous, selon les conditions du programme concerné.',
+  redirect_title:'Vous quittez DealFinder AI',
+  redirect_aff:'Lien partenaire : ce lien peut générer une commission pour DealFinder AI, sans surcoût pour vous.',
+  redirect_off:'Lien officiel de la boutique — aucune affiliation sur cette offre.',
+  copy_link:'Copier le lien', copied:'Copié !', close:'Fermer', converted:'converti',
+  favs_title:'Favoris', favs_empty:'Aucun favori pour l\u2019instant', favs_empty_body:'Touchez le cœur sur un produit pour l\u2019enregistrer et suivre son prix.',
+  saved_price:'Prix enregistré : {0}', fav_added:'Ajouté aux favoris', fav_removed:'Retiré des favoris', remove:'Retirer',
+  prof_title:'Profil', prof_history:'Historique de recherches', prof_no_hist:'Vos recherches apparaîtront ici.',
+  prof_share_app:'Partager DealFinder AI', prof_settings:'Paramètres', prof_lang:'Langue', prof_currency:'Devise d\u2019affichage',
+  prof_theme:'Thème', prof_light:'Clair', prof_dark:'Sombre', prof_notif:'Alertes baisse de prix',
+  prof_notif_hint:'Uniquement si une baisse réelle est détectée dans les données',
+  prof_stats:'Statistiques locales (anonymisées)', prof_erase:'Effacer mes données locales', prof_erase_done:'Données locales effacées',
+  st_searches:'Recherches', st_clicks:'Clics offre', st_shares:'Partages', st_favs:'Favoris',
+  prof_legal:'Informations', prof_cgu:'Conditions générales d\u2019utilisation', prof_privacy:'Politique de confidentialité', prof_about:'À propos',
+  cur_note:'Conversions approximatives : 1 € = 655,957 FCFA (parité fixe) · 1 $ ≈ 610 FCFA · 1 £ ≈ 775 FCFA (taux indicatifs, non temps réel). Les montants convertis sont signalés par « ≈ ».',
+  acct_out_title:'Compte optionnel', acct_out_body:'Connectez-vous avec votre nom et votre e-mail pour synchroniser favoris et historique. La recherche reste libre, sans compte.',
+  login:'Se connecter', logout:'Se déconnecter', login_title:'Se connecter',
+  login_email:'E-mail', login_name:'Nom affiché', login_btn:'Se connecter',
+  f_name:'Indiquez votre nom (2 caractères minimum).',
+  f_email:'Adresse e-mail invalide.',
+  login_done:'Bienvenue {0} !', logout_done:'Vous êtes déconnecté.',
+  auth_note:'Votre nom et votre e-mail sont enregistrés pour votre compte. Vous pouvez vous déconnecter ou effacer vos données à tout moment.',
+  share_done:'Partage effectué, merci !',
+  share_fb_hint:'Choisissez une application pour envoyer à vos contacts, ou copiez le message :',
+  copy_msg:'Copier le message',
+  share_subject:'Offre DealFinder AI', share_app_subject:'DealFinder AI',
+  share_app_text:'Trouve. Compare. Économise. Découvrez DealFinder AI :\nhttps://dealfinder-ai.app',
+  offline:'Hors ligne — favoris et historique consultables. Reconnectez-vous pour actualiser les offres.',
+  offline_search:'La recherche nécessite une connexion internet. Vos favoris et votre historique restent consultables.',
+  img_title:'Recherche par image', img_analyze:'Analyse de l\u2019image…',
+  img_approx:'Fonctionnalité en préparation', img_body:'L\u2019analyse d\u2019image n\u2019est pas encore disponible. En attendant, touchez une suggestion pour lancer une recherche :',
+  ad_label:'Publicité', ad_text:'emplacement publicitaire natif et discret.', ad_text2:'bannière modérée, jamais au-dessus des résultats.',
+  notif_on:'Alertes activées : vous ne serez notifié qu\u2019en cas de baisse de prix réelle.',
+  notif_off:'Alertes désactivées.',
+  demo_tag:'Mode test — données de démonstration',
+  backend_down:'Connexion en cours… réessaie dans un instant.',
+  cgu_t:'Conditions générales d\u2019utilisation',
+  cgu_b:'<p style="margin-bottom:10px"><b>1. Service.</b> DealFinder AI est un service gratuit d\u2019aide à la comparaison d\u2019offres de boutiques partenaires. Il n\u2019est pas vendeur des produits présentés.</p><p style="margin-bottom:10px"><b>2. Données offres.</b> Prix et disponibilités proviennent de sources autorisées et sont revalidés côté serveur. En cas d\u2019écart au moment de la commande, le prix affiché par la boutique fait foi.</p><p style="margin-bottom:10px"><b>3. Liens affiliés.</b> Certains liens peuvent être des liens affiliés : si vous effectuez un achat via certains d\u2019eux, nous pouvons recevoir une commission, sans coût supplémentaire pour vous, selon les conditions du programme concerné.</p><p style="margin-bottom:10px"><b>4. Compte.</b> Aucun compte n\u2019est requis pour les fonctions de base.</p><p><b>5. Usage.</b> Usage personnel et non commercial.</p>',
+  privacy_t:'Politique de confidentialité',
+  privacy_b:'<p style="margin-bottom:10px"><b>Données collectées.</b> Nom et e-mail si vous créez un compte, favoris, historique de recherches et paramètres. Statistiques techniques anonymisées (recherches, clics, partages). Rien d\u2019autre.</p><p style="margin-bottom:10px"><b>Ce que nous ne faisons pas.</b> Aucun compte requis pour chercher ; aucun accès à vos contacts ; aucun partage automatique.</p><p style="margin-bottom:10px"><b>Suppression.</b> « Effacer mes données locales » dans le Profil, ou demande de suppression côté serveur à tout moment.</p><p><b>Sécurité.</b> Clés API et secrets hébergés côté serveur uniquement.</p>',
+  about_t:'À propos',
+  about_b:'<p style="margin-bottom:10px"><b>DealFinder AI</b> — Trouve. Compare. Économise.<br>v1.8.4</p><p style="margin-bottom:10px"><b>Mission.</b> Décrivez ce que vous cherchez en langage naturel, recevez des offres comparées de sources autorisées et accédez directement à la meilleure offre.</p><p style="margin-bottom:10px"><b>Principes.</b> Sources autorisées uniquement · revalidation serveur des prix · transparence sur les liens affiliés · publicité non intrusive · partage toujours initié et confirmé par vous · aucune fonction de base soumise à compte.</p><p>Si un produit n\u2019est pas trouvé, nous le disons clairement et proposons des suggestions issues de notre sélection réelle — jamais de produits inventés.</p>'
+},
+en:{
+  hero_title:'Find. <em>Compare.</em> Save.',
+  hero_sub:'Describe what you\u2019re looking for in plain language: DealFinder AI compares offers from partner stores.',
+  search_ph:'E.g. Samsung phone under 250 €',
+  img_search:'Search with an image', cats_title:'Categories', popular_title:'Popular searches',
+  nav_home:'Home', nav_search:'Search', nav_favs:'Saved', nav_profile:'Profile',
+  filters:'Filters', reset:'Reset', apply:'Apply',
+  sort:'Sort by', sort_rel:'Relevance', sort_asc:'Price low to high', sort_desc:'Price high to low', sort_new:'Newest',
+  price_range:'Price', price_min:'Min price', price_max:'Max price', merchants:'Stores', only_stock:'Available offers only', known_ship:'Known shipping only',
+  view_offer:'View offer', share:'Share', details:'Product details', best_offer:'View best offer',
+  state_analyze:'Analyzing your request…', state_search:'Searching products…', state_compare:'Comparing offers…', state_ready:'Results ready.',
+  meta:'{0} products · {1} compared offers',
+  interp_cat:'Category: {0}', interp_brand:'Brand: {0}', interp_max:'Budget: ≤ {0}', interp_range:'Budget: {0} – {1}', interp_feat:'{0}', interp_qty:'Quantity: {0}',
+  clarify_title:'Let\u2019s refine', clarify_body:'I couldn\u2019t identify a product in your search. What type of product are you looking for?',
+  clarify_budget:'What is your maximum budget?', clarify_keep:'Your budget of {0} will be kept.',
+  no_res_title:'No product found for \u201C{0}\u201D', no_res_body:'This product is not yet available in our sources. Here are suggestions from our selection:',
+  widen:'Show above budget', new_search:'Edit search',
+  sugg_title:'Suggestions from our selection', sugg_empty:'Real products will appear here once an official product source is connected.',
+  stock_in:'In stock', stock_out:'Out of stock', ship_free:'Free shipping', ship_fee:'Shipping: {0}', ship_unknown:'Shipping not disclosed',
+  updated_h:'{0} h ago', updated_d:'{0} d ago',
+  lowest_lbl:'Lowest price found', offers_n:'{0} compared offers', offers_matching:'Offers matching your search', in_merch:'at {0}',
+  aff_badge:'Partner link', transparency:'Some links in DealFinder AI may be affiliate links. If you make a purchase through some of them, we may earn a commission, at no extra cost to you.',
+  redirect_title:'You are leaving DealFinder AI',
+  redirect_aff:'Partner link: it may earn DealFinder AI a commission, at no extra cost to you.',
+  redirect_off:'Official store link — no affiliation on this offer.',
+  copy_link:'Copy link', copied:'Copied!', close:'Close', converted:'converted',
+  favs_title:'Saved', favs_empty:'No saved items yet', favs_empty_body:'Tap the heart on a product to save it and track its price.',
+  saved_price:'Saved price: {0}', fav_added:'Added to saved', fav_removed:'Removed from saved', remove:'Remove',
+  prof_title:'Profile', prof_history:'Search history', prof_no_hist:'Your searches will appear here.',
+  prof_share_app:'Share DealFinder AI', prof_settings:'Settings', prof_lang:'Language', prof_currency:'Display currency',
+  prof_theme:'Theme', prof_light:'Light', prof_dark:'Dark', prof_notif:'Price drop alerts',
+  prof_notif_hint:'Only if a real drop is detected in the data',
+  prof_stats:'Local stats (anonymized)', prof_erase:'Erase my local data', prof_erase_done:'Local data erased',
+  st_searches:'Searches', st_clicks:'Offer clicks', st_shares:'Shares', st_favs:'Saved',
+  prof_legal:'Information', prof_cgu:'Terms of use', prof_privacy:'Privacy policy', prof_about:'About',
+  cur_note:'Approximate conversions: €1 = 655.957 FCFA (fixed parity) · $1 ≈ 610 FCFA · £1 ≈ 775 FCFA (indicative, not real-time).',
+  acct_out_title:'Optional account', acct_out_body:'Sign in with your name and email to sync saved items and history. Searching stays free, no account needed.',
+  login:'Sign in', logout:'Sign out', login_title:'Sign in',
+  login_email:'Email', login_name:'Display name', login_btn:'Sign in',
+  f_name:'Enter your name (min. 2 characters).',
+  f_email:'Invalid email address.',
+  login_done:'Welcome {0}!', logout_done:'You are signed out.',
+  auth_note:'Your name and email are saved for your account. You can sign out or erase your data at any time.',
+  share_done:'Shared — thanks!',
+  share_fb_hint:'Pick an app to send to your contacts, or copy the message:',
+  copy_msg:'Copy message',
+  share_subject:'DealFinder AI offer', share_app_subject:'DealFinder AI',
+  share_app_text:'Find. Compare. Save. Discover DealFinder AI:\nhttps://dealfinder-ai.app',
+  offline:'Offline — favorites and history available.',
+  offline_search:'Search requires an internet connection.',
+  img_title:'Image search', img_analyze:'Analyzing image…',
+  img_approx:'Feature in preparation', img_body:'Image analysis is not available yet. Tap a suggestion to search:',
+  ad_label:'Ad', ad_text:'native, discreet ad slot.', ad_text2:'moderate banner, never above results.',
+  notif_on:'Alerts on: real price drops only.',
+  notif_off:'Alerts off.',
+  demo_tag:'Test mode — demo data',
+  backend_down:'Connecting… try again in a moment.',
+  cgu_t:'Terms of use',
+  cgu_b:'<p style="margin-bottom:10px"><b>1. Service.</b> DealFinder AI is a free comparison service for partner-store offers.</p><p style="margin-bottom:10px"><b>2. Offer data.</b> Prices and availability come from authorized sources and are revalidated server-side.</p><p style="margin-bottom:10px"><b>3. Affiliate links.</b> We may earn a commission on qualifying purchases, at no extra cost to you.</p><p style="margin-bottom:10px"><b>4. Account.</b> No account is required for core features.</p><p><b>5. Use.</b> Personal, non-commercial use.</p>',
+  privacy_t:'Privacy policy',
+  privacy_b:'<p style="margin-bottom:10px"><b>Data collected.</b> Name and email if you create an account, favorites, search history and settings. Anonymized technical stats. Nothing else.</p><p style="margin-bottom:10px"><b>What we don\u2019t do.</b> No account required to search; no access to your contacts; no automatic sharing.</p><p style="margin-bottom:10px"><b>Deletion.</b> \u201CErase my local data\u201D in Profile, or a server-side deletion request at any time.</p><p><b>Security.</b> API keys and secrets live server-side only.</p>',
+  about_t:'About',
+  about_b:'<p style="margin-bottom:10px"><b>DealFinder AI</b> — Find. Compare. Save.<br>v1.8.4</p><p style="margin-bottom:10px"><b>Mission.</b> Describe what you want in plain language, get compared offers from authorized sources, jump straight to the best offer.</p><p>If a product is not found, we say so clearly and suggest items from our real selection — never invented products.</p>'
+},
+es:{
+  hero_title:'Encuentra. <em>Compara.</em> Ahorra.',
+  hero_sub:'Describe lo que buscas en lenguaje natural: DealFinder AI compara las ofertas de las tiendas asociadas.',
+  search_ph:'Ej. teléfono Samsung por menos de 250 €',
+  img_search:'Buscar con una imagen', cats_title:'Categorías', popular_title:'Búsquedas populares',
+  nav_home:'Inicio', nav_search:'Búsqueda', nav_favs:'Favoritos', nav_profile:'Perfil',
+  filters:'Filtros', reset:'Restablecer', apply:'Aplicar',
+  sort:'Ordenar por', sort_rel:'Relevancia', sort_asc:'Precio ascendente', sort_desc:'Precio descendente', sort_new:'Novedades',
+  price_range:'Precio', price_min:'Precio mín.', price_max:'Precio máx.', merchants:'Tiendas', only_stock:'Solo ofertas disponibles', known_ship:'Solo envío conocido',
+  view_offer:'Ver la oferta', share:'Compartir', details:'Ficha del producto', best_offer:'Ver la mejor oferta',
+  state_analyze:'Analizando tu solicitud…', state_search:'Buscando productos…', state_compare:'Comparando ofertas…', state_ready:'Resultados listos.',
+  meta:'{0} productos · {1} ofertas comparadas',
+  interp_cat:'Categoría: {0}', interp_brand:'Marca: {0}', interp_max:'Presupuesto: ≤ {0}', interp_range:'Presupuesto: {0} – {1}', interp_feat:'{0}', interp_qty:'Cantidad: {0}',
+  clarify_title:'Seamos precisos', clarify_body:'No identifiqué un producto en tu búsqueda. ¿Qué tipo de producto buscas?',
+  clarify_budget:'¿Cuál es tu presupuesto máximo?', clarify_keep:'Tu presupuesto de {0} se mantendrá.',
+  no_res_title:'No se encontró producto para « {0} »', no_res_body:'Este producto aún no está disponible en nuestras fuentes. Aquí tienes sugerencias de nuestra selección:',
+  widen:'Ver por encima del presupuesto', new_search:'Modificar la búsqueda',
+  sugg_title:'Sugerencias de nuestra selección', sugg_empty:'Los productos reales aparecerán aquí cuando se conecte una fuente oficial de productos.',
+  stock_in:'Disponible', stock_out:'Agotado', ship_free:'Envío gratis', ship_fee:'Envío: {0}', ship_unknown:'Envío no indicado',
+  updated_h:'hace {0} h', updated_d:'hace {0} d',
+  lowest_lbl:'Precio más bajo encontrado', offers_n:'{0} ofertas comparadas', offers_matching:'Ofertas correspondientes a tu búsqueda', in_merch:'en {0}',
+  aff_badge:'Enlace de socio', transparency:'Algunos enlaces de DealFinder AI pueden ser enlaces de afiliado. Si compras a través de algunos de ellos, podemos recibir una comisión, sin coste adicional para ti.',
+  redirect_title:'Estás saliendo de DealFinder AI',
+  redirect_aff:'Enlace de socio: puede generar una comisión, sin coste adicional para ti.',
+  redirect_off:'Enlace oficial de la tienda: sin afiliación en esta oferta.',
+  copy_link:'Copiar el enlace', copied:'¡Copiado!', close:'Cerrar', converted:'convertido',
+  favs_title:'Favoritos', favs_empty:'Aún no hay favoritos', favs_empty_body:'Toca el corazón en un producto para guardarlo y seguir su precio.',
+  saved_price:'Precio guardado: {0}', fav_added:'Añadido a favoritos', fav_removed:'Eliminado de favoritos', remove:'Eliminar',
+  prof_title:'Perfil', prof_history:'Historial de búsquedas', prof_no_hist:'Tus búsquedas aparecerán aquí.',
+  prof_share_app:'Compartir DealFinder AI', prof_settings:'Ajustes', prof_lang:'Idioma', prof_currency:'Moneda de visualización',
+  prof_theme:'Tema', prof_light:'Claro', prof_dark:'Oscuro', prof_notif:'Alertas de bajada de precio',
+  prof_notif_hint:'Solo si se detecta una bajada real en los datos',
+  prof_stats:'Estadísticas locales (anónimas)', prof_erase:'Borrar mis datos locales', prof_erase_done:'Datos locales borrados',
+  st_searches:'Búsquedas', st_clicks:'Clics de oferta', st_shares:'Compartidos', st_favs:'Favoritos',
+  prof_legal:'Información', prof_cgu:'Condiciones de uso', prof_privacy:'Política de privacidad', prof_about:'Acerca de',
+  cur_note:'Conversiones aproximadas: 1 € = 655,957 FCFA (paridad fija) · 1 $ ≈ 610 FCFA · 1 £ ≈ 775 FCFA (tasas indicativas).',
+  acct_out_title:'Cuenta opcional', acct_out_body:'Inicia sesión con tu nombre y correo para sincronizar favoritos e historial. La búsqueda sigue siendo libre, sin cuenta.',
+  login:'Iniciar sesión', logout:'Cerrar sesión', login_title:'Iniciar sesión',
+  login_email:'Correo electrónico', login_name:'Nombre mostrado', login_btn:'Iniciar sesión',
+  f_name:'Indica tu nombre (mín. 2 caracteres).',
+  f_email:'Dirección de correo no válida.',
+  login_done:'¡Bienvenida/o {0}!', logout_done:'Has cerrado sesión.',
+  auth_note:'Tu nombre y correo se guardan para tu cuenta. Puedes cerrar sesión o borrar tus datos en cualquier momento.',
+  share_done:'¡Compartido, gracias!',
+  share_fb_hint:'Elige una aplicación para enviarlo a tus contactos, o copia el mensaje:',
+  copy_msg:'Copiar el mensaje',
+  share_subject:'Oferta DealFinder AI', share_app_subject:'DealFinder AI',
+  share_app_text:'Encuentra. Compara. Ahorra. Descubre DealFinder AI:\nhttps://dealfinder-ai.app',
+  offline:'Sin conexión: favoritos e historial disponibles.',
+  offline_search:'La búsqueda requiere conexión a internet.',
+  img_title:'Búsqueda por imagen', img_analyze:'Analizando la imagen…',
+  img_approx:'Función en preparación', img_body:'El análisis de imágenes aún no está disponible. Toca una sugerencia para buscar:',
+  ad_label:'Publicidad', ad_text:'espacio publicitario nativo y discreto.', ad_text2:'banner moderado, nunca sobre los resultados.',
+  notif_on:'Alertas activadas: solo bajadas reales.',
+  notif_off:'Alertas desactivadas.',
+  demo_tag:'Modo de prueba: datos de demostración',
+  backend_down:'Conectando… inténtalo en un momento.',
+  cgu_t:'Condiciones de uso',
+  cgu_b:'<p style="margin-bottom:10px"><b>1. Servicio.</b> DealFinder AI es un servicio gratuito de comparación de ofertas.</p><p style="margin-bottom:10px"><b>2. Datos de ofertas.</b> Precios y disponibilidad provienen de fuentes autorizadas.</p><p style="margin-bottom:10px"><b>3. Enlaces de afiliado.</b> Podemos recibir una comisión por compras cualificadas, sin coste adicional.</p><p style="margin-bottom:10px"><b>4. Cuenta.</b> No se requiere cuenta para las funciones básicas.</p><p><b>5. Uso.</b> Uso personal y no comercial.</p>',
+  privacy_t:'Política de privacidad',
+  privacy_b:'<p style="margin-bottom:10px"><b>Datos recogidos.</b> Nombre y correo si creas una cuenta, favoritos, historial y ajustes. Estadísticas anónimas. Nada más.</p><p style="margin-bottom:10px"><b>Lo que no hacemos.</b> Sin cuenta obligatoria; sin acceso a tus contactos; sin envíos automáticos.</p><p style="margin-bottom:10px"><b>Eliminación.</b> «Borrar mis datos locales» en el Perfil.</p><p><b>Seguridad.</b> Las claves API viven solo en el servidor.</p>',
+  about_t:'Acerca de',
+  about_b:'<p style="margin-bottom:10px"><b>DealFinder AI</b> — Encuentra. Compara. Ahorra.<br>v1.8.4</p><p style="margin-bottom:10px"><b>Misión.</b> Describe lo que buscas en lenguaje natural, recibe ofertas comparadas de fuentes autorizadas y accede directamente a la mejor oferta.</p><p>Si un producto no se encuentra, lo decimos claramente y sugerimos artículos de nuestra selección real — nunca productos inventados.</p>'
+},
+pt:{
+  hero_title:'Encontra. <em>Compara.</em> Poupa.',
+  hero_sub:'Descreve o que procuras em linguagem natural: a DealFinder AI compara as ofertas das lojas parceiras.',
+  search_ph:'Ex. telemóvel Samsung por menos de 250 €',
+  img_search:'Pesquisar com uma imagem', cats_title:'Categorias', popular_title:'Pesquisas populares',
+  nav_home:'Início', nav_search:'Pesquisa', nav_favs:'Favoritos', nav_profile:'Perfil',
+  filters:'Filtros', reset:'Reiniciar', apply:'Aplicar',
+  sort:'Ordenar por', sort_rel:'Relevância', sort_asc:'Preço crescente', sort_desc:'Preço decrescente', sort_new:'Novidades',
+  price_range:'Preço', price_min:'Preço mín.', price_max:'Preço máx.', merchants:'Lojas', only_stock:'Apenas ofertas disponíveis', known_ship:'Apenas envio conhecido',
+  view_offer:'Ver a oferta', share:'Partilhar', details:'Ficha do produto', best_offer:'Ver a melhor oferta',
+  state_analyze:'A analisar o teu pedido…', state_search:'A procurar produtos…', state_compare:'A comparar ofertas…', state_ready:'Resultados prontos.',
+  meta:'{0} produtos · {1} ofertas comparadas',
+  interp_cat:'Categoria: {0}', interp_brand:'Marca: {0}', interp_max:'Orçamento: ≤ {0}', interp_range:'Orçamento: {0} – {1}', interp_feat:'{0}', interp_qty:'Quantidade: {0}',
+  clarify_title:'Vamos precisar', clarify_body:'Não identifiquei um produto na tua pesquisa. Que tipo de produto procuras?',
+  clarify_budget:'Qual é o teu orçamento máximo?', clarify_keep:'O teu orçamento de {0} será mantido.',
+  no_res_title:'Sem resultados para « {0} »', no_res_body:'Este produto ainda não está disponível nas nossas fontes. Aqui tens sugestões da nossa seleção:',
+  widen:'Ver acima do orçamento', new_search:'Modificar a pesquisa',
+  sugg_title:'Sugestões da nossa seleção', sugg_empty:'Os produtos reais aparecerão aqui quando uma fonte oficial de produtos for ligada.',
+  stock_in:'Disponível', stock_out:'Esgotado', ship_free:'Envio grátis', ship_fee:'Envio: {0}', ship_unknown:'Envio não indicado',
+  updated_h:'há {0} h', updated_d:'há {0} d',
+  lowest_lbl:'Preço mais baixo encontrado', offers_n:'{0} ofertas comparadas', offers_matching:'Ofertas correspondentes à tua pesquisa', in_merch:'em {0}',
+  aff_badge:'Link de parceiro', transparency:'Alguns links da DealFinder AI podem ser links de afiliado. Se comprares através de alguns deles, podemos receber uma comissão, sem custo adicional para ti.',
+  redirect_title:'Estás a sair da DealFinder AI',
+  redirect_aff:'Link de parceiro: pode gerar uma comissão, sem custo adicional para ti.',
+  redirect_off:'Link oficial da loja — sem afiliação nesta oferta.',
+  copy_link:'Copiar o link', copied:'Copiado!', close:'Fechar', converted:'convertido',
+  favs_title:'Favoritos', favs_empty:'Ainda sem favoritos', favs_empty_body:'Toca no coração num produto para o guardar e seguir o preço.',
+  saved_price:'Preço guardado: {0}', fav_added:'Adicionado aos favoritos', fav_removed:'Removido dos favoritos', remove:'Remover',
+  prof_title:'Perfil', prof_history:'Histórico de pesquisas', prof_no_hist:'As tuas pesquisas aparecerão aqui.',
+  prof_share_app:'Partilhar DealFinder AI', prof_settings:'Definições', prof_lang:'Idioma', prof_currency:'Moeda de exibição',
+  prof_theme:'Tema', prof_light:'Claro', prof_dark:'Escuro', prof_notif:'Alertas de baixa de preço',
+  prof_notif_hint:'Apenas se for detetada uma baixa real nos dados',
+  prof_stats:'Estatísticas locais (anónimas)', prof_erase:'Apagar os meus dados locais', prof_erase_done:'Dados locais apagados',
+  st_searches:'Pesquisas', st_clicks:'Cliques de oferta', st_shares:'Partilhas', st_favs:'Favoritos',
+  prof_legal:'Informação', prof_cgu:'Condições de utilização', prof_privacy:'Política de privacidade', prof_about:'Sobre',
+  cur_note:'Conversões aproximadas: 1 € = 655,957 FCFA (paridade fixa) · 1 $ ≈ 610 FCFA · 1 £ ≈ 775 FCFA (taxas indicativas).',
+  acct_out_title:'Conta opcional', acct_out_body:'Inicia sessão com o teu nome e e-mail para sincronizar favoritos e histórico. A pesquisa continua livre, sem conta.',
+  login:'Iniciar sessão', logout:'Terminar sessão', login_title:'Iniciar sessão',
+  login_email:'E-mail', login_name:'Nome apresentado', login_btn:'Iniciar sessão',
+  f_name:'Indica o teu nome (mín. 2 caracteres).',
+  f_email:'Endereço de e-mail inválido.',
+  login_done:'Bem-vinda/o {0}!', logout_done:'Terminaste a sessão.',
+  auth_note:'O teu nome e e-mail são guardados para a tua conta. Podes terminar a sessão ou apagar os teus dados a qualquer momento.',
+  share_done:'Partilhado, obrigado!',
+  share_fb_hint:'Escolhe uma aplicação para enviar aos teus contactos, ou copia a mensagem:',
+  copy_msg:'Copiar a mensagem',
+  share_subject:'Oferta DealFinder AI', share_app_subject:'DealFinder AI',
+  share_app_text:'Encontra. Compara. Poupa. Descobre a DealFinder AI:\nhttps://dealfinder-ai.app',
+  offline:'Sem ligação: favoritos e histórico disponíveis.',
+  offline_search:'A pesquisa requer ligação à internet.',
+  img_title:'Pesquisa por imagem', img_analyze:'A analisar a imagem…',
+  img_approx:'Funcionalidade em preparação', img_body:'A análise de imagens ainda não está disponível. Toca numa sugestão para pesquisar:',
+  ad_label:'Publicidade', ad_text:'espaço publicitário nativo e discreto.', ad_text2:'banner moderado, nunca acima dos resultados.',
+  notif_on:'Alertas ativados: só baixas reais.',
+  notif_off:'Alertas desativados.',
+  demo_tag:'Modo de teste: dados de demonstração',
+  backend_down:'Servidor inacessível, motor local utilizado.',
+  cgu_t:'Condições de utilização',
+  cgu_b:'<p style="margin-bottom:10px"><b>1. Serviço.</b> A DealFinder AI é um serviço gratuito de comparação de ofertas.</p><p style="margin-bottom:10px"><b>2. Dados das ofertas.</b> Preços e disponibilidade provêm de fontes autorizadas.</p><p style="margin-bottom:10px"><b>3. Links de afiliado.</b> Podemos receber uma comissão por compras qualificadas, sem custo adicional.</p><p style="margin-bottom:10px"><b>4. Conta.</b> Não é necessária conta para as funções básicas.</p><p><b>5. Uso.</b> Uso pessoal e não comercial.</p>',
+  privacy_t:'Política de privacidade',
+  privacy_b:'<p style="margin-bottom:10px"><b>Dados recolhidos.</b> Nome e e-mail se criares conta, favoritos, histórico e definições. Estatísticas anónimas. Nada mais.</p><p style="margin-bottom:10px"><b>O que não fazemos.</b> Sem conta obrigatória; sem acesso aos teus contactos; sem envios automáticos.</p><p style="margin-bottom:10px"><b>Eliminação.</b> «Apagar os meus dados locais» no Perfil.</p><p><b>Segurança.</b> As chaves API vivem apenas no servidor.</p>',
+  about_t:'Sobre',
+  about_b:'<p style="margin-bottom:10px"><b>DealFinder AI</b> — Encontra. Compara. Poupa.<br>v1.8.4</p><p style="margin-bottom:10px"><b>Missão.</b> Descreve o que procuras em linguagem natural, recebe ofertas comparadas de fontes autorizadas e acede diretamente à melhor oferta.</p><p>Se um produto não for encontrado, dizemo-lo claramente e sugerimos artigos da nossa seleção real — nunca produtos inventados.</p>'
+},
+ar:{
+  hero_title:'ابحث. <em>قارِن.</em> وفّر.',
+  hero_sub:'صِف ما تبحث عنه بلغة طبيعية: تقارن DealFinder AI عروض المتاجر الشريكة.',
+  search_ph:'مثال: هاتف Samsung بأقل من 250 €',
+  img_search:'البحث بصورة', cats_title:'الفئات', popular_title:'عمليات البحث الشائعة',
+  nav_home:'الرئيسية', nav_search:'البحث', nav_favs:'المفضلة', nav_profile:'الملف الشخصي',
+  filters:'المرشحات', reset:'إعادة تعيين', apply:'تطبيق',
+  sort:'ترتيب حسب', sort_rel:'الصلة', sort_asc:'السعر تصاعديًا', sort_desc:'السعر تنازليًا', sort_new:'الأحدث',
+  price_range:'السعر', price_min:'أدنى سعر', price_max:'أقصى سعر', merchants:'المتاجر', only_stock:'العروض المتوفرة فقط', known_ship:'الشحن المعروف فقط',
+  view_offer:'عرض العرض', share:'مشاركة', details:'بطاقة المنتج', best_offer:'عرض أفضل عرض',
+  state_analyze:'جارٍ تحليل طلبك…', state_search:'جارٍ البحث عن المنتجات…', state_compare:'جارٍ مقارنة العروض…', state_ready:'النتائج جاهزة.',
+  meta:'{0} منتجات · {1} عروض مقارنة',
+  interp_cat:'الفئة: {0}', interp_brand:'العلامة: {0}', interp_max:'الميزانية: ≤ {0}', interp_range:'الميزانية: {0} – {1}', interp_feat:'{0}', interp_qty:'الكمية: {0}',
+  clarify_title:'لنوضّح معًا', clarify_body:'لم أتعرف على منتج في بحثك. أي نوع من المنتجات تبحث عنه؟',
+  clarify_budget:'ما هي ميزانيتك القصوى؟', clarify_keep:'ستُحفظ ميزانيتك {0}.',
+  no_res_title:'لم يُعثر على منتج لـ « {0} »', no_res_body:'هذا المنتج غير متوفر بعد في مصادرنا. إليك اقتراحات من اختيارنا:',
+  widen:'عرض ما فوق الميزانية', new_search:'تعديل البحث',
+  sugg_title:'اقتراحات من اختيارنا', sugg_empty:'ستظهر المنتجات الحقيقية هنا عند ربط مصدر رسمي للمنتجات.',
+  stock_in:'متوفر', stock_out:'نفد المخزون', ship_free:'شحن مجاني', ship_fee:'الشحن: {0}', ship_unknown:'الشحن غير محدد',
+  updated_h:'قبل {0} س', updated_d:'قبل {0} ي',
+  lowest_lbl:'أدنى سعر تم العثور عليه', offers_n:'{0} عروض مقارنة', offers_matching:'العروض المطابقة لبحثك', in_merch:'في {0}',
+  aff_badge:'رابط شريك', transparency:'قد تكون بعض الروابط في DealFinder AI روابط تابعة. إذا أجريت عملية شراء عبر بعضها، فقد نتلقى عمولة دون أي تكلفة إضافية عليك.',
+  redirect_title:'أنت تغادر DealFinder AI',
+  redirect_aff:'رابط شريك: قد يُنشئ عمولة دون تكلفة إضافية عليك.',
+  redirect_off:'رابط المتجر الرسمي — لا تابعة لهذا العرض.',
+  copy_link:'نسخ الرابط', copied:'تم النسخ!', close:'إغلاق', converted:'محوّل',
+  favs_title:'المفضلة', favs_empty:'لا مفضلات بعد', favs_empty_body:'المس القلب على منتج لحفظه ومتابعة سعره.',
+  saved_price:'السعر المحفوظ: {0}', fav_added:'أُضيف إلى المفضلة', fav_removed:'أُزيل من المفضلة', remove:'إزالة',
+  prof_title:'الملف الشخصي', prof_history:'سجل عمليات البحث', prof_no_hist:'ستظهر عمليات بحثك هنا.',
+  prof_share_app:'شارك DealFinder AI', prof_settings:'الإعدادات', prof_lang:'اللغة', prof_currency:'عملة العرض',
+  prof_theme:'السمة', prof_light:'فاتح', prof_dark:'داكن', prof_notif:'تنبيهات انخفاض الأسعار',
+  prof_notif_hint:'فقط عند رصد انخفاض حقيقي في البيانات',
+  prof_stats:'إحصاءات محلية (مجهولة)', prof_erase:'حذف بياناتي المحلية', prof_erase_done:'حُذفت البيانات المحلية',
+  st_searches:'عمليات البحث', st_clicks:'نقرات العروض', st_shares:'المشاركات', st_favs:'المفضلة',
+  prof_legal:'معلومات', prof_cgu:'شروط الاستخدام', prof_privacy:'سياسة الخصوصية', prof_about:'حول',
+  cur_note:'تحويلات تقريبية: 1 € = 655.957 FCFA (تعادل ثابت) · 1 $ ≈ 610 FCFA · 1 £ ≈ 775 FCFA (أسعار استرشادية).',
+  acct_out_title:'حساب اختياري', acct_out_body:'سجّل الدخول باسمك وبريدك لمزامنة المفضلة والسجل. يبقى البحث حرًا دون حساب.',
+  login:'تسجيل الدخول', logout:'تسجيل الخروج', login_title:'تسجيل الدخول',
+  login_email:'البريد الإلكتروني', login_name:'الاسم المعروض', login_btn:'تسجيل الدخول',
+  f_name:'أدخل اسمك (حرفان على الأقل).',
+  f_email:'بريد إلكتروني غير صالح.',
+  login_done:'مرحبًا {0}!', logout_done:'سجّلت الخروج.',
+  auth_note:'يُحفظ اسمك وبريدك لحسابك. يمكنك تسجيل الخروج أو حذف بياناتك في أي وقت.',
+  share_done:'تمت المشاركة، شكرًا!',
+  share_fb_hint:'اختر تطبيقًا لإرساله إلى جهات اتصالك، أو انسخ الرسالة:',
+  copy_msg:'نسخ الرسالة',
+  share_subject:'عرض DealFinder AI', share_app_subject:'DealFinder AI',
+  share_app_text:'ابحث. قارِن. وفّر. اكتشف DealFinder AI:\nhttps://dealfinder-ai.app',
+  offline:'غير متصل — المفضلة والسجل متاحان.',
+  offline_search:'يتطلب البحث اتصالًا بالإنترنت.',
+  img_title:'البحث بصورة', img_analyze:'جارٍ تحليل الصورة…',
+  img_approx:'ميزة قيد الإعداد', img_body:'تحليل الصور غير متاح بعد. المس اقتراحًا للبحث:',
+  ad_label:'إعلان', ad_text:'مساحة إعلانية أصلية ومهذبة.', ad_text2:'لافتة معتدلة، لا فوق النتائج أبدًا.',
+  notif_on:'التنبيهات مفعلة: انخفاضات حقيقية فقط.',
+  notif_off:'التنبيهات معطلة.',
+  demo_tag:'وضع الاختبار — بيانات تجريبية',
+  backend_down:'الخادم غير متاح، يُستخدم المحرك المحلي.',
+  cgu_t:'شروط الاستخدام',
+  cgu_b:'<p style="margin-bottom:10px"><b>1. الخدمة.</b> DealFinder AI خدمة مجانية لمقارنة عروض المتاجر الشريكة.</p><p style="margin-bottom:10px"><b>2. بيانات العروض.</b> الأسعار والتوافر مصدرها مصادر مصرّح بها.</p><p style="margin-bottom:10px"><b>3. الروابط التابعة.</b> قد نتلقى عمولة دون تكلفة إضافية عليك.</p><p style="margin-bottom:10px"><b>4. الحساب.</b> لا يلزم حساب للوظائف الأساسية.</p><p><b>5. الاستخدام.</b> استخدام شخصي وغير تجاري.</p>',
+  privacy_t:'سياسة الخصوصية',
+  privacy_b:'<p style="margin-bottom:10px"><b>البيانات المجمعة.</b> الاسم والبريد إذا أنشأت حسابًا، والمفضلة وسجل البحث والإعدادات. إحصاءات مجهولة. لا شيء آخر.</p><p style="margin-bottom:10px"><b>ما لا نفعله.</b> لا حساب إلزامي؛ لا وصول لجهات اتصالك؛ لا مشاركة تلقائية.</p><p style="margin-bottom:10px"><b>الحذف.</b> «حذف بياناتي المحلية» في الملف الشخصي.</p><p><b>الأمان.</b> مفاتيح API في الخادم فقط.</p>',
+  about_t:'حول',
+  about_b:'<p style="margin-bottom:10px"><b>DealFinder AI</b> — ابحث. قارِن. وفّر.<br>v1.8.4</p><p style="margin-bottom:10px"><b>المهمة.</b> صِف ما تبحث عنه بلغة طبيعية، واستلم عروضًا مقارنة من مصادر مصرّح بها، وانتقل مباشرة إلى أفضل عرض.</p><p>إذا لم يُعثر على منتج، نقول ذلك بوضوح ونقترح عناصر من اختيارنا الحقيقي — لا منتجات مختلقة أبدًا.</p>'
+}};
+
+/* ---------- 2. Icônes ---------- */
+const IC = {
+  heart:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M19 14c1.5-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.5 4.04 3 5.5l7 7Z"/></svg>',
+  heartF:'<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 14c1.5-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.5 4.04 3 5.5l7 7Z"/></svg>',
+  share:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="6" cy="12" r="2.6"/><circle cx="17.5" cy="5.5" r="2.6"/><circle cx="17.5" cy="18.5" r="2.6"/><path d="M8.3 10.8l6.9-4M8.3 13.2l6.9 4"/></svg>',
+  ext:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 5h5v5M19 5l-8.5 8.5"/><path d="M9.5 5H6.5a2 2 0 0 0-2 2v10.5a2 2 0 0 0 2 2H17a2 2 0 0 0 2-2v-3"/></svg>',
+  truck:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 17V6a1.5 1.5 0 0 0-1.5-1.5h-8A1.5 1.5 0 0 0 3 6v11M14 8h4l3 4v5h-2"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/><path d="M9 17.5h6"/></svg>',
+  clock:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>',
+  warn:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.3"/></svg>',
+  trash:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4 7h16M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13M10 11v5M14 11v5"/></svg>',
+  cam:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h2.6L8.8 5.4h6.4L17.4 8H20a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1Z"/><circle cx="12" cy="13.2" r="3.4"/></svg>',
+  moon:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 13A8.5 8.5 0 1 1 11 3a7 7 0 0 0 10 10Z"/></svg>',
+  sun:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5 5l1.5 1.5M17.5 17.5 19 19M19 5l-1.5 1.5M6.5 17.5 5 19"/></svg>',
+  user:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4.5 20.5c.7-3.6 3.8-5.5 7.5-5.5s6.8 1.9 7.5 5.5"/></svg>',
+  wa:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3.5a8.5 8.5 0 0 0-7.3 12.8L3.5 20.5l4.4-1.1A8.5 8.5 0 1 0 12 3.5Z"/><path d="M9 8.8c.3 2.6 2.6 4.9 5.2 5.2l1-1.4 1.8.8c-.2 1.2-1.2 1.9-2.4 1.7-3.2-.4-6-3.2-6.4-6.4-.2-1.2.5-2.2 1.7-2.4l.8 1.8-1.7.7Z" stroke-width="1.5"/></svg>',
+  tg:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"><path d="M21 4 3.4 11l5.1 2.1L10.5 19l2.8-3.6 4.5 2L21 4Z"/><path d="M8.5 13.1 17 6.5"/></svg>',
+  sms:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 5h16a1.5 1.5 0 0 1 1.5 1.5v9A1.5 1.5 0 0 1 20 17H9l-4.5 3.5V17H4a1.5 1.5 0 0 1-1.5-1.5v-9A1.5 1.5 0 0 1 4 5Z"/><circle cx="8.2" cy="11" r="1" fill="currentColor" stroke="none"/><circle cx="12" cy="11" r="1" fill="currentColor" stroke="none"/><circle cx="15.8" cy="11" r="1" fill="currentColor" stroke="none"/></svg>',
+  mail:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2"/><path d="m4 7 8 6 8-6"/></svg>'
+};
+const CAT_IC = {
+  telephones:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><rect x="7.5" y="3" width="9" height="18" rx="2.4"/><path d="M11 17.8h2"/></svg>',
+  ordinateurs:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><rect x="4" y="5.5" width="16" height="10.5" rx="1.6"/><path d="M2 19h20"/></svg>',
+  audio:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 15v-1.5a8 8 0 0 1 16 0V15"/><rect x="3.5" y="14" width="4" height="6" rx="1.6"/><rect x="16.5" y="14" width="4" height="6" rx="1.6"/></svg>',
+  chaussures:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" stroke-linecap="round"><path d="M2.5 16.5v-3l4.5-1.5 3-4c2.5.5 5 2 6.5 3.5l5 1.5v3.5Z"/><path d="M8 12.5l1.5 1.5M10.5 10.5 12 12M2.5 16.5h19"/></svg>',
+  mode:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M8.5 4 4 6.8 6 10l2-1v10.5h8V9l2 1 2-3.2L15.5 4a3.5 3.5 0 0 1-7 0Z"/></svg>',
+  maison:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10.5 12 3.5l8.5 7M5.5 9.5V20h4.5v-5.5h4V20h4.5V9.5"/></svg>',
+  jeux:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><rect x="2.5" y="8" width="19" height="9.5" rx="4.7"/><path d="M8 10.5v4M6 12.5h4"/><circle cx="15.6" cy="11.4" r="1" fill="currentColor" stroke="none"/><circle cx="17.8" cy="13.8" r="1" fill="currentColor" stroke="none"/></svg>',
+  electronique:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><rect x="7" y="7" width="10" height="10" rx="2"/><rect x="10.5" y="10.5" width="3" height="3"/><path d="M9.5 7V4M14.5 7V4M9.5 20v-3M14.5 20v-3M7 9.5H4M7 14.5H4M20 9.5h-3M20 14.5h-3"/></svg>',
+  meubles:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" stroke-linecap="round"><path d="M6 12V7a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v5M4 18.5v-4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4ZM5.5 18.5V20M18.5 18.5V20"/></svg>',
+  autres:'<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5.5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="18.5" cy="12" r="1.7"/></svg>'
+};
+
+/* ---------- 3. Catalogue local (secours) ---------- */
+const MERCHANTS = {
+  tm:{name:"TechMarché", affiliate:true}, ep:{name:"Electro+", affiliate:true},
+  bs:{name:"BoutiqueSahel", affiliate:false}, md:{name:"MegaDeal Store", affiliate:true},
+  ac:{name:"AudioCenter", affiliate:true}, me:{name:"ModeExpress", affiliate:false},
+  cm:{name:"CasaMeuble", affiliate:false}
+};
+const O=(m,price,cur="FCFA",stock=true,ship=-1,h=12)=>({m,price,cur,stock,ship,h});
+const P=(id,cat,brand,name,tags,specs,offers)=>({id,cat,brand,name,tags,specs,offers});
+const PRODUCTS = [
+  P("p1","telephones","Samsung","Samsung Galaxy A15 — 128 Go",["samsung","galaxy","a15","128 go","amoled","4g","telephone","smartphone","double sim"],["Écran 6,5\" Super AMOLED","128 Go · 4 Go RAM","Batterie 5000 mAh","Double SIM 4G"],
+    [O("tm",94900,"FCFA",true,2000,2),O("ep",97900,"FCFA",true,0,5),O("md",96500,"FCFA",true,1500,24),O("bs",93900,"FCFA",false,1500,48)]),
+  P("p2","telephones","Samsung","Samsung Galaxy A05 — 64 Go",["samsung","galaxy","a05","64 go","telephone","smartphone"],["Écran 6,7\"","64 Go · 4 Go RAM","Batterie 5000 mAh"],
+    [O("tm",72500,"FCFA",true,1500,6),O("bs",71900,"FCFA",true,2000,20)]),
+  P("p3","telephones","Tecno","Tecno Spark 20 — 128 Go",["tecno","spark","128 go","telephone","smartphone","90 hz"],["Écran 90 Hz","128 Go · 8 Go RAM","Double SIM"],
+    [O("ep",68900,"FCFA",true,1000,3),O("md",67500,"FCFA",false,-1,30),O("bs",69900,"FCFA",true,0,10)]),
+  P("p4","telephones","Xiaomi","Xiaomi Redmi 13C — 128 Go",["xiaomi","redmi","13c","128 go","telephone","smartphone"],["128 Go · 6 Go RAM","Caméra 50 Mpx","Batterie 5000 mAh"],
+    [O("ep",79900,"FCFA",true,0,4),O("tm",81500,"FCFA",true,1500,12)]),
+  P("p5","telephones","Apple","Apple iPhone 13 — 128 Go",["apple","iphone","13","telephone","smartphone","128 go"],["Puce A15 Bionic","128 Go","Double caméra 12 Mpx"],
+    [O("tm",549000,"FCFA",true,0,8),O("md",789,"EUR",true,0,24)]),
+  P("p6","ordinateurs","HP","HP 250 G9 — Core i5",["hp","250","g9","ordinateur","laptop","pc portable","i5","512 go"],["Intel Core i5 12ᵉ gén.","8 Go · 512 Go SSD","Écran 15,6\""],
+    [O("tm",289000,"FCFA",true,0,5),O("md",295000,"FCFA",true,2500,30)]),
+  P("p7","ordinateurs","Lenovo","Lenovo IdeaPad Slim 3",["lenovo","ideapad","slim","ordinateur","laptop","pc"],["AMD Ryzen 5","8 Go · 256 Go SSD","Écran 15,6\""],
+    [O("ep",259000,"FCFA",true,0,7),O("bs",264000,"FCFA",false,-1,60)]),
+  P("p8","ordinateurs","Apple","Apple MacBook Air M1",["apple","macbook","air","m1","ordinateur","laptop","pc"],["Puce Apple M1","8 Go · 256 Go SSD","Écran 13,3\" Retina"],
+    [O("tm",489000,"FCFA",true,0,48),O("md",749,"EUR",true,0,72)]),
+  P("p9","audio","JBL","JBL Tune 520BT — casque sans fil",["jbl","tune","520bt","casque","sans fil","bluetooth","audio","longue autonomie"],["Bluetooth 5.3","Autonomie 57 h","Pliable, micro intégré"],
+    [O("ac",21500,"FCFA",true,1000,2),O("tm",22900,"FCFA",true,1500,8),O("ep",21900,"FCFA",true,0,14)]),
+  P("p10","audio","Anker","Anker Soundcore Life Q20",["anker","soundcore","q20","casque","sans fil","bluetooth","audio","reduction de bruit"],["Réduction de bruit","Bluetooth","Autonomie 40 h"],
+    [O("ac",18900,"FCFA",true,1000,3),O("md",19900,"FCFA",true,-1,20)]),
+  P("p11","audio","Oraimo","Oraimo FreePods 4 — écouteurs sans fil",["oraimo","freepods","ecouteurs","sans fil","bluetooth","audio"],["Bluetooth 5.2","Réduction de bruit d'appel","Étui de charge"],
+    [O("ep",12500,"FCFA",true,500,1),O("ac",13200,"FCFA",true,1000,9)]),
+  P("p12","audio","JBL","JBL Wave Buds — écouteurs sans fil",["jbl","wave","buds","ecouteurs","sans fil","bluetooth","audio"],["Écouteurs sans fil","Bluetooth 5.3","Autonomie 20 h"],
+    [O("ac",16900,"FCFA",true,1000,4),O("bs",17500,"FCFA",true,1500,26)]),
+  P("p13","audio","JBL","JBL Go 4 — enceinte Bluetooth",["jbl","go 4","enceinte","bluetooth","audio","etanche"],["Enceinte Bluetooth","Étanche IP67","Autonomie 7 h"],
+    [O("ac",14500,"FCFA",true,1000,6)]),
+  P("p14","chaussures","Nike","Nike Court Vision Low",["nike","court vision","baskets","chaussures","sneakers"],["Baskets cuir synthétique","Semelle caoutchouc"],
+    [O("me",34900,"FCFA",true,2000,12),O("md",35900,"FCFA",true,1500,24)]),
+  P("p15","chaussures","Adidas","Adidas Grand Court 2.0",["adidas","grand court","baskets","chaussures","sneakers"],["Baskets lifestyle","Confort mousse"],
+    [O("me",29900,"FCFA",true,2000,18)]),
+  P("p16","mode","Générique","Lot de 3 t-shirts coton",["t-shirt","tshirt","coton","mode","vetements","unisexe"],["100 % coton","Coupe unisexe"],
+    [O("me",6500,"FCFA",true,1000,10)]),
+  P("p17","mode","Générique","Sac à dos urbain 20 L",["sac","a dos","sac a dos","mode","urbain"],["Compartiment PC 15\"","Tissu déperlant"],
+    [O("me",12900,"FCFA",true,1000,15),O("md",13900,"FCFA",true,0,40)]),
+  P("p18","mode","Générique","Robe wax ajustée",["robe","wax","mode","femme"],["Tissu wax authentique","Couture locale"],
+    [O("me",15900,"FCFA",true,1500,20)]),
+  P("p19","jeux","Sony","Manette de jeu sans fil",["manette","jeux","gaming","sans fil","bluetooth","controller"],["Bluetooth","Batterie 12 h","Vibrations"],
+    [O("md",42900,"FCFA",true,1500,9),O("tm",44500,"FCFA",true,0,22)]),
+  P("p20","jeux","Générique","Console portable rétro",["console","jeux","portable","retro","gaming"],["Écran 4,3\"","Carte mémoire incluse"],
+    [O("bs",39900,"FCFA",true,2000,50)]),
+  P("p21","maison","Générique","Blender mixeur 500 W",["blender","mixeur","maison","cuisine"],["Bol 1,5 L","2 vitesses + pulse"],
+    [O("cm",18900,"FCFA",true,1500,11),O("md",19900,"FCFA",true,0,28)]),
+  P("p22","maison","Générique","Bouilloire inox 1,7 L",["bouilloire","maison","cuisine","the"],["1800 W","Arrêt automatique"],
+    [O("cm",9900,"FCFA",true,1000,13)]),
+  P("p23","electronique","Amazfit","Montre connectée Amazfit Bip 5",["amazfit","bip","montre","connectee","electronique","sport","gps"],["GPS intégré","Autonomie 10 jours","Suivi santé"],
+    [O("ep",34900,"FCFA",true,0,5),O("tm",36900,"FCFA",true,1500,16)]),
+  P("p24","electronique","Générique","Powerbank 20 000 mAh",["powerbank","batterie","electronique","chargeur","20000","usb-c"],["Charge rapide 22,5 W","Port USB-C"],
+    [O("tm",11900,"FCFA",true,1000,7),O("ep",12500,"FCFA",true,0,12),O("md",19.5,"USD",true,0,18)]),
+  P("p25","meubles","Générique","Chaise de bureau ergonomique",["chaise","bureau","meubles","ergonomique"],["Dossier mesh respirant","Accoudoirs réglables"],
+    [O("cm",45900,"FCFA",true,3000,35),O("bs",44900,"FCFA",false,-1,70)]),
+  P("p26","meubles","Générique","Lampe de bureau LED",["lampe","bureau","led","meubles","maison"],["3 températures de couleur","Alimentation USB"],
+    [O("cm",8900,"FCFA",true,1000,25)])
+];
+const CATEGORIES = [
+  {id:"telephones",k:"Téléphones"},{id:"ordinateurs",k:"Ordinateurs"},{id:"audio",k:"Audio"},{id:"chaussures",k:"Chaussures"},
+  {id:"mode",k:"Mode"},{id:"maison",k:"Maison"},{id:"jeux",k:"Jeux"},{id:"electronique",k:"Électronique"},
+  {id:"meubles",k:"Meubles"},{id:"autres",k:"Autres"}
+];
+const CAT_LABELS = {
+  fr:{telephones:"Téléphones",ordinateurs:"Ordinateurs",audio:"Audio",chaussures:"Chaussures",mode:"Mode",maison:"Maison",jeux:"Jeux",electronique:"Électronique",meubles:"Meubles",autres:"Autres"},
+  en:{telephones:"Phones",ordinateurs:"Computers",audio:"Audio",chaussures:"Shoes",mode:"Fashion",maison:"Home",jeux:"Gaming",electronique:"Electronics",meubles:"Furniture",autres:"Other"},
+  es:{telephones:"Teléfonos",ordinateurs:"Ordenadores",audio:"Audio",chaussures:"Zapatos",mode:"Moda",maison:"Hogar",jeux:"Videojuegos",electronique:"Electrónica",meubles:"Muebles",autres:"Otros"},
+  pt:{telephones:"Telemóveis",ordinateurs:"Computadores",audio:"Áudio",chaussures:"Sapatos",mode:"Moda",maison:"Casa",jeux:"Videojogos",electronique:"Eletrónica",meubles:"Mobiliário",autres:"Outros"},
+  ar:{telephones:"الهواتف",ordinateurs:"الحواسيب",audio:"الصوتيات",chaussures:"الأحذية",mode:"الأزياء",maison:"المنزل",jeux:"الألعاب",electronique:"الإلكترونيات",meubles:"الأثاث",autres:"أخرى"}
+};
+const POPULAR = ["écouteurs sans fil à moins de 25 000 FCFA","téléphone Samsung à moins de 150 000 FCFA","ordinateur portable","baskets Nike","montre connectée","manette de jeux"];
+
+/* ---------- 4. État & stockage ---------- */
+const CUR_SYM = {FCFA:" FCFA",EUR:" €",USD:" $",GBP:" £"};
+const TO_FCFA = {FCFA:1,EUR:655.957,USD:610,GBP:775};
+const store = {
+  get(k,d){try{const v=localStorage.getItem("df_"+k);return v?JSON.parse(v):d}catch(e){return d}},
+  set(k,v){try{localStorage.setItem("df_"+k,JSON.stringify(v))}catch(e){}},
+  del(k){try{localStorage.removeItem("df_"+k)}catch(e){}}
+};
+const state = {
+  settings:Object.assign({lang:"fr",currency:"FCFA",theme:"light",notif:false}, store.get("set",{})),
+  favorites:store.get("favs",{}), history:store.get("hist",[]), stats:Object.assign({searches:0,clicks:0,shares:0,favs:0},store.get("stats",{})),
+  online:navigator.onLine,
+  parsed:null, baseResults:[], filtered:[], query:"", remoteDemo:false, remoteMerchants:{},
+  filters:{min:null,max:null,merchants:new Set(),inStock:false,knownShip:false,sort:"relevance"}
+};
+function t(key,vars){
+  let s=(I18N[state.settings.lang]&&I18N[state.settings.lang][key])||I18N.fr[key]||key;
+  if(vars)Object.entries(vars).forEach(([i,v])=>s=s.split("{"+i+"}").join(v));
+  return s;
+}
+const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
+const norm=s=>(s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+const esc=s=>(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const saveAll=()=>{store.set("set",state.settings);store.set("favs",state.favorites);store.set("hist",state.history);store.set("stats",state.stats)};
+function track(k){state.stats[k]++;saveAll();renderStats()}
+const fcfa=o=>o.price*TO_FCFA[o.cur];
+const mName=o=>o.merchantName||(MERCHANTS[o.m]?MERCHANTS[o.m].name:o.m);
+
+/* ---------- 5. Authentification ---------- */
+const EMAIL_RE=/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+let memSession=null;
+const Auth={
+  users(){return store.get("accounts",{})},
+  saveUsers(u){store.set("accounts",u)},
+  session(){
+    if(memSession){ if(Date.now()<memSession.expiresAt)return memSession; memSession=null; store.del("session"); }
+    const s=store.get("session",null);
+    if(!s)return null;
+    if(Date.now()>s.expiresAt){store.del("session");return null}
+    memSession=s;
+    return s;
+  },
+  setSession(email,name,srvToken){
+    memSession={email,name,token:srvToken||null,expiresAt:Date.now()+7*864e5};
+    store.set("session",memSession);
+  },
+  logout(){memSession=null;store.del("session")}
+};
+function authShowErr(msg){
+  const e=$("#auth-err");if(!e)return;
+  e.textContent=msg;e.classList.add("show");
+  const f=$("#auth-form");
+  if(f){f.classList.remove("shake");void f.offsetWidth;f.classList.add("shake")}
+}
+function authHideErr(){const e=$("#auth-err");if(e)e.classList.remove("show")}
+
+async function doAuth(){
+  authHideErr();
+  const name=($("#a-name").value||"").trim();
+  const email=($("#a-email").value||"").trim().toLowerCase();
+  if(name.length<2){const el=$("#a-name");if(el)el.classList.add("err");return authShowErr(t("f_name"))}
+  if(!EMAIL_RE.test(email)){const el=$("#a-email");if(el)el.classList.add("err");return authShowErr(t("f_email"))}
+  let srvToken=null;
+  if(API_EFFECTIVE!==null){
+    try{
+      const r=await fetch(API_EFFECTIVE+"/api/auth/register",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name,email})});
+      if(r.ok){const d=await r.json();srvToken=d.token}
+      else if(r.status===400){
+        const d=await r.json().catch(()=>null);
+        const map={invalid_name:t("f_name"),invalid_email:t("f_email")};
+        return authShowErr((d&&d.error&&map[d.error])||t("f_email"));
+      }
+    }catch(e){}
+  }
+  const users=Auth.users();
+  const displayName=(users[email]&&users[email].name)||name;
+  users[email]={name:displayName,createdAt:users[email]?users[email].createdAt:Date.now()};
+  Auth.saveUsers(users);
+  Auth.setSession(email,displayName,srvToken);
+  syncAuthUI();
+  closeAll();
+  goView("profile");
+  toast(t("login_done",{0:displayName}));
+  if(srvToken)syncServerData();
+}
+ $("#auth-form").addEventListener("submit",e=>{e.preventDefault();doAuth()});
+ $$("#auth-form .login-inp").forEach(inp=>inp.addEventListener("input",()=>inp.classList.remove("err")));
+function openAuth(){openSheet("sheet-login");setTimeout(()=>{const f=$("#a-name");if(f&&!f.value)f.focus()},300)}
+
+/* ================================================================
+   ADMIN — panneau + branchement serveur (anti-erreur v1.8.4)
+   ================================================================ */
+const ADMIN_EMAIL="sowgueye.mariama@gmail.com";
+let admProducts=[], admDirty=new Set(), admTabCur="p", admSettings=null, delArm=null, admOpening=false;
+
+function adminEnsureSheet(){
+  if($("#adm-wrap"))return;
+  const w=document.createElement("div");w.className="adm-wrap";w.id="adm-wrap";
+  w.innerHTML=`<div class="adm-bg" id="adm-close"></div>
+  <div class="adm-panel">
+    <div style="display:flex;align-items:center;gap:10px;padding:14px 16px 8px">
+      <h3 style="font-family:Sora;font-size:16px;flex:1">🛠️ Administration</h3>
+      <button id="adm-x" style="width:32px;height:32px;border-radius:10px;background:var(--surface2);color:var(--text2)">✕</button>
+    </div>
+    <div class="adm-tabs">
+      <button id="adm-tab-p" class="on">Produits</button>
+      <button id="adm-tab-a">Affiliation</button>
+      <button id="adm-tab-k">🔑 Clés</button>
+      <button id="adm-tab-n">📢 Notifs</button>
+      <button id="adm-tab-c">💻 Console</button>
+    </div>
+    <div class="adm-body" id="adm-body"></div>
+    <div style="padding:12px 16px calc(14px + env(safe-area-inset-bottom));border-top:1px solid var(--line)">
+      <button id="adm-save" class="btn btn-brand btn-block" style="padding:13px">💾 Enregistrer les modifications</button>
+    </div>
+  </div>`;
+  document.getElementById("screen").appendChild(w);
+  w.querySelector("#adm-close").onclick=admClose; w.querySelector("#adm-x").onclick=admClose;
+  w.querySelector("#adm-tab-p").onclick=()=>admTab("p");
+  w.querySelector("#adm-tab-a").onclick=()=>admTab("a");
+  w.querySelector("#adm-tab-k").onclick=()=>admTab("k");
+  w.querySelector("#adm-tab-n").onclick=()=>admTab("n");
+  w.querySelector("#adm-tab-c").onclick=()=>admTab("c");
+  w.querySelector("#adm-save").onclick=admSave;
+}
+async function admOpen(){
+  if(admOpening)return;
+  admOpening=true;
+  adminEnsureSheet();
+  $("#adm-wrap").classList.add("open");
+  $("#adm-body").innerHTML='<p class="adm-note" style="text-align:center;padding:30px 0">⏳ Connexion…</p>';
+  if(API_EFFECTIVE===null){
+    await detectBackend();
+    if(API_EFFECTIVE===null){
+      await new Promise(r=>setTimeout(r,1500));
+      await detectBackend();
+    }
+  }
+  admOpening=false;
+  if(API_EFFECTIVE===null){
+    $("#adm-body").innerHTML=`
+      <div class="adm-lbl">⚠️ À quoi sert cette adresse ?</div>
+      <p class="adm-note">C'est l'<b>entrepôt</b> de ton application : c'est LÀ que tes produits, clés, annonces et affiliations sont enregistrés pour toujours, et c'est de LÀ que les utilisateurs reçoivent tout. Sans elle, le panneau ne peut rien enregistrer nulle part.</p>
+      <div class="adm-lbl">⚠️ Piège à éviter</div>
+      <p class="adm-note"><b>« Chrome » n'est PAS une adresse.</b> Chrome est juste l'application avec laquelle tu ouvres des sites. Ne tape jamais « Chrome » ici.</p>
+      <div class="adm-lbl">Comment obtenir l'adresse (gratuit, sur ton téléphone)</div>
+      <p class="adm-note">1️⃣ Va sur <b>github.com</b> → crée un dépôt « dealfinder-ai » → « uploading an existing file » → glisse les fichiers du projet.<br>2️⃣ Va sur <b>render.com</b> → « New + » → « Web Service » → connecte GitHub → choisis ton dépôt → Build : <b>npm install</b> · Start : <b>npm start</b> · variable : ADMIN_EMAIL = ton e-mail.<br>3️⃣ Attends 3 minutes → Render t'affiche une adresse comme <b>https://dealfinder-ai-ab12.onrender.com</b> → copie-la et colle-la ci-dessous. Mémorisée pour toujours.</p>
+      <div class="adm-f">
+        <input id="adm-srv" placeholder="https://dealfinder-ai-ab12.onrender.com" autocomplete="off">
+        <button class="btn btn-brand btn-block" id="adm-srv-go" style="padding:12px">Connecter mon entrepôt</button>
+      </div>`;
+    const go=$("#adm-srv-go");
+    if(go)go.onclick=async()=>{
+      const v=$("#adm-srv").value.trim().replace(/\/+$/,"");
+      if(!v)return toast("Colle d'abord l'adresse donnée par Render");
+      if(!/^https?:\/\//.test(v))return toast("L'adresse doit commencer par https:// — pas « Chrome » ni autre chose");
+      if(/chrome/i.test(v))return toast("« Chrome » n'est pas une adresse : colle l'adresse .onrender.com de Render");
+      store.set("api_base",v);
+      API_EFFECTIVE=null;
+      $("#adm-body").innerHTML='<p class="adm-note" style="text-align:center;padding:30px 0">⏳ Connexion…</p>';
+      const ok=await detectBackend();
+      if(ok){toast("Serveur branché ✅ (mémorisé pour toujours)");const l=await admLoad();if(l)admTab("p")}
+      else{$("#adm-body").innerHTML='<p class="adm-note" style="text-align:center;padding:30px 0">Cette adresse ne répond pas. Vérifie sur render.com que ton service est bien « Live » (pas « Deploying »), copie l\u2019URL exacte affichée en haut de la page de ton service, puis réessaie.</p>'+
+        '<button class="btn btn-ghost btn-block" style="padding:12px" onclick="admOpen()">Réessayer</button>';}
+    };
+    return;
+  }
+  const loaded=await admLoad();
+  if(loaded)admTab("p");
+}
+function admClose(){const w=$("#adm-wrap");if(w)w.classList.remove("open")}
+function isAdminNow(){
+  const s=Auth.session();
+  return !!(s&&s.email&&s.email.toLowerCase()===ADMIN_EMAIL);
+}
+function renderAdminUI(){
+  const e=$("#admin-entry");
+  if(isAdminNow()){
+    if(!e){
+      const el=document.createElement("div");el.id="admin-entry";el.style.margin="0 0 22px";
+      el.innerHTML=`<button class="btn btn-ghost btn-block" id="admin-open" style="padding:12px;border-color:var(--brand);color:var(--brand)">🛠️ Panneau d'administration</button>`;
+      document.querySelector("#acct-card").after(el);
+      $("#admin-open").onclick=admOpen;
+    }
+  }else if(e){e.remove()}
+}
+async function admLoad(){
+  const H=authHeaders();
+  try{
+    const [rp,rs]=await Promise.all([
+      fetch(API_EFFECTIVE+"/api/admin/products",{headers:H}),
+      fetch(API_EFFECTIVE+"/api/admin/settings",{headers:H})
+    ]);
+    if(rp.status===401||rs.status===401){toast("Accès réservé au compte administrateur.");return false}
+    admProducts=(await rp.json()).products||[];
+    admSettings=await rs.json();
+    admDirty=new Set();
+    return true;
+  }catch(e){return false}
+}
+function admTab(which){
+  admTabCur=which;
+  ["adm-tab-p","adm-tab-a","adm-tab-k","adm-tab-n","adm-tab-c"].forEach(id=>{const b=$("#"+id);if(b)b.classList.remove("on")});
+  const btn=$("#adm-tab-"+which);if(btn)btn.classList.add("on");
+  const save=$("#adm-save");if(save)save.style.display=(which==="p"||which==="a")?"":"none";
+  if(which==="p")admRenderProducts();
+  else if(which==="a")admRenderAff();
+  else if(which==="k")admRenderKeys();
+  else if(which==="n")admRenderAnn();
+  else admRenderConsole();
+}
+function admRenderProducts(){
+  const b=$("#adm-body");if(!b)return;
+  b.innerHTML=`
+    <div class="adm-lbl">Ajouter un produit</div>
+    <div class="adm-f">
+      <input id="adm-n" placeholder="Nom du produit">
+      <div class="adm-r2"><div><input id="adm-br" placeholder="Marque"></div><div><input id="adm-pr" type="number" inputmode="decimal" placeholder="Prix"></div></div>
+      <div class="adm-r2"><div><input id="adm-me" placeholder="Boutique"></div><div><input id="adm-cu" placeholder="FCFA / EUR / USD / GBP" value="FCFA"></div></div>
+      <input id="adm-u" placeholder="Lien boutique (https://…)">
+      <button class="btn btn-ghost btn-block" id="adm-add" style="padding:11px">＋ Ajouter ce produit</button>
+    </div>
+    <div class="adm-lbl">Catalogue (${admProducts.length})</div>
+    <div id="adm-list"></div>
+    <p class="adm-note">Modifie le prix, la dispo ou le lien, puis « 💾 Enregistrer ». Un produit apparaît dans les recherches ET les suggestions quand son prix ET son lien sont renseignés.</p>`;
+  const list=b.querySelector("#adm-list");
+  if(!admProducts.length)list.innerHTML=`<p class="adm-note">Aucun produit pour l'instant. Ajoute le premier ci-dessus.</p>`;
+  admProducts.forEach(p=>{
+    const d=document.createElement("div");d.className="adm-item";
+    d.innerHTML=`<b>${esc(p.name)}</b><small>${esc(p.brand||"")} · ${esc(p.merchant_name||"—")} · ${esc(p.currency)}</small>
+      <div class="line">
+        <input type="number" value="${p.price}" data-price="${esc(p.id)}">
+        <label style="font-size:12px;display:flex;gap:5px;align-items:center"><input type="checkbox" data-stock="${esc(p.id)}" ${p.stock?"checked":""}> Dispo</label>
+        <button class="adm-mini del" data-del="${esc(p.id)}">🗑</button>
+        <input type="url" placeholder="Lien boutique (https://…)" value="${esc(p.product_url||"")}" data-url="${esc(p.id)}">
+      </div>`;
+    list.appendChild(d);
+  });
+  b.querySelector("#adm-add").onclick=admAdd;
+  b.querySelectorAll("[data-price]").forEach(i=>i.addEventListener("input",()=>admDirty.add(i.dataset.price)));
+  b.querySelectorAll("[data-stock]").forEach(i=>i.addEventListener("change",()=>admDirty.add(i.dataset.stock)));
+  b.querySelectorAll("[data-url]").forEach(i=>i.addEventListener("input",()=>admDirty.add(i.dataset.url)));
+  b.querySelectorAll("[data-del]").forEach(bt=>bt.addEventListener("click",()=>{
+    if(delArm!==bt.dataset.del){delArm=bt.dataset.del;bt.classList.add("armed");bt.textContent="Confirmer ?";
+      setTimeout(()=>{if(delArm===bt.dataset.del){delArm=null;bt.classList.remove("armed");bt.textContent="🗑"}},2500);return}
+    admDelete(bt.dataset.del);
+  }));
+}
+async function admAdd(){
+  const body={
+    name:$("#adm-n").value.trim(), brand:$("#adm-br").value.trim(),
+    price:parseFloat($("#adm-pr").value), currency:($("#adm-cu").value||"FCFA").trim().toUpperCase(),
+    merchant_name:$("#adm-me").value.trim(), product_url:$("#adm-u").value.trim()
+  };
+  if(!body.name||!isFinite(body.price))return toast("Remplis au moins le nom et le prix.");
+  const r=await fetch(API_EFFECTIVE+"/api/admin/products",{method:"POST",headers:authHeaders(),body:JSON.stringify(body)});
+  if(r.status===401)return toast("Accès refusé");
+  if(r.ok){toast("Produit ajouté ✅ visible par tous");await admLoad();admRenderProducts()}else toast("Erreur d'enregistrement");
+}
+async function admDelete(id){
+  const r=await fetch(API_EFFECTIVE+"/api/admin/products/"+id,{method:"DELETE",headers:authHeaders()});
+  if(r.status===401)return toast("Accès refusé");
+  if(r.ok){toast("Produit supprimé ✅");delArm=null;await admLoad();admRenderProducts()}
+}
+function admRenderAff(){
+  const b=$("#adm-body");if(!b)return;
+  const phTag=admSettings&&admSettings.affiliateTag?(admSettings.affiliateTag+" (inchangé)"):"vide";
+  const phTpl=admSettings&&admSettings.trackingTemplate?(admSettings.trackingTemplate+" (inchangé)"):"vide";
+  b.innerHTML=`
+    <div class="adm-lbl">Tag d'affiliation</div>
+    <div class="adm-f"><input id="adm-tag" placeholder="${phTag}" autocomplete="off"></div>
+    <div class="adm-lbl">Modèle de lien de tracking</div>
+    <div class="adm-f"><input id="adm-tpl" placeholder="${phTpl}" autocomplete="off"></div>
+    <p class="adm-note">Placeholders : {url} = lien produit · {tag} = ton tag · {clickId} = id du clic. Tant que ces champs sont vides, AUCUN tag n'est attaché aux liens.</p>
+    <p class="adm-note">🔒 Dès l'enregistrement, ton tag s'attache AUTOMATIQUEMENT aux liens de TOUS les utilisateurs, pour toujours.</p>`;
+}
+function admRenderKeys(){
+  const b=$("#adm-body");if(!b)return;
+  b.innerHTML=`
+    <div class="adm-lbl">Ajouter / remplacer une clé</div>
+    <div class="adm-f">
+      <input id="adm-kn" placeholder="Nom (ex. admob, ai_gemini, provider_x)">
+      <input id="adm-kv" placeholder="Colle ta clé ici" autocomplete="off">
+      <button class="btn btn-ghost btn-block" id="adm-ks" style="padding:11px">Enregistrer la clé</button>
+    </div>
+    <div class="adm-lbl">Clés enregistrées (masquées)</div>
+    <div id="adm-klist"><p class="adm-note">Chargement…</p></div>
+    <p class="adm-note">Acceptées INSTANTANÉMENT, appliquées à tous, sauvegardées dans la base — ne disparaissent jamais.</p>
+    <p class="adm-note">ℹ️ Une clé seule ne cherche pas de produits : chaque source a sa documentation. Enregistre la clé ici puis donne-moi la documentation du service — je connecte le connecteur réel et la recherche trouvera de VRAIS produits.</p>`;
+  b.querySelector("#adm-ks").onclick=async()=>{
+    const n=$("#adm-kn").value.trim(), v=$("#adm-kv").value.trim();
+    if(!n||!v)return toast("Remplis le nom et la clé");
+    const r=await fetch(API_EFFECTIVE+"/api/admin/apikeys",{method:"POST",headers:authHeaders(),body:JSON.stringify({name:n,value:v})});
+    if(r.status===401)return toast("Accès refusé");
+    if(r.ok){toast("Clé acceptée ✅ appliquée immédiatement à tous");$("#adm-kn").value="";$("#adm-kv").value="";admRenderKeys()}
+    else toast("Erreur d'enregistrement");
+  };
+  fetch(API_EFFECTIVE+"/api/admin/apikeys",{headers:authHeaders()}).then(r=>r.ok?r.json():null).then(d=>{
+    const list=$("#adm-klist");if(!list)return;
+    const ks=d&&d.keys?d.keys:{};
+    const names=Object.keys(ks);
+    if(!names.length){list.innerHTML='<p class="adm-note">Aucune clé enregistrée.</p>';return}
+    list.innerHTML=names.map(n=>`<div class="adm-item"><b>${esc(n.replace("apikey_",""))}</b><small>${esc(ks[n])}</small>
+      <div class="line"><button class="adm-mini del" data-kd="${esc(n)}">🗑 Supprimer</button></div></div>`).join("");
+    list.querySelectorAll("[data-kd]").forEach(bt=>bt.onclick=async()=>{
+      if(bt.textContent!=="Confirmer ?"){bt.classList.add("armed");bt.textContent="Confirmer ?";
+        setTimeout(()=>{bt.classList.remove("armed");bt.textContent="🗑 Supprimer"},2500);return}
+      await fetch(API_EFFECTIVE+"/api/admin/apikeys",{method:"DELETE",headers:authHeaders(),body:JSON.stringify({name:bt.dataset.kd})});
+      admRenderKeys();
+    });
+  }).catch(()=>{});
+}
+function admRenderAnn(){
+  const b=$("#adm-body");if(!b)return;
+  b.innerHTML=`
+    <div class="adm-lbl">Notifier les utilisateurs — toute taille acceptée</div>
+    <div class="adm-f">
+      <input id="adm-at" placeholder="Titre de l'annonce">
+      <textarea id="adm-ab" placeholder="Écris ton message ici, aussi long que tu veux…"></textarea>
+      <button class="btn btn-brand btn-block" id="adm-as" style="padding:11px">📢 Publier l'annonce</button>
+    </div>
+    <div class="adm-lbl">Annonce active</div>
+    <div id="adm-al"><p class="adm-note">Chargement…</p></div>
+    <p class="adm-note">Publiée instantanément pour TOUS, sauvegardée dans la base — elle ne disparaît jamais.</p>`;
+  b.querySelector("#adm-as").onclick=async()=>{
+    const tt=$("#adm-at").value.trim();
+    const bb=$("#adm-ab").value.trim();
+    if(tt.length<3)return toast("Titre : 3 caractères minimum");
+    if(tt.length>200)return toast("Titre : 200 caractères maximum");
+    if(bb.length>2000)return toast("Message : 2000 caractères maximum");
+    const r=await fetch(API_EFFECTIVE+"/api/admin/announcements",{method:"POST",headers:authHeaders(),body:JSON.stringify({title:tt,body:bb})});
+    if(r.status===401)return toast("Accès refusé");
+    if(r.ok){toast("Annonce publiée ✅ visible par tous");admRenderAnn()}
+    else toast("Erreur de publication");
+  };
+  fetch(API_EFFECTIVE+"/api/admin/announcements",{headers:authHeaders()}).then(r=>r.ok?r.json():null).then(d=>{
+    const list=$("#adm-al");if(!list)return;
+    const items=(d&&d.announcements?d.announcements:[]).filter(a=>a.active);
+    if(!items.length){list.innerHTML='<p class="adm-note">Aucune annonce active.</p>';return}
+    list.innerHTML=items.map(a=>`<div class="adm-item"><b>${esc(a.title)}</b><small>${esc((a.body||"").slice(0,120))}${(a.body||"").length>120?"…":""}</small>
+      <div class="line"><button class="adm-mini del" data-ad="${a.id}">Masquer l'annonce</button></div></div>`).join("");
+    list.querySelectorAll("[data-ad]").forEach(bt=>bt.onclick=async()=>{
+      await fetch(API_EFFECTIVE+"/api/admin/announcements/"+bt.dataset.ad+"/deactivate",{method:"POST",headers:authHeaders()});
+      admRenderAnn();
+    });
+  }).catch(()=>{});
+}
+async function admConsoleRun(method,path,body){
+  const out=$("#adm-c-out");
+  if(!out)return;
+  out.textContent="⏳ Envoi vers le backend…";
+  try{
+    const r=await fetch(API_EFFECTIVE+path,{method,headers:authHeaders(),body:body?JSON.stringify(body):undefined});
+    const text=await r.text();
+    let pretty=text;
+    try{pretty=JSON.stringify(JSON.parse(text),null,2)}catch(e){}
+    out.textContent="HTTP "+r.status+"\n\n"+pretty;
+  }catch(e){
+    out.textContent="Erreur : le serveur n'a pas répondu.";
+  }
+}
+function admRenderConsole(){
+  const b=$("#adm-body");if(!b)return;
+  b.innerHTML=`
+    <div class="adm-lbl">Console — dialogue direct avec ton backend</div>
+    <div class="adm-f">
+      <select id="adm-c-act">
+        <option value="get_products">📋 Voir tous les produits</option>
+        <option value="get_settings">🏷️ Voir les réglages d'affiliation</option>
+        <option value="get_keys">🔑 Voir les clés (masquées)</option>
+        <option value="get_health">❤️ Santé du serveur</option>
+        <option value="get_overview">📊 Statistiques globales</option>
+        <option value="get_search">🔍 Tester une recherche (champ ci-dessous)</option>
+        <option value="get_announcements">📢 Voir toutes les annonces</option>
+      </select>
+      <input id="adm-c-arg" placeholder="Paramètre optionnel (ex. texte de recherche)">
+      <button class="btn btn-brand btn-block" id="adm-c-run" style="padding:11px">▶ Exécuter</button>
+    </div>
+    <div class="adm-lbl">Réponse du serveur (brute)</div>
+    <textarea id="adm-c-out" readonly style="width:100%;min-height:160px;background:var(--surface);border:1.5px solid var(--line);border-radius:10px;padding:10px;font-size:11.5px;font-family:monospace;resize:vertical">Prêt. Choisis une action et appuie sur ▶ Exécuter.</textarea>
+    <p class="adm-note">💡 Toute modification faite via les autres onglets est appliquée à l'app et à TOUS les utilisateurs immédiatement — l'app interroge ce backend à chaque recherche. Rien ne disparaît : tout est dans la base du serveur, même après extinction.</p>`;
+  b.querySelector("#adm-c-run").onclick=async()=>{
+    const act=$("#adm-c-act").value;
+    const arg=$("#adm-c-arg").value.trim();
+    if(act==="get_products")return admConsoleRun("GET","/api/admin/products");
+    if(act==="get_settings")return admConsoleRun("GET","/api/admin/settings");
+    if(act==="get_keys")return admConsoleRun("GET","/api/admin/apikeys");
+    if(act==="get_health")return admConsoleRun("GET","/api/health");
+    if(act==="get_overview")return admConsoleRun("GET","/api/admin/overview");
+    if(act==="get_announcements")return admConsoleRun("GET","/api/admin/announcements");
+    if(act==="get_search"){
+      if(!arg)return toast("Tape un texte à chercher dans le champ paramètre");
+      return admConsoleRun("POST","/api/search",{query:arg});
+    }
+  };
+}
+async function admSave(){
+  const H=authHeaders();
+  if(admTabCur==="p"){
+    if(!admDirty.size)return toast("Aucune modification à enregistrer");
+    let okCount=0;
+    for(const id of admDirty){
+      const inp=document.querySelector(`[data-price="${id}"]`);
+      const chk=document.querySelector(`[data-stock="${id}"]`);
+      const urlI=document.querySelector(`[data-url="${id}"]`);
+      const body={price:parseFloat(inp.value),stock:chk.checked};
+      if(urlI)body.product_url=urlI.value.trim();
+      const r=await fetch(API_EFFECTIVE+"/api/admin/products/"+id,{method:"PUT",headers:H,body:JSON.stringify(body)});
+      if(r.ok)okCount++;
+    }
+    toast(okCount?"Modifications enregistrées ✅ (appliquées à tous, en direct)":"Erreur — vérifie le format du lien (https://…)");
+    if(okCount){await admLoad();admRenderProducts()}
+  }else{
+    const tag=$("#adm-tag").value.trim(), tpl=$("#adm-tpl").value.trim();
+    if(!tag&&!tpl)return toast("Laisse vide = inchangé");
+    const body={};if(tag)body.affiliateTag=tag;if(tpl)body.trackingTemplate=tpl;
+    const r=await fetch(API_EFFECTIVE+"/api/admin/settings",{method:"POST",headers:H,body:JSON.stringify(body)});
+    if(r.status===401)return toast("Accès refusé");
+    if(r.status===400)return toast("Le modèle doit contenir {url}");
+    if(r.ok){toast("Affiliation acceptée ✅ appliquée à tous immédiatement");await admLoad();admRenderAff()}
+  }
+}
+
+/* ---------- 5b. syncAuthUI ---------- */
+function syncAuthUI(){
+  const card=$("#acct-card");
+  let dot=$("#auth-dot");
+  const s=Auth.session();
+  if(!dot){dot=document.createElement("span");dot.id="auth-dot";dot.style.cssText="flex:none;width:11px;height:11px;border-radius:99px;display:inline-block;margin-right:4px";
+    const bar=document.querySelector(".brandline");if(bar)bar.appendChild(dot);}
+  if(s&&s.email){
+    dot.style.background="#22c55e";dot.title="Connectée (indicateur)";
+    card.innerHTML=`
+      <div class="acct">
+        <div class="avatar">${esc((s.name||"U").charAt(0).toUpperCase())}</div>
+        <div class="grow"><h3>${esc(s.name)}</h3><p>${esc(s.email)}</p></div>
+        <button type="button" class="btn btn-ghost" data-auth-action="logout" style="padding:9px 14px;font-size:12.5px;flex:none;color:var(--red);border-color:var(--red)">${t("logout")}</button>
+      </div>`;
+  }else{
+    dot.style.background="transparent";dot.title="";
+    card.innerHTML=`
+      <div class="acct">
+        <div class="avatar">${IC.user}</div>
+        <div class="grow"><h3>${t("acct_out_title")}</h3><p>${t("acct_out_body")}</p></div>
+        <button type="button" class="btn btn-brand" data-auth-action="login" style="padding:9px 14px;font-size:12.5px;flex:none">${t("login")}</button>
+      </div>`;
+  }
+  renderAdminUI();
+}
+ $("#acct-card").addEventListener("click",e=>{
+  const btn=e.target.closest("[data-auth-action]");
+  if(!btn)return;
+  if(btn.dataset.authAction==="logout"){
+    const s=Auth.session();
+    if(s&&s.token&&API_EFFECTIVE!==null){fetch(API_EFFECTIVE+"/api/auth/logout",{method:"POST",headers:authHeaders()}).catch(()=>{})}
+    Auth.logout();
+    syncAuthUI();
+    toast(t("logout_done"));
+  }else openAuth();
+});
+async function syncServerData(){
+  if(API_EFFECTIVE===null)return;
+  const s=Auth.session();if(!s||!s.token)return;
+  const H=authHeaders();
+  try{
+    await Promise.all(Object.keys(state.favorites).map(id=>
+      fetch(API_EFFECTIVE+"/api/favorites",{method:"POST",headers:H,body:JSON.stringify({productId:id,savedPrice:state.favorites[id].savedPrice,currency:state.favorites[id].savedCur})}).catch(()=>{})
+    ));
+    const r=await fetch(API_EFFECTIVE+"/api/favorites",{headers:H});
+    if(r.ok){
+      const d=await r.json();let changed=false;
+      (d.favorites||[]).forEach(f=>{
+        if(!state.favorites[f.productId]){
+          state.favorites[f.productId]={savedAt:f.savedAt||Date.now(),savedPrice:f.savedPrice,savedCur:f.currency||"FCFA"};changed=true;
+        }
+      });
+      if(changed){saveAll();updateFavUI()}
+    }
+    const rh=await fetch(API_EFFECTIVE+"/api/history",{headers:H});
+    if(rh.ok){
+      const dh=await rh.json();
+      const srv=(dh.history||[]).map(h=>h.query).filter(Boolean);
+      state.history=[...new Set([...srv,...state.history])].slice(0,8);
+      saveAll();renderHistChips();
+    }
+  }catch(e){}
+}
+
+/* ---------- 6. Prix & devises ---------- */
+function fmtPrice(amount,cur){
+  const v=new Intl.NumberFormat(state.settings.lang==="ar"?"ar":(state.settings.lang==="en"?"en-US":"fr-FR"),{maximumFractionDigits:cur==="FCFA"?0:2}).format(amount);
+  return v+CUR_SYM[cur];
+}
+function displayPrice(o){
+  const target=state.settings.currency;
+  if(o.cur===target)return{txt:fmtPrice(o.price,o.cur),conv:false};
+  const v=o.price*TO_FCFA[o.cur]/TO_FCFA[target];
+  return{txt:"≈ "+fmtPrice(v,target),conv:true};
+}
+
+/* ---------- 7. Toast ---------- */
+function toast(msg){
+  const el=document.createElement("div");el.className="toast";
+  el.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M5 13l4 4L19 7"/></svg><span></span>';
+  el.querySelector("span").textContent=msg;
+  $("#toasts").appendChild(el);setTimeout(()=>{el.style.opacity="0";el.style.transition=".3s";setTimeout(()=>el.remove(),320)},2600);
+}
+
+/* ---------- 8. Navigation & thème ---------- */
+function goView(v){
+  $$(".nav-btn").forEach(b=>b.classList.toggle("active",b.dataset.view===v));
+  $$(".view").forEach(s=>s.classList.toggle("active",s.id==="view-"+v));
+  $("#main").scrollTop=0;
+  if(v==="favs")renderFavs();
+  if(v==="profile")renderProfile();
+  if(v==="search"&&!state.query)renderSearchIdle();
+}
+ $$(".nav-btn").forEach(b=>b.addEventListener("click",()=>goView(b.dataset.view)));
+function applyTheme(){
+  document.documentElement.dataset.theme=state.settings.theme;
+  $("#theme-btn").innerHTML=state.settings.theme==="light"?IC.moon:IC.sun;
+  $$("#set-theme button").forEach(b=>b.classList.toggle("on",b.dataset.th===state.settings.theme));
+}
+ $("#theme-btn").addEventListener("click",()=>{state.settings.theme=state.settings.theme==="light"?"dark":"light";applyTheme();saveAll()});
+ $$("#set-theme button").forEach(b=>b.addEventListener("click",()=>{state.settings.theme=b.dataset.th;applyTheme();saveAll()}));
+
+/* ---------- 9. Parsing de la requête ---------- */
+const STOP = new Set(["le","la","les","de","des","du","un","une","et","en","pour","avec","sur","dans","par","moins","plus","max","maximum","budget","cher","entre","sous","que","quel","quelle","combien","the","for","and","with","under","less","than","of"]);
+const FEATURES=["sans fil","bluetooth","etanche","gaming","amoled","longue autonomie","reduction de bruit","4g","usb-c","gps"];
+const BRANDS=["samsung","apple","iphone","xiaomi","redmi","tecno","hp","lenovo","macbook","jbl","anker","oraimo","nike","adidas","amazfit","sony"];
+const CAT_KEYS={telephones:["telephone","smartphone","phone"],ordinateurs:["ordinateur","laptop","portable","pc"],audio:["ecouteur","ecouteurs","casque","enceinte","audio"],
+  chaussures:["chaussure","chaussures","basket","baskets","sneaker","sneakers"],mode:["tshirt","t-shirt","sac","robe","veste","mode","vetement","vetements"],
+  maison:["mixeur","blender","bouilloire","cuisine","maison"],jeux:["manette","console","jeux","jeu","gaming"],meubles:["chaise","canape","table","meuble","meubles"],
+  electronique:["montre","powerbank","chargeur","connectee","electronique"]};
+function detectCurrency(q){if(/€|eur\b/.test(q))return"EUR";if(/\$|usd\b/.test(q))return"USD";if(/£|gbp\b/.test(q))return"GBP";return"FCFA"}
+function parseNum(s){return parseFloat(s.replace(/[\s.]/g,"").replace(",","."))||0}
+function parseQuery(raw){
+  const q=norm(raw).trim();
+  const out={raw,cat:null,brand:null,min:null,max:null,cur:"FCFA",features:[],qty:null,tokens:[],askBudget:false};
+  out.cur=detectCurrency(q);
+  const mR=q.match(/entre\s*([\d][\d\s.,]*)\s*(?:et|and|-)\s*([\d][\d\s.,]*)/);
+  const mM=q.match(/(?:a moins de|moins de|pas plus de|sous|max(?:imum)?(?: de)?|budget(?: max)?(?: de)?|inferieur(?:e)? a|en dessous de|<)\s*([\d][\d\s.,]*)/);
+  if(mR){out.min=parseNum(mR[1])*TO_FCFA[out.cur];out.max=parseNum(mR[2])*TO_FCFA[out.cur];out.curShown=out.cur}
+  else if(mM){out.max=parseNum(mM[1])*TO_FCFA[out.cur];out.curShown=out.cur}
+  for(const b of BRANDS)if(new RegExp("\\b"+b+"\\b").test(q)){out.brand=b.charAt(0).toUpperCase()+b.slice(1);break}
+  for(const[cat,keys]of Object.entries(CAT_KEYS))if(keys.some(k=>q.includes(k))){out.cat=cat;break}
+  FEATURES.forEach(f=>{if(q.includes(f))out.features.push(f)});
+  const mq=q.match(/(\d+)\s*(?:unites|pieces|pcs)/);if(mq)out.qty=mq[1];
+  if(/\bpas cher\b|moins cher|low cost|cheap/.test(q)&&!out.max)out.askBudget=true;
+  out.tokens=q.split(/[^a-z0-9]+/).filter(w=>w.length>2&&!STOP.has(w)&&!/^\d+$/.test(w));
+  return out;
+}
+
+/* ---------- 10. Recherche : backend d'abord, local en secours ---------- */
+async function fetchBackendSearch(raw){
+  if(API_EFFECTIVE===null)return null;
+  try{
+    const ctrl=new AbortController();const to=setTimeout(()=>ctrl.abort(),6000);
+    const r=await fetch(API_EFFECTIVE+"/api/search",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({query:raw}),signal:ctrl.signal});
+    clearTimeout(to);
+    if(!r.ok)return null;
+    const data=await r.json();
+    if(!data||!Array.isArray(data.products))return null;
+    state.remoteDemo=!!data.demo;
+    (data.merchants||[]).forEach(m=>{state.remoteMerchants[m.id]=m.name});
+    state.remoteMerchants["admin"]="Boutique partenaire";
+    return data.products;
+  }catch(e){return null}
+}
+function hay(p){return norm(p.name+" "+p.brand+" "+p.specs.join(" ")+" "+p.tags.join(" "))}
+function score(p,q){
+  let s=0;const h=hay(p);
+  if(q.brand&&h.includes(norm(q.brand)))s+=5;
+  if(q.cat&&p.cat===q.cat)s+=5;
+  q.tokens.forEach(w=>{if(h.includes(w))s+=1.2});
+  q.features.forEach(f=>{if(h.includes(f))s+=1.6});
+  return s;
+}
+function offersAfterFilters(p,f){
+  return p.offers.filter(o=>(!f.merchants.size||f.merchants.has(o.m))&&(!f.inStock||o.stock)&&(!f.knownShip||o.ship>=0));
+}
+function bestOf(offers){const av=offers.filter(o=>o.stock);const pool=av.length?av:offers;if(!pool.length)return null;return pool.slice().sort((a,b)=>fcfa(a)-fcfa(b))[0]}
+function runSearch(raw,opts={}){
+  if(!state.online){toast(t("offline_search"));return}
+  state.query=raw;goView("search");$("#search-input").value=raw;
+  const q=state.parsed=parseQuery(raw);
+  $("#no-results").innerHTML="";$("#interp").hidden=true;$("#results-zone").hidden=true;$("#ad-results").hidden=true;
+  state.remoteDemo=false;
+  state.filters={min:opts.keepFilters?state.filters.min:null,max:opts.keepFilters?state.filters.max:null,merchants:new Set(),inStock:false,knownShip:false,sort:"relevance"};
+  const sid=++runSearch.id;
+  const steps=[t("state_analyze"),t("state_search"),t("state_compare")];
+  const box=$("#search-state");
+  const draw=i=>{box.innerHTML='<div class="ai-steps">'+steps.map((s,j)=>'<div class="step '+(j<i?"done":j===i?"active":"")+'"><span class="dot"></span>'+s+"</div>").join("")+"</div>"};
+  draw(0);
+  const delay=ms=>new Promise(r=>setTimeout(r,ms));
+  (async()=>{
+    await delay(400);if(sid!==runSearch.id)return;draw(1);
+    const remote=await fetchBackendSearch(raw);
+    if(sid!==runSearch.id)return;
+    draw(2);
+    if(remote&&remote.length){
+      state.baseResults=remote;
+    }else{
+      if(API_EFFECTIVE!==null&&remote===null)toast(t("backend_down"));
+      await delay(500);if(sid!==runSearch.id)return;
+      const scored=PRODUCTS.map(p=>({p,s:score(p,q)})).filter(x=>x.s>0)
+        .sort((a,b)=>b.s-a.s||fcfa(bestOf(a.p.offers))-fcfa(bestOf(b.p.offers)));
+      state.baseResults=scored.map(x=>x.p);
+    }
+    if(!opts.noHist){
+      state.history=[raw,...state.history.filter(h=>h!==raw)].slice(0,8);saveAll();
+      const s=Auth.session();
+      if(s&&s.token&&API_EFFECTIVE!==null)
+        fetch(API_EFFECTIVE+"/api/history",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+s.token},body:JSON.stringify({query:raw,nResults:state.baseResults.length})}).catch(()=>{});
+    }
+    state.stats.searches++;saveAll();
+    const noCrit=!q.cat&&!q.brand&&!q.tokens.some(w=>PRODUCTS.some(p=>hay(p).includes(w)));
+    if(sid!==runSearch.id)return;
+    box.innerHTML="";
+    if(q.askBudget){renderClarify("budget");return}
+    if(!remote&&(noCrit||(!q.cat&&!q.brand&&state.baseResults.length===0))){renderClarify("type");return}
+    showInterp(q);
+    applyFiltersAndRender(opts.ignoreBudget);
+  })();
+}
+runSearch.id=0;
+
+function showInterp(q){
+  const chips=[];
+  if(q.cat)chips.push(t("interp_cat",{0:(CAT_LABELS[state.settings.lang]||CAT_LABELS.fr)[q.cat]||q.cat}));
+  if(q.brand)chips.push(t("interp_brand",{0:q.brand}));
+  if(q.min!=null&&q.max!=null)chips.push(t("interp_range",{0:fmtPrice(q.min/TO_FCFA[q.curShown],q.curShown),1:fmtPrice(q.max/TO_FCFA[q.curShown],q.curShown)}));
+  else if(q.max!=null)chips.push(t("interp_max",{0:fmtPrice(q.max/TO_FCFA[q.curShown],q.curShown)}));
+  q.features.forEach(f=>chips.push(t("interp_feat",{0:f.charAt(0).toUpperCase()+f.slice(1)})));
+  if(q.qty)chips.push(t("interp_qty",{0:q.qty}));
+  if(chips.length){$("#interp").innerHTML=chips.map(c=>"<span>"+c+"</span>").join("");$("#interp").hidden=false}
+}
+function renderClarify(kind){
+  $("#no-results").innerHTML="";
+  const q=state.parsed;
+  const budgetTxt=q.max?t("clarify_keep",{0:fmtPrice(q.max/TO_FCFA[q.curShown],q.curShown)}):"";
+  const isB=kind==="budget";
+  $("#no-results").innerHTML=`<div class="clarify">
+    <h3>${isB?t("clarify_budget"):t("clarify_title")}</h3>
+    <p>${isB?(budgetTxt||t("clarify_budget")):t("clarify_body")}${budgetTxt?"<br>"+budgetTxt:""}</p>
+    <form class="search-bar" id="clarify-form" style="box-shadow:none">
+      <input id="clarify-input" placeholder="${isB?"Ex. 50 000":"Ex. écouteurs sans fil"}" autocomplete="off">
+      <button class="search-go" type="submit"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+    </form>
+    <div class="chips">${CATEGORIES.filter(c=>c.id!=="autres").slice(0,6).map(c=>'<button class="pop-chip" data-cat="'+c.id+'">'+(CAT_LABELS[state.settings.lang]||CAT_LABELS.fr)[c.id]+"</button>").join("")}
+    ${isB?"":[10000,25000,50000,100000].map(v=>'<button class="pop-chip" data-bmax="'+v+'">≤ '+fmtPrice(v,"FCFA")+"</button>").join("")}</div></div>`;
+  $("#clarify-form").addEventListener("submit",e=>{
+    e.preventDefault();const v=$("#clarify-input").value.trim();if(!v)return;
+    runSearch(isB?state.query+" "+v:(q.max?state.query.split(" à moins")[0]+" "+v:v));
+  });
+  $$("#no-results [data-cat]").forEach(b=>b.addEventListener("click",()=>runSearch(CAT_LABELS.fr[b.dataset.cat])));
+  $$("#no-results [data-bmax]").forEach(b=>b.addEventListener("click",()=>runSearch(state.query+" à moins de "+b.dataset.bmax+" FCFA")));
+}
+
+/* ---------- 11. Filtres, tri, rendu ---------- */
+function applyFiltersAndRender(ignoreBudget){
+  const q=state.parsed,f=state.filters;
+  let items=state.baseResults.map(p=>{
+    const offs=offersAfterFilters(p,f);
+    if(!offs.length)return null;
+    const best=bestOf(offs);
+    return{p,offs,best};
+  }).filter(Boolean);
+  if(!ignoreBudget){
+    if(q.max!=null)items=items.filter(x=>fcfa(x.best)<=q.max);
+    if(q.min!=null)items=items.filter(x=>fcfa(x.best)>=q.min);
+  }
+  if(f.sort==="price_asc")items.sort((a,b)=>fcfa(a.best)-fcfa(b.best));
+  else if(f.sort==="price_desc")items.sort((a,b)=>fcfa(b.best)-fcfa(a.best));
+  else if(f.sort==="new")items.sort((a,b)=>Math.min(...a.offs.map(o=>o.h))-Math.min(...b.offs.map(o=>o.h)));
+  state.filtered=items;
+  const nOff=items.reduce((s,x)=>s+x.offs.length,0);
+  const demoTag=state.remoteDemo?' · <span style="color:var(--amber)">'+t("demo_tag")+"</span>":"";
+  $("#results-meta").innerHTML=items.length?t("meta",{0:items.length,1:nOff})+demoTag:"";
+  $("#ready-line").hidden=!items.length;
+  $("#ad-results").hidden=!items.length;
+  renderResults();updateFCount();
+  if(!items.length)renderNoResults(ignoreBudget);
+}
+function renderNoResults(widened){
+  $("#results-zone").hidden=false;$("#ready-line").hidden=true;
+  $("#no-results").innerHTML=`<div class="no-res">
+    <div class="ic">${IC.warn}</div><h3>${t("no_res_title",{0:esc(state.query)})}</h3><p>${t("no_res_body")}</p>
+    ${!widened&&state.parsed.max!=null?'<button class="btn btn-brand" id="widen-btn">'+t("widen")+"</button> ":""}
+    <button class="btn btn-ghost" id="edit-btn">${t("new_search")}</button></div>
+    <h2 class="sect">${t("sugg_title")}</h2>
+    <div id="sugg-list"><p class="adm-note" style="text-align:center">Chargement…</p></div>`;
+  const w=$("#widen-btn");if(w)w.addEventListener("click",()=>applyFiltersAndRender(true));
+  $("#edit-btn").addEventListener("click",()=>{$("#search-input").focus()});
+  loadSuggestions();
+}
+function adminToClientInternal(p){
+  return {id:p.id,cat:p.cat,brand:p.brand||"",name:p.title||p.name,tags:[],specs:p.specs||[],
+    offers:[{m:"admin",merchantName:p.merchant_name||p.merchant||"Boutique",price:p.price,cur:p.currency,stock:!!p.in_stock,ship:-1,h:12,productUrl:p.url||p.product_url,remote:true}]};
+}
+async function loadSuggestions(){
+  const box=$("#sugg-list");if(!box)return;
+  if(API_EFFECTIVE===null){
+    box.innerHTML='<p class="adm-note" style="text-align:center">'+t("sugg_empty")+"</p>";return;
+  }
+  try{
+    const r=await fetch(API_EFFECTIVE+"/api/products");
+    if(!r.ok)throw new Error();
+    const d=await r.json();
+    const items=(d.products||[]).slice(0,4);
+    if(!items.length){
+      box.innerHTML='<p class="adm-note" style="text-align:center">'+t("sugg_empty")+"</p>";return;
+    }
+    box.innerHTML=items.map(p=>{
+      const internal=adminToClientInternal(p);
+      const dp=displayPrice(internal.offers[0]);
+      return `<article class="p-card sugg" data-open="${esc(p.id)}">
+        <img class="p-img" loading="lazy" src="${p.image?esc(p.image):'https://picsum.photos/seed/df-'+esc(p.id)+'/300/300.jpg'}" alt="">
+        <div class="p-body">
+          <h3>${esc(p.title||p.name)}</h3>
+          <div class="p-sub">${esc(p.merchant_name||p.merchant||"")}</div>
+          <div class="price-row"><span class="price" style="font-size:15px">${dp.txt}</span></div>
+          <div class="p-actions">
+            <button class="btn btn-brand" data-offer="${esc(p.id)}">${t("view_offer")}</button>
+            <button class="icon-btn brand" data-share="${esc(p.id)}" aria-label="Partager">${IC.share}</button>
+          </div>
+        </div></article>`;
+    }).join("");
+    const ensure=id=>{
+      let p=state.baseResults.find(x=>x.id===id);
+      if(!p){
+        const item=(d.products||[]).find(x=>x.id===id);
+        if(item){p=adminToClientInternal(item);state.baseResults.push(p)}
+      }
+      return p;
+    };
+    box.querySelectorAll("[data-open]").forEach(el=>el.addEventListener("click",e=>{
+      if(e.target.closest("[data-offer],[data-share]"))return;
+      const p=ensure(el.dataset.open);if(p)openProduct(p.id);
+    }));
+    box.querySelectorAll("[data-offer]").forEach(el=>el.addEventListener("click",()=>{
+      const p=ensure(el.dataset.offer);if(p)openRedirect(p.offers[0],p);
+    }));
+    box.querySelectorAll("[data-share]").forEach(el=>el.addEventListener("click",()=>{
+      const p=ensure(el.dataset.share);if(p)shareOffer(p.offers[0],p);
+    }));
+  }catch(e){
+    box.innerHTML='<p class="adm-note" style="text-align:center">Suggestions indisponibles pour le moment.</p>';
+  }
+}
+function shipLabel(o){
+  if(o.ship===0)return'<span class="ok">'+t("ship_free")+"</span>";
+  if(o.ship>0)return t("ship_fee",{0:displayPrice({price:o.ship,cur:o.cur}).txt});
+  return t("ship_unknown");
+}
+function upLabel(o){return o.h<24?t("updated_h",{0:o.h}):t("updated_d",{0:Math.round(o.h/24)})}
+function renderResults(){
+  $("#no-results").innerHTML="";
+  const LBL=CAT_LABELS[state.settings.lang]||CAT_LABELS.fr;
+  $("#results").innerHTML=state.filtered.map(({p,offs,best})=>{
+    const dp=displayPrice(best);
+    const specs=p.specs.slice(0,2).join(" · ");
+    const inFav=!!state.favorites[p.id];
+    const avail=offs.some(o=>o.stock);
+    return `<article class="p-card" data-open="${esc(p.id)}">
+      <img class="p-img" loading="lazy" src="${p.image?esc(p.image):'https://picsum.photos/seed/df-'+esc(p.id)+'/300/300.jpg'}" alt="">
+      <div class="p-body">
+        <div class="p-top"><span class="p-cat">${LBL[p.cat]||esc(p.cat)}</span>
+          <button class="fav-btn ${inFav?"on":""}" data-fav="${esc(p.id)}" aria-label="Favori">${inFav?IC.heartF:IC.heart}</button></div>
+        <h3>${esc(p.name)}</h3>
+        <div class="p-specs">${esc(specs)}</div>
+        <div class="lowest-lbl">${t("lowest_lbl")}</div>
+        <div class="price-row"><span class="price">${dp.txt}</span>${dp.conv?'<span class="conv">'+t("converted")+"</span>":""}</div>
+        <div class="p-sub">${t("in_merch",{0:esc(mName(best))})} · <span class="${avail?"ok":""}">${avail?t("stock_in"):t("stock_out")}</span> · ${t("offers_n",{0:offs.length})}</div>
+        <div class="p-actions">
+          <button class="btn btn-brand" data-offer="${esc(p.id)}">${t("view_offer")}</button>
+          <button class="icon-btn brand" data-share="${esc(p.id)}" aria-label="Partager">${IC.share}</button>
+        </div>
+      </div></article>`;
+  }).join("");
+  bindCardEvents($("#results"));
+}
+function bindCardEvents(root){
+  root.querySelectorAll("[data-open]").forEach(el=>el.addEventListener("click",e=>{
+    if(e.target.closest("[data-fav],[data-offer],[data-share],[data-del]"))return;
+    openProduct(el.dataset.open);
+  }));
+  root.querySelectorAll("[data-fav]").forEach(el=>el.addEventListener("click",()=>toggleFav(el.dataset.fav)));
+  root.querySelectorAll("[data-offer]").forEach(el=>el.addEventListener("click",()=>{
+    const x=state.filtered.find(i=>i.p.id===el.dataset.offer)||favsEntry(el.dataset.offer);openRedirect(x.best,x.p);
+  }));
+  root.querySelectorAll("[data-share]").forEach(el=>el.addEventListener("click",()=>{
+    const x=state.filtered.find(i=>i.p.id===el.dataset.share)||favsEntry(el.dataset.share);shareOffer(x.best,x.p);
+  }));
+}
+function favsEntry(id){const p=PRODUCTS.find(p=>p.id===id)||state.baseResults.find(p=>p.id===id);const best=p?bestOf(p.offers):null;return{p,best}}
+
+/* ---------- 12. Fiche produit ---------- */
+function openProduct(id){
+  const p=PRODUCTS.find(x=>x.id===id)||state.baseResults.find(x=>x.id===id);if(!p)return;
+  const offs=p.offers.slice().sort((a,b)=>(b.stock?1:0)-(a.stock?1:0)||fcfa(a)-fcfa(b));
+  let lowest=true;const inFav=!!state.favorites[p.id];
+  const LBL=CAT_LABELS[state.settings.lang]||CAT_LABELS.fr;
+  const rows=offs.map(o=>{
+    const dp=displayPrice(o);const nm=mName(o);
+    const badge=(o.stock&&lowest)?'<div class="or-badge"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 13l4 4L19 7"/></svg>'+t("lowest_lbl")+"</div>":"";
+    if(o.stock&&lowest)lowest=false;
+    return `<div class="offer-row ${o.stock?"":"off"}">
+      <div class="or-top">
+        <div class="store-av">${esc(nm.charAt(0))}</div>
+        <div class="or-info"><b>${esc(nm)}</b>
+          <div class="or-meta"><span class="${o.stock?"ok":"ko"}">${o.stock?t("stock_in"):t("stock_out")}</span>${o.ship>=0?'<span>'+IC.truck+" "+shipLabel(o)+"</span>":''}<span>${IC.clock.replace('width="13" height="13"','width="11" height="11"')} ${upLabel(o)}</span></div>
+        </div>
+        <div class="or-price">${badge}<span class="price">${dp.txt}</span>${dp.conv?'<div class="conv">≈ '+t("converted")+"</div>":""}</div>
+      </div>
+      <div class="or-foot">
+        ${o.remote?'<span class="or-aff">'+IC.ext+t("aff_badge")+"</span>":""}
+        ${o.stock?`<button class="btn btn-brand" data-redirect="${esc(p.id)}|${esc(o.m)}|${o.price}|${esc(o.cur)}">${t("view_offer")}</button>`
+                 :`<button class="btn btn-brand btn-disabled" disabled>${t("stock_out")}</button>`}
+      </div></div>`;
+  }).join("");
+  $("#pd-body").innerHTML=`
+    <img class="pd-img" src="${p.image?esc(p.image):'https://picsum.photos/seed/df-'+esc(p.id)+'/640/400.jpg'}" alt="">
+    <div class="pd-cat">${LBL[p.cat]||esc(p.cat)} · ${esc(p.brand||"")}</div>
+    <h2 class="pd-name">${esc(p.name)}</h2>
+    <div class="pd-specs">${p.specs.map(s=>"<div><svg width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.8' stroke-linecap='round'><path d='M5 13l4 4L19 7'/></svg><span>"+esc(s)+"</span></div>").join("")}</div>
+    <div class="offers-head"><h3>${t("offers_matching")}</h3><span>${p.offers.length}</span></div>
+    ${rows}
+    <p class="transparency">${t("transparency")}</p>
+    <div class="pd-actions">
+      <button class="btn btn-ghost" id="pd-fav" style="${inFav?"color:var(--red);border-color:var(--red)":""}">${inFav?IC.heartF:IC.heart}</button>
+      <button class="btn btn-ghost" id="pd-share">${IC.share} ${t("share")}</button>
+      <button class="btn btn-brand" id="pd-best">${t("best_offer")}</button>
+    </div>`;
+  openSheet("sheet-product");
+  $("#pd-fav").addEventListener("click",()=>{
+    toggleFav(p.id);
+    const on=!!state.favorites[p.id],b=$("#pd-fav");
+    b.innerHTML=on?IC.heartF:IC.heart;b.style.cssText=on?"color:var(--red);border-color:var(--red)":"";
+  });
+  $("#pd-share").addEventListener("click",()=>shareOffer(bestOf(p.offers),p));
+  $("#pd-best").addEventListener("click",()=>openRedirect(bestOf(p.offers),p));
+  $("#pd-body").querySelectorAll("[data-redirect]").forEach(b=>b.addEventListener("click",()=>{
+    const[id,m,price,cur]=b.dataset.redirect.split("|");
+    const o=p.offers.find(x=>x.m===m&&x.price===+price)||{m,price:+price,cur};
+    openRedirect(o,p);
+  }));
+}
+
+/* ---------- 13. Clic « Voir l'offre » : tags auto via le serveur ---------- */
+const AffiliateManager={
+  buildLink(o,p){
+    const m=MERCHANTS[o.m];
+    const slug=norm(m.name).replace(/[^a-z0-9]+/g,"");
+    const base="https://www."+slug+".shop/p/"+p.id;
+    if(!m.affiliate)return{url:base,affiliated:false};
+    const cid="DF-"+Math.abs((p.id+o.m).split("").reduce((a,c)=>a*31+c.charCodeAt(0)|0,7)).toString(36).toUpperCase();
+    return{url:base+"?aff_id="+o.m+"&utm_source=dealfinderai&utm_medium=app&cid="+cid,affiliated:true};
+  },
+  track(){track("clicks")}
+};
+async function openRemoteOffer(o,p){
+  track("clicks");
+  try{
+    const r=await fetch(API_EFFECTIVE+"/api/clicks",{method:"POST",headers:authHeaders(),body:JSON.stringify({productId:p.id,merchantId:o.m})});
+    if(r.ok){const d=await r.json();if(d&&d.url){window.open(d.url,"_blank","noopener");return}}
+  }catch(e){}
+  toast(t("backend_down"));
+}
+async function openRedirect(o,p){
+  if(!o)return;
+  if(o.remote&&API_EFFECTIVE!==null)return openRemoteOffer(o,p);
+  const link=AffiliateManager.buildLink(o,p);AffiliateManager.track();
+  $("#redirect-body").innerHTML=`<div class="center" style="padding-bottom:6px">
+    <div class="big-ic">${IC.ext.replace('width="14" height="14"','width="24" height="24"')}</div>
+    <h3>${t("redirect_title")}</h3>
+    <p style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:10px">${esc(link.url.split("/p/")[0])}</p>
+    <p>${link.affiliated?t("redirect_aff"):t("redirect_off")}</p>
+    <div style="background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:9px 11px;font-size:11px;color:var(--text2);word-break:break-all;margin-bottom:14px;text-align:left">${esc(link.url)}</div>
+    <button class="btn btn-brand btn-block" id="rd-copy" style="padding:12px">${t("copy_link")}</button>
+    <button class="btn btn-ghost btn-block" data-close style="margin-top:8px">${t("close")}</button>
+  </div>`;
+  openSheet("sheet-redirect");
+  $("#rd-copy").addEventListener("click",()=>copyText(link.url));
+}
+function copyText(txt){
+  const done=()=>toast(t("copied"));
+  if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(txt).then(done).catch(()=>fallbackCopy(txt,done))}
+  else fallbackCopy(txt,done);
+}
+function fallbackCopy(txt,done){
+  const ta=document.createElement("textarea");ta.value=txt;ta.style.position="fixed";ta.style.opacity="0";
+  document.body.appendChild(ta);ta.select();try{document.execCommand("copy")}catch(e){}ta.remove();done();
+}
+
+/* ---------- 14. Partage natif + log serveur ---------- */
+function buildShare(o,p){
+  const link=(o.remote&&o.productUrl)?o.productUrl:AffiliateManager.buildLink(o,p).url;
+  const text="Regarde cette offre que j'ai trouvée sur DealFinder AI :\n"+p.name+"\n"+displayPrice(o).txt.replace("≈ ","")+"\n"+mName(o)+"\n"+link;
+  return{text,link};
+}
+function logShareEvent(productId,type){
+  if(API_EFFECTIVE===null)return;
+  fetch(API_EFFECTIVE+"/api/share-events",{method:"POST",headers:authHeaders(),body:JSON.stringify({productId,type})}).catch(()=>{});
+}
+async function doNativeShare(title,text,link,productId,type){
+  if(navigator.share){
+    try{
+      await navigator.share({title,text});
+      track("shares");
+      logShareEvent(productId||null,type||"product");
+      toast(t("share_done"));
+      return true;
+    }catch(err){
+      if(err&&(err.name==="AbortError"||err.code===20))return false;
+    }
+  }
+  openShareFallback(text,link||extractLink(text));
+  return false;
+}
+function extractLink(text){const m=text.match(/https?:\/\/\S+/);return m?m[0]:""}
+async function shareOffer(o,p){
+  if(!o)return;
+  const{text,link}=buildShare(o,p);
+  await doNativeShare(t("share_subject"),text,link,p.id,"product");
+}
+ $("#share-app-btn").addEventListener("click",async()=>{
+  await doNativeShare(t("share_app_subject"),t("share_app_text"),"https://dealfinder-ai.app",null,"app");
+});
+function openShareFallback(text,link){
+  const enc=encodeURIComponent;
+  const tgText=text.replace(link,"").trim();
+  const apps=[
+    {label:"WhatsApp",icon:IC.wa,url:"https://wa.me/?text="+enc(text)},
+    {label:"Telegram",icon:IC.tg,url:"https://t.me/share/url?url="+enc(link)+"&text="+enc(tgText)},
+    {label:"SMS",icon:IC.sms,url:"sms:?body="+enc(text)},
+    {label:"E-mail",icon:IC.mail,url:"mailto:?subject="+enc(t("share_subject"))+"&body="+enc(text)}
+  ];
+  $("#share-apps").innerHTML=apps.map((a,i)=>'<button class="share-app-btn" data-i="'+i+'">'+a.icon+"<span>"+a.label+"</span></button>").join("");
+  $("#share-text").value=text;
+  $("#share-apps").querySelectorAll("[data-i]").forEach(b=>b.addEventListener("click",()=>window.open(apps[+b.dataset.i].url,"_blank")));
+  openSheet("sheet-share");
+}
+ $("#share-copy").addEventListener("click",()=>copyText($("#share-text").value));
+
+/* ---------- 15. Favoris ---------- */
+function toggleFav(id){
+  const p=PRODUCTS.find(x=>x.id===id)||state.baseResults.find(x=>x.id===id);if(!p)return;
+  const best=bestOf(p.offers);
+  let added=false;
+  if(state.favorites[id]){delete state.favorites[id];toast(t("fav_removed"))}
+  else{added=true;state.favorites[id]={savedAt:Date.now(),savedPrice:best?best.price:null,savedCur:best?best.cur:"FCFA"};state.stats.favs++;toast(t("fav_added"))}
+  saveAll();updateFavUI();
+  const s=Auth.session();
+  if(s&&s.token&&API_EFFECTIVE!==null)
+    fetch(API_EFFECTIVE+"/api/favorites",{method:added?"POST":"DELETE",headers:authHeaders(),body:JSON.stringify({productId:id,savedPrice:best?best.price:null,currency:best?best.cur:"FCFA"})}).catch(()=>{});
+}
+function updateFavUI(){
+  const find=id=>PRODUCTS.find(x=>x.id===id)||state.baseResults.find(x=>x.id===id);
+  const n=Object.keys(state.favorites).filter(id=>find(id)).length;
+  $("#fav-bub").hidden=!n;$("#fav-bub").textContent=n;
+  $$("[data-fav]").forEach(b=>{const on=!!state.favorites[b.dataset.fav];b.classList.toggle("on",on);b.innerHTML=on?IC.heartF:IC.heart});
+  if($("#view-favs").classList.contains("active"))renderFavs();
+}
+function renderFavs(){
+  const ids=Object.keys(state.favorites);
+  if(!ids.length){
+    $("#favs-list").innerHTML=`<div class="no-res"><div class="ic">${IC.heart}</div><h3>${t("favs_empty")}</h3><p>${t("favs_empty_body")}</p></div>`;return;
+  }
+  const LBL=CAT_LABELS[state.settings.lang]||CAT_LABELS.fr;
+  $("#favs-list").innerHTML=ids.map(id=>{
+    const p=PRODUCTS.find(x=>x.id===id)||state.baseResults.find(x=>x.id===id);if(!p)return"";
+    const best=bestOf(p.offers);
+    const sv=state.favorites[id];const dp=best?displayPrice(best):null;
+    return `<div class="fav-item">
+      <img class="p-img" loading="lazy" src="${p.image?esc(p.image):'https://picsum.photos/seed/df-'+esc(p.id)+'/300/300.jpg'}" alt="">
+      <div class="p-body" style="cursor:pointer" data-open="${esc(p.id)}">
+        <div class="p-top"><span class="p-cat">${LBL[p.cat]||esc(p.cat)}</span></div>
+        <h3>${esc(p.name)}</h3>
+        <div class="price-row"><span class="price" style="font-size:14.5px">${dp?dp.txt:"—"}</span></div>
+        <div class="p-sub">${best?t("in_merch",{0:esc(mName(best))}):""} · ${t("saved_price",{0:fmtPrice(sv.savedPrice,sv.savedCur)})}</div>
+        <div class="fav-foot">
+          <button class="btn btn-brand" data-offer="${esc(p.id)}">${t("view_offer")}</button>
+          <button class="btn btn-ghost" data-share="${esc(p.id)}">${IC.share}</button>
+          <button class="btn btn-ghost" data-del="${esc(p.id)}" aria-label="Supprimer">${IC.trash}</button>
+        </div>
+      </div></div>`;
+  }).join("");
+  bindCardEvents($("#favs-list"));
+  $$("#favs-list [data-del]").forEach(b=>b.addEventListener("click",()=>{toggleFav(b.dataset.del)}));
+}
+
+/* ---------- 16. Profil ---------- */
+function renderProfile(){
+  syncAuthUI();
+  renderHistChips();
+  $("#set-lang").value=state.settings.lang;$("#set-cur").value=state.settings.currency;
+  $("#set-notif").checked=state.settings.notif;
+  $("#cur-note").textContent=t("cur_note");
+  renderStats();
+  const s=Auth.session();
+  if(s&&s.token&&API_EFFECTIVE!==null){
+    fetch(API_EFFECTIVE+"/api/history",{headers:authHeaders()}).then(r=>r.ok?r.json():null).then(d=>{
+      if(d&&d.history&&d.history.length){
+        const srv=d.history.map(h=>h.query).filter(Boolean);
+        state.history=[...new Set([...srv,...state.history])].slice(0,8);
+        saveAll();renderHistChips();
+      }
+    }).catch(()=>{});
+  }
+}
+function renderHistChips(){
+  $("#hist-chips").innerHTML=state.history.length?state.history.map(h=>'<button class="pop-chip" data-h="'+esc(h)+'">'+esc(h)+"</button>").join("")
+    :'<span style="font-size:12.5px;color:var(--text3)">'+t("prof_no_hist")+"</span>";
+  $$("#hist-chips [data-h]").forEach(b=>b.addEventListener("click",()=>runSearch(b.dataset.h)));
+}
+function renderStats(){
+  const s=state.stats;
+  $("#stat-line").innerHTML=`<div><b>${s.searches}</b><span>${t("st_searches")}</span></div>
+    <div><b>${s.clicks}</b><span>${t("st_clicks")}</span></div>
+    <div><b>${s.shares}</b><span>${t("st_shares")}</span></div>
+    <div><b>${Object.keys(state.favorites).length}</b><span>${t("st_favs")}</span></div>`;
+}
+ $("#set-lang").addEventListener("change",e=>{state.settings.lang=e.target.value;saveAll();applyLang()});
+ $("#set-cur").addEventListener("change",e=>{state.settings.currency=e.target.value;saveAll();
+  if(state.query&&state.filtered)applyFiltersAndRender();renderFavs();renderProfile()});
+ $("#set-notif").addEventListener("change",e=>{state.settings.notif=e.target.checked;saveAll();toast(t(e.target.checked?"notif_on":"notif_off"))});
+let eraseArmed=null;
+ $("#erase-btn").addEventListener("click",function(){
+  if(eraseArmed){
+    ["favs","hist","stats","accounts","session","set","api_base"].forEach(k=>store.del(k));
+    state.favorites={};state.history=[];state.stats={searches:0,clicks:0,shares:0,favs:0};
+    state.settings={lang:"fr",currency:"FCFA",theme:"light",notif:false};
+    this.textContent=t("prof_erase");this.classList.remove("armed");clearTimeout(eraseArmed);eraseArmed=null;
+    applyTheme();$("#set-lang").value="fr";$("#set-cur").value="FCFA";$("#set-notif").checked=false;
+    updateFavUI();syncAuthUI();renderStats();renderHistChips();
+    toast(t("prof_erase_done"));return;
+  }
+  this.classList.add("armed");this.textContent=t("prof_erase")+" — ?";
+  eraseArmed=setTimeout(()=>{this.textContent=t("prof_erase");this.classList.remove("armed");eraseArmed=null},3000);
+});
+
+/* ---------- 17. Légaux ---------- */
+const LEGAL={cgu:["cgu_t","cgu_b"],privacy:["privacy_t","privacy_b"],about:["about_t","about_b"]};
+ $$("[data-legal]").forEach(b=>b.addEventListener("click",()=>{
+  const[k1,k2]=LEGAL[b.dataset.legal];
+  $("#legal-title").textContent=t(k1);$("#legal-body").innerHTML=t(k2);
+  openSheet("sheet-legal");
+}));
+
+/* ---------- 18. Sheets ---------- */
+function openSheet(id){closeAll();$("#"+id).classList.add("open")}
+function closeSheet(id){$("#"+id).classList.remove("open")}
+function closeAll(){$$(".sheet-wrap").forEach(s=>s.classList.remove("open"))}
+ $$("[data-close]").forEach(b=>b.addEventListener("click",()=>b.closest(".sheet-wrap").classList.remove("open")));
+
+/* ---------- 19. Filtres UI ---------- */
+ $("#filters-btn").addEventListener("click",()=>{
+  if(!state.query){toast(t("clarify_body"));return}
+  renderFilters();openSheet("sheet-filters");
+});
+function renderFilters(){
+  const f=state.filters;const cur=state.settings.currency;
+  const merchSet=new Set();state.baseResults.forEach(p=>p.offers.forEach(o=>merchSet.add(o.m)));
+  const mLabel=m=>(MERCHANTS[m]&&MERCHANTS[m].name)||state.remoteMerchants[m]||m;
+  $("#filters-body").innerHTML=`
+    <div class="f-sect"><h4>${t("sort")}</h4><div class="seg-col">
+      ${[["relevance",t("sort_rel")],["price_asc",t("sort_asc")],["price_desc",t("sort_desc")],["new",t("sort_new")]]
+        .map(([v,l])=>'<button class="sort-pill '+(f.sort===v?"on":"")+'" data-sort="'+v+'">'+l+"</button>").join("")}
+    </div></div>
+    <div class="f-sect"><h4>${t("price_range")} (${cur})</h4><div class="two-inp">
+      <label>${t("price_min")}<input id="f-min" type="number" inputmode="numeric" placeholder="0" value="${f.min!=null?Math.round(f.min/TO_FCFA[cur]):""}"></label>
+      <label>${t("price_max")}<input id="f-max" type="number" inputmode="numeric" placeholder="∞" value="${f.max!=null?Math.round(f.max/TO_FCFA[cur]):""}"></label>
+    </div></div>
+    <div class="f-sect"><h4>${t("merchants")}</h4><div class="merch-list">
+      ${[...merchSet].map(m=>'<label><input type="checkbox" data-merch="'+esc(m)+'" '+(f.merchants.has(m)?"checked":"")+"> "+esc(mLabel(m))+"</label>").join("")||"—"}
+    </div></div>
+    <div class="f-sect">
+      <div class="p-row"><span class="lbl">${t("only_stock")}</span><span class="sw"><input type="checkbox" id="f-stock" ${f.inStock?"checked":""}><i></i></span></div>
+      <div class="p-row"><span class="lbl">${t("known_ship")}</span><span class="sw"><input type="checkbox" id="f-ship" ${f.knownShip?"checked":""}><i></i></span></div>
+    </div>`;
+  $$("#filters-body [data-sort]").forEach(b=>b.addEventListener("click",()=>{f.sort=b.dataset.sort;renderFilters()}));
+}
+ $("#f-apply").addEventListener("click",()=>{
+  const f=state.filters;const cur=state.settings.currency;
+  const mn=parseFloat($("#f-min").value),mx=parseFloat($("#f-max").value);
+  f.min=isNaN(mn)?null:mn*TO_FCFA[cur];f.max=isNaN(mx)?null:mx*TO_FCFA[cur];
+  f.merchants=new Set($$("#filters-body [data-merch]:checked").map(c=>c.dataset.merch));
+  f.inStock=$("#f-stock").checked;f.knownShip=$("#f-ship").checked;
+  closeSheet("sheet-filters");applyFiltersAndRender();
+});
+ $("#f-reset").addEventListener("click",()=>{
+  state.filters={min:null,max:null,merchants:new Set(),inStock:false,knownShip:false,sort:"relevance"};
+  renderFilters();applyFiltersAndRender();
+});
+function updateFCount(){
+  const f=state.filters;let n=0;
+  if(f.min!=null)n++;if(f.max!=null)n++;n+=f.merchants.size;if(f.inStock)n++;if(f.knownShip)n++;
+  $("#f-count").hidden=!n;$("#f-count").textContent=n;
+}
+
+/* ---------- 20. Accueil ---------- */
+ $("#cats").innerHTML=CATEGORIES.map(c=>'<button class="cat-chip" data-cat="'+c.id+'">'+CAT_IC[c.id]+CAT_LABELS.fr[c.id]+"</button>").join("");
+ $$("#cats [data-cat]").forEach(b=>b.addEventListener("click",()=>{
+  if(b.dataset.cat==="autres"){$("#home-input").focus();toast(t("clarify_body"));return}
+  runSearch(CAT_LABELS.fr[b.dataset.cat]);
+}));
+ $("#popular").innerHTML=POPULAR.map(p=>'<button class="pop-chip" data-p="'+p+'">'+p+"</button>").join("");
+ $$("#popular [data-p]").forEach(b=>b.addEventListener("click",()=>runSearch(b.dataset.p)));
+ $("#home-form").addEventListener("submit",e=>{e.preventDefault();const v=$("#home-input").value.trim();if(v)runSearch(v)});
+ $("#search-form").addEventListener("submit",e=>{e.preventDefault();const v=$("#search-input").value.trim();if(v)runSearch(v)});
+function renderSearchIdle(){
+  $("#search-state").innerHTML="";$("#interp").hidden=true;$("#results-zone").hidden=true;$("#no-results").innerHTML="";$("#ad-results").hidden=true;
+  $("#idle-search").innerHTML='<h2 class="sect">'+t("popular_title")+'</h2><div class="chips">'+
+    POPULAR.map(p=>'<button class="pop-chip" data-p="'+p+'">'+p+"</button>").join("")+"</div>";
+  $$("#idle-search [data-p]").forEach(b=>b.addEventListener("click",()=>runSearch(b.dataset.p)));
+}
+
+/* ---------- 21. Recherche par image — honnête : en préparation ---------- */
+ $("#img-btn").addEventListener("click",()=>$("#img-input").click());
+ $("#img-input").addEventListener("change",e=>{
+  const f=e.target.files[0];if(!f)return;
+  const url=URL.createObjectURL(f);
+  $("#img-body").innerHTML=`<div style="text-align:center;padding:8px 0 4px">
+    <img src="${url}" style="max-width:200px;max-height:150px;border-radius:14px;margin:0 auto 14px;display:block">
+    <div class="ai-steps" style="text-align:left"><div class="step active"><span class="dot"></span>${t("img_analyze")}</div></div></div>`;
+  openSheet("sheet-img");
+  setTimeout(()=>{
+    $("#img-body").innerHTML=`<div class="center" style="padding-top:8px">
+      <div class="big-ic">${IC.cam}</div>
+      <h3>${t("img_approx")}</h3><p>${t("img_body")}</p>
+      <div class="chips" style="justify-content:center">${["écouteurs sans fil","montre connectée","powerbank","enceinte Bluetooth"].map(s=>'<button class="pop-chip" data-s="'+s+'">'+s+"</button>").join("")}</div>
+      <button class="btn btn-ghost btn-block" data-close style="margin-top:14px">${t("close")}</button></div>`;
+    $$("#img-body [data-s]").forEach(b=>b.addEventListener("click",()=>{closeSheet("sheet-img");runSearch(b.dataset.s)}));
+    $$("#img-body [data-close]").forEach(b=>b.addEventListener("click",()=>closeSheet("sheet-img")));
+  },900);
+  e.target.value="";
+});
+
+/* ---------- 22. Hors-ligne ---------- */
+function setOnline(on){
+  state.online=on;$("#off-bar").classList.toggle("show",!on);
+  if(!on)$("#off-bar").innerHTML=IC.warn+"<span>"+t("offline")+"</span>";
+}
+window.addEventListener("online",()=>setOnline(true));
+window.addEventListener("offline",()=>setOnline(false));
+
+/* ---------- 23. i18n application (RTL arabe) ---------- */
+function applyLang(){
+  const lang=state.settings.lang;document.documentElement.lang=lang;
+  document.documentElement.dir=lang==="ar"?"rtl":"ltr";
+  $$("[data-i18n]").forEach(el=>{el.innerHTML=t(el.dataset.i18n)});
+  $$("[data-i18n-ph]").forEach(el=>{el.placeholder=t(el.dataset.i18nPh)});
+  $("#search-input").placeholder=state.query?state.query:t("search_ph");
+  renderResults();renderFavs();renderProfile();updateFavUI();
+}
+
+/* ---------- 24. Annonce de l'admin ---------- */
+function checkAnnouncement(){
+  if(API_EFFECTIVE===null)return;
+  fetch(API_EFFECTIVE+"/api/announcement").then(r=>r.ok?r.json():null).then(d=>{
+    const a=d&&d.announcement;
+    if(!a)return;
+    if(store.get("ann_seen","0")===String(a.id))return;
+    store.set("ann_seen",String(a.id));
+    const bar=document.createElement("div");
+    bar.style.cssText="position:absolute;top:44px;left:12px;right:12px;z-index:80;background:var(--brand-soft);color:var(--brand-ink);border:1px solid var(--brand);border-radius:12px;padding:10px 12px;font-size:12.5px;font-weight:600;display:flex;gap:8px;align-items:center;box-shadow:var(--shadow)";
+    const short=(a.body&&(a.title+" — "+a.body).length>90)?(a.title+" — "+a.body.slice(0,90-(a.title.length))+"…"):(a.title+(a.body?" — "+a.body:""));
+    bar.innerHTML=`<span style="flex:1">📢 ${esc(short)}</span><button id="ann-x" style="font-weight:700;color:inherit">✕</button>`;
+    bar.querySelector("#ann-x").onclick=()=>bar.remove();
+    document.getElementById("screen").appendChild(bar);
+    setTimeout(()=>bar.remove(),12000);
+  }).catch(()=>{});
+}
+
+/* ---------- 25. Init ---------- */
+function tick(){$("#clock").textContent=new Date().toLocaleTimeString(state.settings.lang==="en"?"en-GB":"fr-FR",{hour:"2-digit",minute:"2-digit"})}
+tick();setInterval(tick,20000);
+applyTheme();applyLang();setOnline(navigator.onLine);
+syncAuthUI();
+detectBackend().then(async()=>{
+  const s=Auth.session();
+  if(s&&s.token&&API_EFFECTIVE!==null){
+    try{const r=await fetch(API_EFFECTIVE+"/api/me",{headers:authHeaders()});
+      if(!r.ok){Auth.logout();syncAuthUI();toast("Session expirée — reconnecte-toi")}}catch(e){}
+  }
+  syncAuthUI();
+  checkAnnouncement();
+});
+</script>
+</body>
+  </html>
