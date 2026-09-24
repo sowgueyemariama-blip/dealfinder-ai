@@ -15,7 +15,7 @@ if (!fs.existsSync(dataDir)){
 const dbPath = path.join(dataDir, 'dealfinder.db');
 const db = new Database(dbPath);
 
-// Structure d'origine de la base de données
+// Table d'origine (sans le champ marque, nettoyé)
 db.exec(`
   CREATE TABLE IF NOT EXISTS products (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -30,13 +30,13 @@ db.exec(`
   );
 `);
 
-// 🛡️ VERROUILLAGE ADMINISTRATEUR EXCLUSIF
+// 🛡️ SÉCURITÉ ADMINISTRATEUR UNIQUE EXCLUSIF
 const EXCLUSIVE_ADMIN = "sowgueye.mariama@gmail.com";
 
 function verifyAdminPermission(req, res, next) {
     const incomingEmail = req.headers['x-admin-auth-email'];
     if (incomingEmail !== EXCLUSIVE_ADMIN) {
-        return res.status(403).json({ error: "Action interdite. Espace réservé à l'administrateur unique." });
+        return res.status(403).json({ error: "Accès refusé. Vous n'êtes pas l'administrateur unique." });
     }
     next();
 }
@@ -52,7 +52,6 @@ app.get('/api/search', (req, res) => {
     const cleanQuery = query.trim().toLowerCase();
 
     try {
-        // Recherche des produits correspondants
         const products = db.prepare("SELECT * FROM products WHERE lower(name) LIKE ?").all(`%${cleanQuery}%`);
         res.json(products);
     } catch (err) {
@@ -60,11 +59,11 @@ app.get('/api/search', (req, res) => {
     }
 });
 
-// AJOUTER UN PRODUIT (Vérification Admin + Photo Obligatoire - Pas de marque)
+// AJOUTER UN PRODUIT (Sécurisé + Photo obligatoire)
 app.post('/api/products', verifyAdminPermission, (req, res) => {
     const { name, price, link, image } = req.body;
     
-    if (!name || !price || !link) return res.status(400).json({ error: "Informations incomplètes." });
+    if (!name || !price || !link) return res.status(400).json({ error: "Champs requis manquants." });
     if (!image || image.trim() === "") {
         return res.status(400).json({ error: "La photo du produit est obligatoire." });
     }
@@ -78,7 +77,7 @@ app.post('/api/products', verifyAdminPermission, (req, res) => {
     }
 });
 
-// SAUVEGARDER LES PARAMÈTRES ET AFFILIATIONS (Vérification Admin)
+// ENREGISTRER LES MODIFICATIONS (Sécurisé)
 app.post('/api/settings', verifyAdminPermission, (req, res) => {
     const { key, value } = req.body;
     try {
@@ -90,7 +89,7 @@ app.post('/api/settings', verifyAdminPermission, (req, res) => {
     }
 });
 
-// RÉCUPÉRER LES PARAMÈTRES
+// RÉCUPÉRER LES RÉGLAGES
 app.get('/api/settings', (req, res) => {
     try {
         const rows = db.prepare("SELECT * FROM settings").all();
@@ -103,4 +102,4 @@ app.get('/api/settings', (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log("Serveur DealFinder d'origine sécurisé"));
+app.listen(PORT, () => console.log("Serveur DealFinder d'origine réactivé"));
