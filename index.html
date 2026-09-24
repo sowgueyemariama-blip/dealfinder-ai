@@ -3,192 +3,295 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Console Globale - DealFinder AI</title>
+    <title>DealFinder AI</title>
     <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f5f0; margin: 0; padding: 15px; }
-        .container { max-width: 550px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
-        h1, h2 { color: #2e7d32; text-align: center; }
-        .card { border: 1px solid #eee; padding: 15px; margin-top: 15px; border-radius: 10px; background: #fff; }
-        .form-group { margin-bottom: 12px; }
-        label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px; }
-        input[type="text"], input[type="number"] { width: 100%; padding: 11px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
-        button { background: #2e7d32; color: white; border: none; padding: 12px; border-radius: 6px; width: 100%; font-weight: bold; cursor: pointer; font-size: 15px; }
-        button:hover { background: #1b5e20; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f4f3ec; /* Marron très clair d'origine */
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        .header {
+            background-color: #fff;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e0dfd5;
+        }
+        .logo {
+            color: #1b5e20; /* Vert d'origine */
+            font-size: 20px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .logo .dot {
+            width: 10px;
+            height: 10px;
+            background-color: #2ec4b6;
+            border-radius: 50%;
+        }
+        .main-content {
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .profile-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .profile-card {
+            background: #e1dfd5;
+            border-radius: 16px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .profile-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .profile-avatar {
+            width: 50px;
+            height: 50px;
+            background-color: #c9c7bd;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 20px;
+            color: #1b5e20;
+        }
+        .profile-details .name {
+            font-weight: bold;
+            font-size: 18px;
+        }
+        .profile-details .email {
+            color: #666;
+            font-size: 14px;
+        }
+        .btn-disconnect {
+            background: none;
+            border: 1px solid #b71c1c;
+            color: #b71c1c;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .btn-admin-panel {
+            background-color: #f4f3ec;
+            border: 1px solid #1b5e20;
+            color: #1b5e20;
+            width: 100%;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
         
-        .products-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
-        .product-card { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; padding: 8px; }
-        .product-img { width: 100%; height: 130px; object-fit: cover; border-radius: 6px; }
-        .product-title { font-size: 13px; font-weight: bold; margin: 8px 0 4px 0; color: #333; }
-        .product-price { font-size: 14px; color: #d32f2f; font-weight: bold; margin-bottom: 8px; }
-        .btn-offer { background: #e65100; text-align: center; color: white; text-decoration: none; padding: 8px 0; border-radius: 4px; font-size: 13px; font-weight: bold; display: block; }
-        
-        .status { padding: 10px; margin-top: 10px; border-radius: 5px; display: none; text-align: center; font-weight: bold; }
-        .success { background: #d4edda; color: #155724; }
-        .error { background: #f8d7da; color: #721c24; }
+        /* FENÊTRE D'ADMINISTRATION STYLE VISUEL D'ORIGINE */
+        .admin-modal {
+            background-color: #fff;
+            border-top-left-radius: 24px;
+            border-top-right-radius: 24px;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-top: 10px;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .modal-header h3 {
+            margin: 0;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .tabs {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            margin-bottom: 20px;
+            padding-bottom: 5px;
+        }
+        .tab {
+            padding: 8px 16px;
+            border-radius: 12px;
+            border: 1px solid #ccc;
+            background: #fff;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+        .tab.active {
+            background-color: #1b5e20;
+            color: #fff;
+            border-color: #1b5e20;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            text-transform: uppercase;
+            font-size: 12px;
+            color: #777;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e0dfd5;
+            border-radius: 12px;
+            box-sizing: border-box;
+            background-color: #fafafa;
+            font-size: 15px;
+        }
+        .info-disclaimer {
+            font-size: 13px;
+            color: #888;
+            line-height: 1.4;
+            margin-bottom: 15px;
+        }
+        .btn-save-master {
+            background-color: #1b5e20;
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .status-box {
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+            text-align: center;
+            font-weight: bold;
+            display: none;
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>🛒 DealFinder AI</h1>
+    <div class="header">
+        <div class="logo">🛠️ DealFinder AI <div class="dot"></div></div>
+    </div>
 
-    <!-- 1. MOTEUR DE RECHERCHE -->
-    <section class="card">
-        <h2>🔍 Moteur de recherche</h2>
-        <div class="form-group">
-            <input type="text" id="userQuery" placeholder="Ex: robe, montre, t-shirt...">
+    <div class="main-content">
+        <div class="profile-title">Profil</div>
+
+        <!-- CARTE PROFIL D'ORIGINE -->
+        <div class="profile-card">
+            <div class="profile-info">
+                <div class="profile-avatar">M</div>
+                <div class="profile-details">
+                    <div class="name">Mariama Gueye</div>
+                    <div class="email">sowgueye.mariama@gmail.com</div>
+                </div>
+            </div>
+            <button class="btn-disconnect">Se déconnecter</button>
         </div>
-        <button onclick="triggerAppSearch()">Lancer la recherche</button>
-        <div id="productsGrid" class="products-grid" style="display:none;"></div>
-    </section>
 
-    <!-- 2. PANNEAU DE CONFIGURATION DES BOUTIQUES -->
-    <section class="card">
-        <h2>⚙️ Configuration des Liens d'Affiliation</h2>
-        <form id="affiliationsForm">
-            <div class="form-group">
-                <label>Lien d'affiliation Jumia Sénégal</label>
-                <input type="text" id="jumiaInput" placeholder="https://jumia.com...">
+        <button class="btn-admin-panel">🛠️ Panneau d'administration</button>
+
+        <!-- ESPACE ADMINISTRATION TECHNIQUE CONFORME -->
+        <div class="admin-modal">
+            <div class="modal-header">
+                <h3>🛠️ Administration</h3>
             </div>
-            <div class="form-group">
-                <label>Lien d'affiliation SHEIN</label>
-                <input type="text" id="sheinInput" placeholder="https://...">
+
+            <!-- ONGLES DE NAVIGATION SPÉCIFIQUES -->
+            <div class="tabs">
+                <button class="tab" onclick="switchTab('produits')">Produits</button>
+                <button class="tab active" onclick="switchTab('affiliation')">Affiliation</button>
+                <button class="tab" onclick="switchTab('cles')">🔑 Clés</button>
+                <button class="tab" onclick="switchTab('notifs')">📢 Notifs</button>
             </div>
-            <button type="submit">Enregistrer les Liens</button>
-        </form>
-        <div id="settingsStatus" class="status"></div>
-    </section>
 
-    <!-- 3. ZONE D'AJOUT MANUEL (PHOTO OBLIGATOIRE - PAS DE MARQUE) -->
-    <section class="card">
-        <h2>📦 Ajouter un produit à la main</h2>
-        <form id="manualProductForm">
-            <div class="form-group">
-                <label>Nom du produit *</label>
-                <input type="text" id="manualName" required>
-            </div>
-            <div class="form-group">
-                <label>Prix (FCFA) *</label>
-                <input type="number" id="manualPrice" required>
-            </div>
-            <div class="form-group">
-                <label>Lien d'achat du produit *</label>
-                <input type="text" id="manualLink" required>
-            </div>
-            <div class="form-group">
-                <label>Lien URL de la photo *</label>
-                <input type="text" id="manualImage" required placeholder="https://.../image.jpg">
-            </div>
-            <button type="submit">Enregistrer le produit</button>
-        </form>
-        <div id="productStatus" class="status"></div>
-    </section>
-</div>
-
-<script {citationKey="0.7.2", node=789}>
-    const API_URL = "https://onrender.com";
-    const ADMIN_EMAIL = "sowgueye.mariama@gmail.com"; // Clé admin unique
-
-    function showStatus(element, text, isSuccess) {
-        element.innerText = text;
-        element.className = 'status ' + (isSuccess ? 'success' : 'error');
-        element.style.display = 'block';
-        setTimeout(() => element.style.display = 'none', 5000);
-    }
-
-    // SAUVEGARDE DES LIENS AFFILIÉS AVEC SÉCURITÉ ADMIN
-    document.getElementById('affiliationsForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const statusBox = document.getElementById('settingsStatus');
-        
-        try {
-            await fetch(`${API_URL}/api/settings`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'x-admin-email': ADMIN_EMAIL },
-                body: JSON.stringify({ key: 'jumia_link', value: document.getElementById('jumiaInput').value })
-            });
-            await fetch(`${API_URL}/api/settings`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'x-admin-email': ADMIN_EMAIL },
-                body: JSON.stringify({ key: 'shein_link', value: document.getElementById('sheinInput').value })
-            });
-            showStatus(statusBox, "✅ Liens enregistrés avec succès par l'administrateur !", true);
-        } catch(err) { showStatus(statusBox, "❌ Erreur réseau lors de la sauvegarde.", false); }
-    });
-
-    // AJOUT DE PRODUIT MANUEL AVEC CRITÈRE PHOTO MANDATAIRE
-    document.getElementById('manualProductForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const statusBox = document.getElementById('productStatus');
-        const imgUrl = document.getElementById('manualImage').value;
-
-        if(!imgUrl || imgUrl.trim() === "") {
-            showStatus(statusBox, "❌ L'ajout a échoué : La photo est obligatoire !", false);
-            return;
-        }
-
-        const payload = {
-            name: document.getElementById('manualName').value,
-            price: parseFloat(document.getElementById('manualPrice').value),
-            link: document.getElementById('manualLink').value,
-            image: imgUrl
-        };
-
-        try {
-            const res = await fetch(`${API_URL}/api/products`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'x-admin-email': ADMIN_EMAIL },
-                body: JSON.stringify(payload)
-            });
-            if(res.ok) {
-                showStatus(statusBox, "✅ Produit enregistré !", true);
-                document.getElementById('manualProductForm').reset();
-            } else { showStatus(statusBox, "❌ Erreur : Accès non autorisé ou rejeté.", false); }
-        } catch(err) { showStatus(statusBox, "❌ Liaison coupée avec Render.", false); }
-    });
-
-    // RECHERCHE VISUELLE COMPLETE
-    async function triggerAppSearch() {
-        const query = document.getElementById('userQuery').value;
-        const grid = document.getElementById('productsGrid');
-        if(!query) return;
-
-        grid.innerHTML = "<p style='grid-column:1/3; text-align:center;'>Génération des offres...</p>";
-        grid.style.display = "grid";
-
-        try {
-            const res = await fetch(`${API_URL}/api/search?q=${encodeURIComponent(query)}`);
-            const data = await res.json();
-            grid.innerHTML = "";
-
-            if(data.length === 0) {
-                grid.innerHTML = "<p style='grid-column:1/3; text-align:center;'>Aucune offre trouvée.</p>";
-                return;
-            }
-
-            data.forEach(prod => {
-                grid.innerHTML += `
-                    <div class="product-card">
-                        <img class="product-img" src="${prod.image}">
-                        <div class="product-title">${prod.name}</div>
-                        <div class="product-price">${prod.price}</div>
-                        <a class="btn-offer" href="${prod.link}" target="_blank">Voir l'offre</a>
+            <!-- FORMULAIRE CONTENU DYNAMIQUE -->
+            <div id="adminFormContent">
+                <!-- CONTENU DE L'ONGLET AFFILIATION (VU SUR LA PHOTO) -->
+                <div id="tab-affiliation" class="tab-pane">
+                    <div class="form-group">
+                        <label>Tag d'affiliation</label>
+                        <input type="text" id="affTag" placeholder="vide">
                     </div>
-                `;
-            });
-        } catch(e) { grid.innerHTML = "<p style='grid-column:1/3; text-align:center; color:red;'>Erreur réseau.</p>"; }
-    }
+                    <div class="form-group">
+                        <label>Modèle de lien de tracking</label>
+                        <input type="text" id="affTrack" placeholder="vide">
+                    </div>
+                    <div class="info-disclaimer">
+                        Placeholders : {url} = lien produit · {tag} = ton tag · {clickId} = id du clic. Tant que ces champs sont vides, AUCUN tag n'est attaché aux liens.
+                    </div>
+                </div>
 
-    window.onload = async () => {
-        try {
-            const res = await fetch(`${API_URL}/api/settings`);
-            if(res.ok) {
-                const s = await res.json();
-                if(s.jumia_link) document.getElementById('jumiaInput').value = s.jumia_link;
-                if(s.shein_link) document.getElementById('sheinInput').value = s.shein_link;
-            }
-        } catch(e){}
-    };
-</script>
-</body>
-</html>
+                <!-- CONTENU DE L'ONGLET PRODUITS (SANS MARQUE, AVEC PHOTO REQUISE) -->
+                <div id="tab-produits" class="tab-pane" style="display:none;">
+                    <div class="form-group">
+                        <label>Nom du produit *</label>
+                        <input type="text" id="prodName">
+                    </div>
+                    <div class="form-group">
+                        <label>Prix (FCFA) *</label>
+                        <input type="number" id="prodPrice">
+                    </div>
+                    <div class="form-group">
+                        <label>Lien profond d'achat *</label>
+                        <input type="text" id="prodLink">
+                    </div>
+                    <div class="form-group">
+                        <label>Photo du produit (Lien URL) *</label>
+                        <input type="text" id="prodImage" placeholder="https://...">
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn-save-master" onclick="submitAdminData()">💾 Enregistrer les modifications</button>
+            <div id="statusNotice" class="status-box"></div>
+        </div>
+    </div>
+
+<script>
+    // Élimination complète de localhost ➡️ Liaison vers votre serveur Render stable
+    const API_URL = "https://onrender.com";
+    const ADMIN_EMAIL = "sowgueye.mariama@gmail.com"; 
+    let currentActiveTab = "affiliation";
+
+    function switchTab(tabId) {
+        currentActiveTab = tabId;
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        event.target.classList.add('active');
+
+        if(tabId === 'affiliation') {
+            document.getElementById('tab-affiliation').style.display = 'block';
+            document.getElementById('tab-produits').style.display = 'none';
+        } else if(tabId === 'produits') {
+            document.getElementById('tab-affiliation').style.display = 'none';
+            document.getElementById('tab-produits').style.display = 'block';
+        } else {
+            // Clés et Notifs (Générique d'origine)
+            document.getElementById('tab-affiliation').style.display = 'none';
