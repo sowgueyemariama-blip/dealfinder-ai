@@ -15,13 +15,14 @@ if (!fs.existsSync(dataDir)){
 const dbPath = path.join(dataDir, 'dealfinder.db');
 const db = new Database(dbPath);
 
+// Structure d'origine de la base de données
 db.exec(`
   CREATE TABLE IF NOT EXISTS products (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
-    price REAL,
-    link TEXT,
-    image TEXT
+    price REAL NOT NULL,
+    link TEXT NOT NULL,
+    image TEXT NOT NULL
   );
   CREATE TABLE IF NOT EXISTS settings (
     key TEXT PRIMARY KEY,
@@ -29,119 +30,77 @@ db.exec(`
   );
 `);
 
-// 🛡️ SÉCURITÉ DE L'ADMINISTRATEUR UNIQUE
-const ADMIN_EMAIL = "sowgueye.mariama@gmail.com";
+// 🛡️ VERROUILLAGE ADMINISTRATEUR EXCLUSIF
+const EXCLUSIVE_ADMIN = "sowgueye.mariama@gmail.com";
 
-function checkAdmin(req, res, next) {
-    const userEmail = req.headers['x-admin-email'];
-    if (userEmail !== ADMIN_EMAIL) {
-        return res.status(403).json({ error: "Accès refusé. Vous n'êtes pas l'administrateur unique." });
+function verifyAdminPermission(req, res, next) {
+    const incomingEmail = req.headers['x-admin-auth-email'];
+    if (incomingEmail !== EXCLUSIVE_ADMIN) {
+        return res.status(403).json({ error: "Action interdite. Espace réservé à l'administrateur unique." });
     }
     next();
 }
 
 app.get('/api/health', (req, res) => {
-    res.json({ ok: true, admin: ADMIN_EMAIL });
+    res.json({ status: "online", secure: true });
 });
 
-// ROUTE RECHERCHE / RETRAIT DES PRODUITS
-app.get('/api/products', (req, res) => {
+// ROUTE RECHERCHE UTILISATEUR
+app.get('/api/search', (req, res) => {
+    const query = req.query.q || '';
+    if (!query) return res.json([]);
+    const cleanQuery = query.trim().toLowerCase();
+
     try {
-        const products = db.prepare("SELECT * FROM products ORDER BY id DESC").all();
+        // Recherche des produits correspondants
+        const products = db.prepare("SELECT * FROM products WHERE lower(name) LIKE ?").all(`%${cleanQuery}%`);
         res.json(products);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-// RECHERCHE DYNAMIQUE (Jumia, Shein, Temu basés sur vos liens d'affiliation)
-app.get('/api/search', (req, res) => {
-    const query = req.query.q || '';
-    if (!query) return res.json([]);
-
-    const cleanQuery = query.trim();
-    const rows = db.prepare("SELECT * FROM settings").all();
-    const settings = {};
-    rows.forEach(r => settings[r.key] = r.value);
-
-    const results = [];
-    let productImg = "https://unsplash.com"; 
-    
-    if (cleanQuery.toLowerCase().includes("robe") || cleanQuery.toLowerCase().includes("vêtement")) {
-        productImg = "https://unsplash.com"; 
-    } else if (cleanQuery.toLowerCase().includes("chaussure")) {
-        productImg = "https://unsplash.com";
-    }
-
-    if (settings.jumia_link) {
-        results.push({
-            name: `${cleanQuery.toUpperCase()} - Jumia Sénégal`,
-            price: "Prix Jumia",
-            image: productImg,
-            link: `${settings.jumia_link}&next=https%3A%2F%2Fwww.jumia.sn%2Fcatalog%2F%3Fq%3D${encodeURIComponent(cleanQuery)}`,
-            provider: "Jumia"
-        });
-    }
-
-    if (settings.shein_link) {
-        results.push({
-            name: `${cleanQuery.toUpperCase()} - Collection SHEIN`,
-            price: "Prix SHEIN",
-            image: productImg,
-            link: `${settings.shein_link}&url=https%3A%2F%://shein.com%2Fpdsearch%2F${encodeURIComponent(cleanQuery)}%2F`,
-            provider: "SHEIN"
-        });
-    }
-
-    try {
-        const local = db.prepare("SELECT * FROM products WHERE name LIKE ?").all(`%${cleanQuery}%`);
-        local.forEach(p => {
-            results.unshift({ name: p.name, price: p.price + " FCFA", image: p.image, link: p.link, provider: "Manuel" });
-        });
-    } catch(e){}
-
-    res.json(results);
-});
-
-// AJOUTER UN PRODUIT MANUEL (Sécurisé par Admin Email + Photo Obligatoire - Pas de marque)
-app.post('/api/products', checkAdmin, (req, res) => {
+// AJOUTER UN PRODUIT (Vérification Admin + Photo Obligatoire - Pas de marque)
+app.post('/api/products', verifyAdminPermission, (req, res) => {
     const { name, price, link, image } = req.body;
-    if (!name || !link) return res.status(400).json({ error: "Données manquantes" });
-    if (!image || image.trim() === "") {
-        return res.status(400).json({ error: "Erreur : La photo du produit est obligatoire !" });
-    }
     
+    if (!name || !price || !link) return res.status(400).json({ error: "Informations incomplètes." });
+    if (!image || image.trim() === "") {
+        return res.status(400).json({ error: "La photo du produit est obligatoire." });
+    }
+
     try {
-        const insert = db.prepare("INSERT INTO products (name, price, link, image) VALUES (?, ?, ?, ?)");
-        insert.run(name, price, link, image);
-        res.json({ success: true });
+        const statement = db.prepare("INSERT INTO products (name, price, link, image) VALUES (?, ?, ?, ?)");
+        const result = statement.run(name, price, link, image);
+        res.json({ success: true, id: result.lastInsertRowid });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-// SAUVEGARDER LES RÉGLAGES (Sécurisé par Admin Email)
-app.post('/api/settings', checkAdmin, (req, res) => {
+// SAUVEGARDER LES PARAMÈTRES ET AFFILIATIONS (Vérification Admin)
+app.post('/api/settings', verifyAdminPermission, (req, res) => {
     const { key, value } = req.body;
     try {
-        const upsert = db.prepare("INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value=?");
-        upsert.run(key, value, value);
+        const statement = db.prepare("INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value=?");
+        statement.run(key, value, value);
         res.json({ success: true });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
+// RÉCUPÉRER LES PARAMÈTRES
 app.get('/api/settings', (req, res) => {
     try {
         const rows = db.prepare("SELECT * FROM settings").all();
-        const settings = {};
-        rows.forEach(row => settings[row.key] = row.value);
-        res.json(settings);
+        const config = {};
+        rows.forEach(r => config[r.key] = r.value);
+        res.json(config);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Serveur DealFinder sécurisé actif`));
+app.listen(PORT, () => console.log("Serveur DealFinder d'origine sécurisé"));
