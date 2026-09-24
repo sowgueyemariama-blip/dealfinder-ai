@@ -30,7 +30,7 @@ db.exec(`
   );
 `);
 
-// 🛡️ SÉCURITÉ ADMINISTRATEUR UNIQUE EXCLUSIF
+// 🛡️ SÉCURITÉ ADMINISTRATEUR EXCLUSIF UNIQUE
 const EXCLUSIVE_ADMIN = "sowgueye.mariama@gmail.com";
 
 function verifyAdminPermission(req, res, next) {
@@ -45,7 +45,7 @@ app.get('/api/health', (req, res) => {
     res.json({ status: "online", secure: true });
 });
 
-// ROUTE RECHERCHE UTILISATEUR
+// ROUTE RECHERCHE UTILISATEUR D'ORIGINE
 app.get('/api/search', (req, res) => {
     const query = req.query.q || '';
     if (!query) return res.json([]);
@@ -59,7 +59,7 @@ app.get('/api/search', (req, res) => {
     }
 });
 
-// AJOUTER UN PRODUIT (Sécurisé + Photo obligatoire)
+// AJOUTER UN PRODUIT (Sécurisé par l'email administrateur + Photo obligatoire)
 app.post('/api/products', verifyAdminPermission, (req, res) => {
     const { name, price, link, image } = req.body;
     
@@ -77,7 +77,7 @@ app.post('/api/products', verifyAdminPermission, (req, res) => {
     }
 });
 
-// ENREGISTRER LES MODIFICATIONS (Sécurisé)
+// ENREGISTRER LES MODIFICATIONS (Sécurisé par l'email administrateur)
 app.post('/api/settings', verifyAdminPermission, (req, res) => {
     const { key, value } = req.body;
     try {
@@ -89,7 +89,7 @@ app.post('/api/settings', verifyAdminPermission, (req, res) => {
     }
 });
 
-// RÉCUPÉRER LES RÉGLAGES
+// RÉCUPÉRER LES RÉGLAGES D'ORIGINE
 app.get('/api/settings', (req, res) => {
     try {
         const rows = db.prepare("SELECT * FROM settings").all();
