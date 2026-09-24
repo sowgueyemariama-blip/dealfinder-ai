@@ -7,7 +7,7 @@
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f4f3ec; /* Marron très clair d'origine */
+            background-color: #f4f3ec; /* Couleur crème originale */
             margin: 0;
             padding: 0;
             color: #333;
@@ -21,7 +21,7 @@
             border-bottom: 1px solid #e0dfd5;
         }
         .logo {
-            color: #1b5e20; /* Vert d'origine */
+            color: #1b5e20; /* Vert original */
             font-size: 20px;
             font-weight: bold;
             display: flex;
@@ -103,8 +103,6 @@
             gap: 8px;
             margin-bottom: 20px;
         }
-        
-        /* FENÊTRE D'ADMINISTRATION STYLE VISUEL D'ORIGINE */
         .admin-modal {
             background-color: #fff;
             border-top-left-radius: 24px;
@@ -112,19 +110,6 @@
             box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
             padding: 20px;
             margin-top: 10px;
-        }
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        .modal-header h3 {
-            margin: 0;
-            font-size: 20px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
         }
         .tabs {
             display: flex;
@@ -198,13 +183,12 @@
 <body>
 
     <div class="header">
-        <div class="logo">🛠️ DealFinder AI <div class="dot"></div></div>
+        <div class="logo">🛠 ... DealFinder AI <div class="dot"></div></div>
     </div>
 
     <div class="main-content">
         <div class="profile-title">Profil</div>
 
-        <!-- CARTE PROFIL D'ORIGINE -->
         <div class="profile-card">
             <div class="profile-info">
                 <div class="profile-avatar">M</div>
@@ -216,15 +200,9 @@
             <button class="btn-disconnect">Se déconnecter</button>
         </div>
 
-        <button class="btn-admin-panel">🛠️ Panneau d'administration</button>
+        <button class="btn-admin-panel">🛠 Panneau d'administration</button>
 
-        <!-- ESPACE ADMINISTRATION TECHNIQUE CONFORME -->
         <div class="admin-modal">
-            <div class="modal-header">
-                <h3>🛠️ Administration</h3>
-            </div>
-
-            <!-- ONGLES DE NAVIGATION SPÉCIFIQUES -->
             <div class="tabs">
                 <button class="tab" onclick="switchTab('produits')">Produits</button>
                 <button class="tab active" onclick="switchTab('affiliation')">Affiliation</button>
@@ -232,9 +210,8 @@
                 <button class="tab" onclick="switchTab('notifs')">📢 Notifs</button>
             </div>
 
-            <!-- FORMULAIRE CONTENU DYNAMIQUE -->
             <div id="adminFormContent">
-                <!-- CONTENU DE L'ONGLET AFFILIATION (VU SUR LA PHOTO) -->
+                <!-- ONGLET AFFILIATION (CONFORME À LA CAPTURE) -->
                 <div id="tab-affiliation" class="tab-pane">
                     <div class="form-group">
                         <label>Tag d'affiliation</label>
@@ -249,7 +226,7 @@
                     </div>
                 </div>
 
-                <!-- CONTENU DE L'ONGLET PRODUITS (SANS MARQUE, AVEC PHOTO REQUISE) -->
+                <!-- ONGLET PRODUITS (SANS CHAMP MARQUE + PHOTO REQUISE) -->
                 <div id="tab-produits" class="tab-pane" style="display:none;">
                     <div class="form-group">
                         <label>Nom du produit *</label>
@@ -260,11 +237,11 @@
                         <input type="number" id="prodPrice">
                     </div>
                     <div class="form-group">
-                        <label>Lien profond d'achat *</label>
+                        <label>Lien produit *</label>
                         <input type="text" id="prodLink">
                     </div>
                     <div class="form-group">
-                        <label>Photo du produit (Lien URL) *</label>
+                        <label>Photo du produit (URL obligatoire) *</label>
                         <input type="text" id="prodImage" placeholder="https://...">
                     </div>
                 </div>
@@ -276,7 +253,6 @@
     </div>
 
 <script>
-    // Élimination complète de localhost ➡️ Liaison vers votre serveur Render stable
     const API_URL = "https://onrender.com";
     const ADMIN_EMAIL = "sowgueye.mariama@gmail.com"; 
     let currentActiveTab = "affiliation";
@@ -293,5 +269,25 @@
             document.getElementById('tab-affiliation').style.display = 'none';
             document.getElementById('tab-produits').style.display = 'block';
         } else {
-            // Clés et Notifs (Générique d'origine)
             document.getElementById('tab-affiliation').style.display = 'none';
+            document.getElementById('tab-produits').style.display = 'none';
+        }
+    }
+
+    function feedback(text, success) {
+        const box = document.getElementById('statusNotice');
+        box.innerText = text;
+        box.style.background = success ? "#d4edda" : "#f8d7da";
+        box.style.color = success ? "#155724" : "#721c24";
+        box.style.display = "block";
+        setTimeout(() => box.style.display = "none", 4000);
+    }
+
+    async function submitAdminData() {
+        if(currentActiveTab === "affiliation") {
+            const tag = document.getElementById('affTag').value;
+            const track = document.getElementById('affTrack').value;
+
+            try {
+                const r1 = await fetch(`${API_URL}/api/settings`, {
+                    method: 'POST',
