@@ -1,469 +1,489 @@
-const express = require('express');
-const cors = require('cors');
-const fs = require('fs');
-const path = require('path');
-const crypto = require('crypto');
-const Database = require('better-sqlite3');
+"use strict";
+/* ================================================================
+   DealFinder AI — server.js
+   Backend Express pour l'app frontend (index.html) déployée sur Render.
+   Persistance : fichiers JSON dans ./data (simple, sans base externe).
+   ================================================================ */
+
+const express = require("express");
+const cors = require("cors");
+const crypto = require("crypto");
+const fs = require("fs");
+const path = require("path");
 
 const app = express();
 app.use(cors());
-app.use(express.json({ limit: '10mb' })); // 10mb : les photos en base64 peuvent être volumineuses
+app.use(express.json({ limit: "2mb" }));
 
-const dataDir = path.join(__dirname, 'backend', 'data');
-if (!fs.existsSync(dataDir)) {
-  fs.mkdirSync(dataDir, { recursive: true });
-}
-const dbPath = path.join(dataDir, 'dealfinder.db');
-const db = new Database(dbPath);
-db.pragma('journal_mode = WAL');
-
-/* ================================================================
-   SCHÉMA
-   ================================================================ */
-db.exec(`
-  CREATE TABLE IF NOT EXISTS products (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    brand TEXT,
-    cat TEXT DEFAULT 'autres',
-    price REAL NOT NULL,
-    currency TEXT NOT NULL DEFAULT 'FCFA',
-    merchant_name TEXT NOT NULL DEFAULT 'Boutique partenaire',
-    product_url TEXT NOT NULL,
-    image TEXT NOT NULL,
-    in_stock INTEGER NOT NULL DEFAULT 1,
-    created_at INTEGER NOT NULL
-  );
-  CREATE TABLE IF NOT EXISTS settings (
-    key TEXT PRIMARY KEY,
-    value TEXT
-  );
-  CREATE TABLE IF NOT EXISTS apikeys (
-    name TEXT PRIMARY KEY,
-    value TEXT NOT NULL,
-    updated_at INTEGER NOT NULL
-  );
-  CREATE TABLE IF NOT EXISTS announcements (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    title TEXT NOT NULL,
-    body TEXT,
-    active INTEGER NOT NULL DEFAULT 1,
-    created_at INTEGER NOT NULL
-  );
-  CREATE TABLE IF NOT EXISTS users (
-    email TEXT PRIMARY KEY,
-    name TEXT NOT NULL,
-    token TEXT NOT NULL,
-    created_at INTEGER NOT NULL
-  );
-  CREATE TABLE IF NOT EXISTS favorites (
-    email TEXT NOT NULL,
-    product_id TEXT NOT NULL,
-    saved_price REAL,
-    currency TEXT,
-    saved_at INTEGER NOT NULL,
-    PRIMARY KEY (email, product_id)
-  );
-  CREATE TABLE IF NOT EXISTS history (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    email TEXT NOT NULL,
-    query TEXT NOT NULL,
-    n_results INTEGER DEFAULT 0,
-    created_at INTEGER NOT NULL
-  );
-  CREATE TABLE IF NOT EXISTS clicks (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    product_id TEXT,
-    merchant_id TEXT,
-    created_at INTEGER NOT NULL
-  );
-  CREATE TABLE IF NOT EXISTS share_events (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    product_id TEXT,
-    type TEXT,
-    created_at INTEGER NOT NULL
-  );
-`);
-
-/* ================================================================
-   🛡️ SÉCURITÉ ADMINISTRATEUR EXCLUSIF UNIQUE
-   ================================================================ */
-const EXCLUSIVE_ADMIN = "sowgueye.mariama@gmail.com";
-
-function userByToken(token) {
-  if (!token) return null;
-  return db.prepare("SELECT * FROM users WHERE token = ?").get(token) || null;
-}
-function bearerToken(req) {
-  const h = req.headers.authorization || '';
-  const m = h.match(/^Bearer\s+(.+)$/i);
-  return m ? m[1] : null;
-}
-// Compatible avec les deux façons d'authentifier l'administrateur :
-// l'en-tête direct x-admin-auth-email, OU un token de session dont
-// l'e-mail associé est bien l'administrateur exclusif.
-function verifyAdminPermission(req, res, next) {
-  const headerEmail = req.headers['x-admin-auth-email'];
-  if (headerEmail === EXCLUSIVE_ADMIN) return next();
-  const u = userByToken(bearerToken(req));
-  if (u && u.email === EXCLUSIVE_ADMIN) return next();
-  return res.status(403).json({ error: "Accès refusé. Vous n'êtes pas l'administrateur unique." });
-}
-// Identifie un utilisateur normal (facultatif — favoris/historique) sans bloquer si absent.
-function optionalUser(req, res, next) {
-  req.user = userByToken(bearerToken(req));
-  next();
-}
-function requireUser(req, res, next) {
-  req.user = userByToken(bearerToken(req));
-  if (!req.user) return res.status(401).json({ error: "Non connecté." });
-  next();
-}
-
-/* ================================================================
-   OUTILS
-   ================================================================ */
-const TO_FCFA = { FCFA: 1, EUR: 655.957, USD: 610, GBP: 775 };
-function toFcfa(price, cur) { return price * (TO_FCFA[cur] || 1); }
-function normText(s) {
-  return (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-}
-const STOPWORDS = new Set(["le","la","les","de","des","du","un","une","et","en","pour","avec","sur","dans","par",
-  "moins","plus","max","maximum","budget","cher","entre","sous","que","quel","quelle","combien"]);
-
-function parseBudget(rawQuery) {
-  const q = normText(rawQuery);
-  let cur = 'FCFA';
-  if (/€|eur\b/.test(q)) cur = 'EUR';
-  else if (/\$|usd\b/.test(q)) cur = 'USD';
-  else if (/£|gbp\b/.test(q)) cur = 'GBP';
-  const range = q.match(/entre\s*([\d][\d\s.,]*)\s*(?:et|-)\s*([\d][\d\s.,]*)/);
-  const max = q.match(/(?:a moins de|moins de|pas plus de|sous|max(?:imum)?(?: de)?|budget(?: max)?(?: de)?|inferieur(?:e)? a|en dessous de|<)\s*([\d][\d\s.,]*)/);
-  const num = s => parseFloat(String(s).replace(/[\s.]/g, '').replace(',', '.')) || 0;
-  if (range) return { min: num(range[1]) * TO_FCFA[cur], max: num(range[2]) * TO_FCFA[cur] };
-  if (max) return { min: null, max: num(max[1]) * TO_FCFA[cur] };
-  return { min: null, max: null };
-}
-function slugMerchant(name) {
-  return normText(name).replace(/[^a-z0-9]+/g, '').slice(0, 24) || 'boutique';
-}
-function maskKey(v) {
-  if (!v) return '';
-  if (v.length <= 6) return v[0] + '***';
-  return v.slice(0, 4) + '••••••' + v.slice(-2);
-}
-function rowToOffer(row) {
-  const hours = Math.max(0, Math.round((Date.now() - row.created_at) / 3600000));
-  return {
-    id: 'a' + row.id,
-    cat: row.cat || 'autres',
-    brand: row.brand || '',
-    name: row.name,
-    tags: [],
-    specs: [],
-    offers: [{
-      m: slugMerchant(row.merchant_name),
-      merchantName: row.merchant_name,
-      price: row.price,
-      cur: row.currency,
-      stock: !!row.in_stock,
-      ship: -1,
-      h: hours,
-      productUrl: row.product_url,
-      remote: true
-    }]
-  };
-}
-function rowToFlat(row) {
-  return {
-    id: 'a' + row.id,
-    cat: row.cat || 'autres',
-    brand: row.brand || '',
-    title: row.name,
-    name: row.name,
-    price: row.price,
-    currency: row.currency,
-    merchant_name: row.merchant_name,
-    merchant: row.merchant_name,
-    image: row.image,
-    in_stock: !!row.in_stock,
-    product_url: row.product_url,
-    url: row.product_url
-  };
-}
-function getSetting(key) {
-  const r = db.prepare("SELECT value FROM settings WHERE key = ?").get(key);
-  return r ? r.value : null;
-}
-
-/* ================================================================
-   SANTÉ
-   ================================================================ */
-app.get('/api/health', (req, res) => {
-  res.json({ status: "online", secure: true });
-});
-
-/* ================================================================
-   RECHERCHE — trouve directement le produit demandé.
-   ================================================================ */
-app.post('/api/search', (req, res) => {
-  const raw = (req.body && req.body.query || '').toString();
-  if (!raw.trim()) return res.json({ products: [], merchants: [], demo: false });
-
-  const { min, max } = parseBudget(raw);
-  const tokens = normText(raw).split(/[^a-z0-9]+/).filter(w => w.length > 2 && !STOPWORDS.has(w) && !/^\d+$/.test(w));
-
-  const all = db.prepare("SELECT * FROM products WHERE image IS NOT NULL AND image != '' AND product_url IS NOT NULL AND product_url != ''").all();
-
-  let scored = all.map(row => {
-    const hay = normText(row.name + ' ' + (row.brand || '') + ' ' + row.merchant_name);
-    let score = 0;
-    tokens.forEach(w => { if (hay.includes(w)) score += 1; });
-    // correspondance exacte de la requête entière = très forte priorité (« trouve directement »)
-    if (hay.includes(normText(raw).trim())) score += 5;
-    return { row, score };
-  }).filter(x => x.score > 0 || tokens.length === 0);
-
-  if (min != null) scored = scored.filter(x => toFcfa(x.row.price, x.row.currency) >= min);
-  if (max != null) scored = scored.filter(x => toFcfa(x.row.price, x.row.currency) <= max);
-
-  scored.sort((a, b) => b.score - a.score || a.row.price - b.row.price);
-
-  const products = scored.slice(0, 40).map(x => rowToOffer(x.row));
-  const merchantMap = new Map();
-  scored.forEach(x => merchantMap.set(slugMerchant(x.row.merchant_name), x.row.merchant_name));
-  const merchants = [...merchantMap.entries()].map(([id, name]) => ({ id, name }));
-
-  res.json({ products, merchants, demo: false });
-});
-
-/* ================================================================
-   SUGGESTIONS PUBLIQUES (page « aucun résultat » + catégories)
-   ================================================================ */
-app.get('/api/products', (req, res) => {
-  try {
-    const rows = db.prepare(
-      "SELECT * FROM products WHERE image IS NOT NULL AND image != '' AND product_url IS NOT NULL AND product_url != '' ORDER BY created_at DESC LIMIT 60"
-    ).all();
-    res.json({ products: rows.map(rowToFlat) });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-/* ================================================================
-   ANNONCE ACTIVE (bannière vue par tous les utilisateurs)
-   ================================================================ */
-app.get('/api/announcement', (req, res) => {
-  const a = db.prepare("SELECT * FROM announcements WHERE active = 1 ORDER BY created_at DESC LIMIT 1").get();
-  res.json({ announcement: a ? { id: a.id, title: a.title, body: a.body } : null });
-});
-
-/* ================================================================
-   COMPTE (facultatif — favoris / historique / accès admin)
-   ================================================================ */
-app.post('/api/auth/register', (req, res) => {
-  const name = (req.body.name || '').trim();
-  const email = (req.body.email || '').trim().toLowerCase();
-  if (name.length < 2) return res.status(400).json({ error: 'invalid_name' });
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return res.status(400).json({ error: 'invalid_email' });
-  let u = db.prepare("SELECT * FROM users WHERE email = ?").get(email);
-  const token = crypto.randomBytes(24).toString('hex');
-  if (u) {
-    db.prepare("UPDATE users SET name = ?, token = ? WHERE email = ?").run(name, token, email);
-  } else {
-    db.prepare("INSERT INTO users (email, name, token, created_at) VALUES (?, ?, ?, ?)").run(email, name, token, Date.now());
-  }
-  res.json({ token, name, email });
-});
-app.post('/api/auth/logout', optionalUser, (req, res) => {
-  if (req.user) db.prepare("UPDATE users SET token = ? WHERE email = ?").run(crypto.randomBytes(24).toString('hex'), req.user.email);
-  res.json({ success: true });
-});
-app.get('/api/me', requireUser, (req, res) => {
-  res.json({ name: req.user.name, email: req.user.email });
-});
-
-app.get('/api/favorites', requireUser, (req, res) => {
-  const rows = db.prepare("SELECT * FROM favorites WHERE email = ?").all(req.user.email);
-  res.json({ favorites: rows.map(r => ({ productId: r.product_id, savedPrice: r.saved_price, currency: r.currency, savedAt: r.saved_at })) });
-});
-app.post('/api/favorites', requireUser, (req, res) => {
-  const { productId, savedPrice, currency } = req.body;
-  if (!productId) return res.status(400).json({ error: 'productId requis' });
-  db.prepare(`INSERT INTO favorites (email, product_id, saved_price, currency, saved_at) VALUES (?, ?, ?, ?, ?)
-              ON CONFLICT(email, product_id) DO UPDATE SET saved_price=excluded.saved_price, currency=excluded.currency`)
-    .run(req.user.email, productId, savedPrice || null, currency || 'FCFA', Date.now());
-  res.json({ success: true });
-});
-app.delete('/api/favorites', requireUser, (req, res) => {
-  const { productId } = req.body;
-  db.prepare("DELETE FROM favorites WHERE email = ? AND product_id = ?").run(req.user.email, productId);
-  res.json({ success: true });
-});
-
-app.get('/api/history', requireUser, (req, res) => {
-  const rows = db.prepare("SELECT query, created_at FROM history WHERE email = ? ORDER BY created_at DESC LIMIT 8").all(req.user.email);
-  res.json({ history: rows.map(r => ({ query: r.query, createdAt: r.created_at })) });
-});
-app.post('/api/history', requireUser, (req, res) => {
-  const { query, nResults } = req.body;
-  if (!query) return res.status(400).json({ error: 'query requis' });
-  db.prepare("INSERT INTO history (email, query, n_results, created_at) VALUES (?, ?, ?, ?)")
-    .run(req.user.email, query, nResults || 0, Date.now());
-  res.json({ success: true });
-});
-
-/* ================================================================
-   CLIC SUR « VOIR L'OFFRE » — combine le lien produit + le lien
-   d'affiliation pour que la boutique sache que la vente vient de
-   l'application, puis redirige.
-   ================================================================ */
-app.post('/api/clicks', optionalUser, (req, res) => {
-  const { productId, merchantId } = req.body;
-  const idNum = parseInt(String(productId || '').replace(/^a/, ''), 10);
-  const row = idNum ? db.prepare("SELECT * FROM products WHERE id = ?").get(idNum) : null;
-  db.prepare("INSERT INTO clicks (product_id, merchant_id, created_at) VALUES (?, ?, ?)")
-    .run(productId || null, merchantId || null, Date.now());
-  if (!row) return res.status(404).json({ error: 'Produit introuvable' });
-
-  const tag = getSetting('affiliateTag') || '';
-  const tpl = getSetting('trackingTemplate') || '';
-  const clickId = 'DF-' + Date.now().toString(36).toUpperCase();
-  let url = row.product_url;
-  if (tag) {
-    if (tpl && tpl.includes('{url}')) {
-      url = tpl.replace('{url}', encodeURIComponent(row.product_url)).replace('{tag}', encodeURIComponent(tag)).replace('{clickId}', clickId);
-    } else {
-      const sep = row.product_url.includes('?') ? '&' : '?';
-      url = row.product_url + sep + 'ref=' + encodeURIComponent(tag) + '&clickId=' + clickId;
-    }
-  }
-  res.json({ url });
-});
-
-app.post('/api/share-events', optionalUser, (req, res) => {
-  const { productId, type } = req.body;
-  db.prepare("INSERT INTO share_events (product_id, type, created_at) VALUES (?, ?, ?)").run(productId || null, type || 'product', Date.now());
-  res.json({ success: true });
-});
-
-/* ================================================================
-   ADMINISTRATION — réservée à sowgueye.mariama@gmail.com
-   ================================================================ */
-
-// --- Produits : photo obligatoire, marque JAMAIS demandée ---
-app.get('/api/admin/products', verifyAdminPermission, (req, res) => {
-  const rows = db.prepare("SELECT * FROM products ORDER BY created_at DESC").all();
-  res.json({
-    products: rows.map(r => ({
-      id: 'a' + r.id, name: r.name, brand: r.brand || '', cat: r.cat,
-      price: r.price, currency: r.currency, merchant_name: r.merchant_name,
-      product_url: r.product_url, image: r.image, stock: !!r.in_stock
-    }))
-  });
-});
-app.post('/api/admin/products', verifyAdminPermission, (req, res) => {
-  const { name, price, currency, merchant_name, product_url, image, cat } = req.body;
-  if (!name || !isFinite(parseFloat(price)) || !product_url) {
-    return res.status(400).json({ error: "Nom, prix et lien boutique requis." });
-  }
-  if (!image || !image.trim()) {
-    return res.status(400).json({ error: "La photo du produit est obligatoire." });
-  }
-  const info = db.prepare(`INSERT INTO products (name, brand, cat, price, currency, merchant_name, product_url, image, in_stock, created_at)
-                            VALUES (?, NULL, ?, ?, ?, ?, ?, ?, 1, ?)`)
-    .run(name.trim(), (cat || 'autres'), parseFloat(price), (currency || 'FCFA').toUpperCase(),
-         (merchant_name || 'Boutique partenaire').trim(), product_url.trim(), image.trim(), Date.now());
-  res.json({ success: true, id: 'a' + info.lastInsertRowid });
-});
-app.put('/api/admin/products/:id', verifyAdminPermission, (req, res) => {
-  const idNum = parseInt(String(req.params.id).replace(/^a/, ''), 10);
-  const row = db.prepare("SELECT * FROM products WHERE id = ?").get(idNum);
-  if (!row) return res.status(404).json({ error: "Produit introuvable." });
-  const price = req.body.price != null ? parseFloat(req.body.price) : row.price;
-  const stock = req.body.stock != null ? (req.body.stock ? 1 : 0) : row.in_stock;
-  const product_url = req.body.product_url != null && req.body.product_url.trim() ? req.body.product_url.trim() : row.product_url;
-  db.prepare("UPDATE products SET price = ?, in_stock = ?, product_url = ? WHERE id = ?").run(price, stock, product_url, idNum);
-  res.json({ success: true });
-});
-app.delete('/api/admin/products/:id', verifyAdminPermission, (req, res) => {
-  const idNum = parseInt(String(req.params.id).replace(/^a/, ''), 10);
-  db.prepare("DELETE FROM products WHERE id = ?").run(idNum);
-  res.json({ success: true });
-});
-
-// --- Affiliation : tag + gabarit de lien, appliqués automatiquement à tous ---
-app.get('/api/admin/settings', verifyAdminPermission, (req, res) => {
-  res.json({
-    affiliateTag: getSetting('affiliateTag') || '',
-    trackingTemplate: getSetting('trackingTemplate') || ''
-  });
-});
-app.post('/api/admin/settings', verifyAdminPermission, (req, res) => {
-  const { affiliateTag, trackingTemplate } = req.body;
-  if (trackingTemplate && !trackingTemplate.includes('{url}')) {
-    return res.status(400).json({ error: "Le modèle doit contenir {url}." });
-  }
-  const set = (k, v) => db.prepare("INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value").run(k, v);
-  if (affiliateTag) set('affiliateTag', affiliateTag.trim());
-  if (trackingTemplate) set('trackingTemplate', trackingTemplate.trim());
-  res.json({ success: true });
-});
-
-// --- Clés (API keys) : acceptées et appliquées immédiatement ---
-app.get('/api/admin/apikeys', verifyAdminPermission, (req, res) => {
-  const rows = db.prepare("SELECT * FROM apikeys ORDER BY name").all();
-  const keys = {};
-  rows.forEach(r => { keys['apikey_' + r.name] = maskKey(r.value); });
-  res.json({ keys });
-});
-app.post('/api/admin/apikeys', verifyAdminPermission, (req, res) => {
-  const { name, value } = req.body;
-  if (!name || !value) return res.status(400).json({ error: "Nom et valeur requis." });
-  db.prepare(`INSERT INTO apikeys (name, value, updated_at) VALUES (?, ?, ?)
-              ON CONFLICT(name) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at`)
-    .run(name.trim(), value.trim(), Date.now());
-  res.json({ success: true });
-});
-app.delete('/api/admin/apikeys', verifyAdminPermission, (req, res) => {
-  const { name } = req.body;
-  db.prepare("DELETE FROM apikeys WHERE name = ?").run((name || '').replace(/^apikey_/, ''));
-  res.json({ success: true });
-});
-
-// --- Annonces : publiées instantanément, vues par tous ---
-app.get('/api/admin/announcements', verifyAdminPermission, (req, res) => {
-  const rows = db.prepare("SELECT * FROM announcements ORDER BY created_at DESC LIMIT 30").all();
-  res.json({ announcements: rows.map(r => ({ id: r.id, title: r.title, body: r.body, active: !!r.active })) });
-});
-app.post('/api/admin/announcements', verifyAdminPermission, (req, res) => {
-  const { title, body } = req.body;
-  if (!title || title.trim().length < 3) return res.status(400).json({ error: "Titre trop court." });
-  if (title.length > 200) return res.status(400).json({ error: "Titre trop long." });
-  if (body && body.length > 2000) return res.status(400).json({ error: "Message trop long." });
-  db.prepare("UPDATE announcements SET active = 0 WHERE active = 1"); // une seule annonce active à la fois
-  const info = db.prepare("INSERT INTO announcements (title, body, active, created_at) VALUES (?, ?, 1, ?)")
-    .run(title.trim(), (body || '').trim(), Date.now());
-  res.json({ success: true, id: info.lastInsertRowid });
-});
-app.post('/api/admin/announcements/:id/deactivate', verifyAdminPermission, (req, res) => {
-  db.prepare("UPDATE announcements SET active = 0 WHERE id = ?").run(parseInt(req.params.id, 10));
-  res.json({ success: true });
-});
-
-// --- Vue d'ensemble ---
-app.get('/api/admin/overview', verifyAdminPermission, (req, res) => {
-  const nProducts = db.prepare("SELECT COUNT(*) n FROM products").get().n;
-  const nClicks = db.prepare("SELECT COUNT(*) n FROM clicks").get().n;
-  const nShares = db.prepare("SELECT COUNT(*) n FROM share_events").get().n;
-  const nSearches = db.prepare("SELECT COUNT(*) n FROM history").get().n;
-  const nUsers = db.prepare("SELECT COUNT(*) n FROM users").get().n;
-  res.json({ products: nProducts, clicks: nClicks, shares: nShares, searches: nSearches, users: nUsers });
-});
-
-/* ================================================================
-   DÉMARRAGE
-   ================================================================ */
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log("Serveur DealFinder — administration + recherche + affiliation actifs sur le port " + PORT));
+const ADMIN_EMAIL = "sowgueye.mariama@gmail.com";
+const JWT_SECRET = process.env.JWT_SECRET || "dealfinder-dev-secret-change-me";
+const TOKEN_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 jours
+
+/* ---------------------------------------------------------------
+   0. Stockage fichier JSON (simple, remplaçable par une vraie BDD)
+   --------------------------------------------------------------- */
+const DATA_DIR = path.join(__dirname, "data");
+if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+
+function dbPath(name) { return path.join(DATA_DIR, name + ".json"); }
+function readDB(name, fallback) {
+  try {
+    const p = dbPath(name);
+    if (!fs.existsSync(p)) return fallback;
+    return JSON.parse(fs.readFileSync(p, "utf8"));
+  } catch (e) { return fallback; }
+}
+function writeDB(name, data) {
+  fs.writeFileSync(dbPath(name), JSON.stringify(data, null, 2), "utf8");
+}
+
+let users = readDB("users", {});           // email -> {name,email,createdAt}
+let products = readDB("products", null);   // array de produits (voir seedProducts)
+let affiliate = readDB("affiliate", null); // { merchantId: {name, template, affiliate:boolean} }
+let apiKeys = readDB("keys", []);          // [{id,label,key,createdAt}]
+let notifications = readDB("notifications", []); // [{id,title,body,createdAt}]
+let favorites = readDB("favorites", {});   // email -> [productId,...]
+let history = readDB("history", {});       // email -> [{q,at}]
+let stats = readDB("stats", { searches: 0, clicks: 0, shares: 0, favs: 0 });
+
+function persistAll() {
+  writeDB("users", users);
+  writeDB("products", products);
+  writeDB("affiliate", affiliate);
+  writeDB("keys", apiKeys);
+  writeDB("notifications", notifications);
+  writeDB("favorites", favorites);
+  writeDB("history", history);
+  writeDB("stats", stats);
+}
+
+/* ---------------------------------------------------------------
+   1. Données de départ (utilisées seulement si data/products.json
+      n'existe pas encore)
+   --------------------------------------------------------------- */
+function seedAffiliate() {
+  return {
+    tm: { name: "TechMarché", affiliate: true, template: "" },
+    ep: { name: "Electro+", affiliate: true, template: "" },
+    bs: { name: "BoutiqueSahel", affiliate: false, template: "" },
+    md: { name: "MegaDeal Store", affiliate: true, template: "" },
+    ac: { name: "AudioCenter", affiliate: true, template: "" },
+    me: { name: "ModeExpress", affiliate: false, template: "" },
+    cm: { name: "CasaMeuble", affiliate: false, template: "" }
+  };
+}
+
+function seedProducts() {
+  const O = (m, price, cur, stock, ship, h, link) => ({ m, price, cur, stock, ship, h, link: link || "", updatedAt: Date.now() - h * 3600 * 1000 });
+  const P = (id, cat, brand, name, tags, specs, image, offers) => ({ id, cat, brand, name, tags, specs, image: image || "", offers, createdAt: Date.now() });
+  return [
+    P("p1", "telephones", "Samsung", "Samsung Galaxy A15 — 128 Go",
+      ["samsung", "galaxy", "a15", "telephone", "smartphone"],
+      ["Écran 6,5\" Super AMOLED", "128 Go · 4 Go RAM", "Batterie 5000 mAh"], "",
+      [O("tm", 94900, "FCFA", true, 2000, 2), O("ep", 97900, "FCFA", true, 0, 5),
+       O("md", 96500, "FCFA", true, 1500, 24), O("bs", 93900, "FCFA", false, 1500, 48)]),
+    P("p3", "telephones", "Tecno", "Tecno Spark 20 — 128 Go",
+      ["tecno", "spark", "telephone", "smartphone"],
+      ["Écran 90 Hz", "128 Go · 8 Go RAM"], "",
+      [O("ep", 68900, "FCFA", true, 1000, 3), O("bs", 69900, "FCFA", true, 0, 10)]),
+    P("p4", "telephones", "Xiaomi", "Xiaomi Redmi 13C — 128 Go",
+      ["xiaomi", "redmi", "telephone", "smartphone"],
+      ["128 Go · 6 Go RAM", "Caméra 50 Mpx"], "",
+      [O("ep", 79900, "FCFA", true, 0, 4), O("tm", 81500, "FCFA", true, 1500, 12)]),
+    P("p9", "audio", "JBL", "JBL Tune 520BT — casque sans fil",
+      ["jbl", "casque", "sans fil", "bluetooth", "audio"],
+      ["Bluetooth 5.3", "Autonomie 57 h"], "",
+      [O("ac", 21500, "FCFA", true, 1000, 2), O("tm", 22900, "FCFA", true, 1500, 8), O("ep", 21900, "FCFA", true, 0, 14)]),
+    P("p11", "audio", "Oraimo", "Oraimo FreePods 4 — écouteurs sans fil",
+      ["oraimo", "ecouteurs", "sans fil", "bluetooth", "audio"],
+      ["Bluetooth 5.2", "Étui de charge"], "",
+      [O("ep", 12500, "FCFA", true, 500, 1), O("ac", 13200, "FCFA", true, 1000, 9)]),
+    P("p14", "chaussures", "Nike", "Nike Court Vision Low",
+      ["nike", "baskets", "chaussures", "sneakers"],
+      ["Baskets cuir synthétique", "Semelle caoutchouc"], "",
+      [O("me", 34900, "FCFA", true, 2000, 12), O("md", 35900, "FCFA", true, 1500, 24)]),
+    P("p19", "jeux", "Sony", "Manette de jeu sans fil",
+      ["manette", "jeux", "gaming", "sans fil"],
+      ["Bluetooth", "Batterie 12 h"], "",
+      [O("md", 42900, "FCFA", true, 1500, 9), O("tm", 44500, "FCFA", true, 0, 22)]),
+    P("p23", "electronique", "Amazfit", "Montre connectée Amazfit Bip 5",
+      ["amazfit", "montre", "connectee", "electronique", "gps"],
+      ["GPS intégré", "Autonomie 10 jours"], "",
+      [O("ep", 34900, "FCFA", true, 0, 5), O("tm", 36900, "FCFA", true, 1500, 16)])
+  ];
+}
+
+if (!products) { products = seedProducts(); writeDB("products", products); }
+if (!affiliate) { affiliate = seedAffiliate(); writeDB("affiliate", affiliate); }
+
+/* ---------------------------------------------------------------
+   2. Auth — jetons simples signés (HMAC), pas de mot de passe
+      (l'app ne demande que nom + e-mail)
+   --------------------------------------------------------------- */
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+function signToken(payload) {
+  const body = Buffer.from(JSON.stringify(payload)).toString("base64url");
+  const sig = crypto.createHmac("sha256", JWT_SECRET).update(body).digest("base64url");
+  return body + "." + sig;
+}
+function verifyToken(token) {
+  if (!token || typeof token !== "string" || !token.includes(".")) return null;
+  const [body, sig] = token.split(".");
+  const expected = crypto.createHmac("sha256", JWT_SECRET).update(body).digest("base64url");
+  if (sig !== expected) return null;
+  try {
+    const payload = JSON.parse(Buffer.from(body, "base64url").toString("utf8"));
+    if (!payload.exp || Date.now() > payload.exp) return null;
+    return payload;
+  } catch (e) { return null; }
+}
+function authMiddleware(req, res, next) {
+  const h = req.headers.authorization || "";
+  const token = h.startsWith("Bearer ") ? h.slice(7) : null;
+  const payload = verifyToken(token);
+  if (!payload) return res.status(401).json({ error: "unauthorized" });
+  req.user = payload; // { email, name, exp }
+  next();
+}
+function adminOnly(req, res, next) {
+  if (!req.user || req.user.email !== ADMIN_EMAIL) return res.status(403).json({ error: "forbidden" });
+  next();
+}
+
+/* ---------------------------------------------------------------
+   3. Santé
+   --------------------------------------------------------------- */
+app.get("/api/health", (req, res) => {
+  res.json({ status: "ok", time: Date.now() });
+});
+
+/* ---------------------------------------------------------------
+   4. Authentification
+   --------------------------------------------------------------- */
+app.post("/api/auth/register", (req, res) => {
+  const name = (req.body && req.body.name || "").trim();
+  const email = (req.body && req.body.email || "").trim().toLowerCase();
+  if (name.length < 2) return res.status(400).json({ error: "invalid_name" });
+  if (!EMAIL_RE.test(email)) return res.status(400).json({ error: "invalid_email" });
+
+  const existing = users[email];
+  users[email] = { name: existing ? existing.name : name, email, createdAt: existing ? existing.createdAt : Date.now() };
+  persistAll();
+
+  const token = signToken({ email, name: users[email].name, exp: Date.now() + TOKEN_TTL_MS });
+  res.json({ token, user: users[email] });
+});
+
+app.get("/api/auth/me", authMiddleware, (req, res) => {
+  const u = users[req.user.email];
+  if (!u) return res.status(404).json({ error: "not_found" });
+  res.json({ user: u });
+});
+
+/* ---------------------------------------------------------------
+   5. Produits — recherche / détail / catégories
+   --------------------------------------------------------------- */
+function bestOffer(p) {
+  const inStock = p.offers.filter(o => o.stock);
+  const pool = inStock.length ? inStock : p.offers;
+  return pool.reduce((a, b) => (fcfa(b) < fcfa(a) ? b : a), pool[0]);
+}
+const TO_FCFA = { FCFA: 1, EUR: 655.957, USD: 610, GBP: 775 };
+function fcfa(o) { return o.price * (TO_FCFA[o.cur] || 1); }
+
+app.get("/api/categories", (req, res) => {
+  const cats = {};
+  products.forEach(p => { cats[p.cat] = (cats[p.cat] || 0) + 1; });
+  res.json(Object.keys(cats).map(id => ({ id, count: cats[id] })));
+});
+
+app.get("/api/products", (req, res) => {
+  const { q, cat, brand, min, max, merchants, inStock, knownShip, sort } = req.query;
+  let list = products.slice();
+
+  if (q) {
+    const nq = String(q).toLowerCase();
+    list = list.filter(p =>
+      p.name.toLowerCase().includes(nq) ||
+      p.brand.toLowerCase().includes(nq) ||
+      (p.tags || []).some(t => t.toLowerCase().includes(nq))
+    );
+  }
+  if (cat) list = list.filter(p => p.cat === cat);
+  if (brand) list = list.filter(p => p.brand.toLowerCase() === String(brand).toLowerCase());
+  if (merchants) {
+    const set = new Set(String(merchants).split(","));
+    list = list.filter(p => p.offers.some(o => set.has(o.m)));
+  }
+  if (inStock === "1" || inStock === "true") {
+    list = list.filter(p => p.offers.some(o => o.stock));
+  }
+  if (knownShip === "1" || knownShip === "true") {
+    list = list.filter(p => p.offers.some(o => o.ship >= 0));
+  }
+  if (min) list = list.filter(p => fcfa(bestOffer(p)) >= Number(min));
+  if (max) list = list.filter(p => fcfa(bestOffer(p)) <= Number(max));
+
+  if (sort === "price_asc") list.sort((a, b) => fcfa(bestOffer(a)) - fcfa(bestOffer(b)));
+  else if (sort === "price_desc") list.sort((a, b) => fcfa(bestOffer(b)) - fcfa(bestOffer(a)));
+  else if (sort === "new") list.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+  const out = list.map(p => ({
+    id: p.id, cat: p.cat, brand: p.brand, name: p.name, image: p.image,
+    specs: p.specs, offersCount: p.offers.length, best: bestOffer(p)
+  }));
+
+  stats.searches++; persistAll();
+  res.json({ count: out.length, offersCompared: list.reduce((s, p) => s + p.offers.length, 0), products: out });
+});
+
+app.get("/api/products/:id", (req, res) => {
+  const p = products.find(x => x.id === req.params.id);
+  if (!p) return res.status(404).json({ error: "not_found" });
+  const offers = p.offers.map(o => ({
+    ...o,
+    merchantName: (affiliate[o.m] && affiliate[o.m].name) || o.m,
+    isAffiliate: !!(affiliate[o.m] && affiliate[o.m].affiliate),
+    finalLink: buildAffiliateLink(o)
+  }));
+  res.json({ ...p, offers });
+});
+
+function buildAffiliateLink(offer) {
+  const merch = affiliate[offer.m];
+  if (!merch) return offer.link || "";
+  if (!merch.affiliate || !merch.template) return offer.link || "";
+  // Le lien produit est combiné au modèle de lien d'affiliation défini en admin.
+  return merch.template.split("{LINK}").join(encodeURIComponent(offer.link || ""));
+}
+
+/* Suivi d'un clic "Voir l'offre" (stat + redirection tracée) */
+app.post("/api/products/:id/click", (req, res) => {
+  const p = products.find(x => x.id === req.params.id);
+  if (!p) return res.status(404).json({ error: "not_found" });
+  stats.clicks++; persistAll();
+  res.json({ ok: true });
+});
+
+/* ---------------------------------------------------------------
+   6. Favoris & historique (utilisateur connecté)
+   --------------------------------------------------------------- */
+app.get("/api/favorites", authMiddleware, (req, res) => {
+  const ids = favorites[req.user.email] || [];
+  res.json({ ids });
+});
+app.post("/api/favorites", authMiddleware, (req, res) => {
+  const id = req.body && req.body.productId;
+  if (!id) return res.status(400).json({ error: "missing_productId" });
+  const list = favorites[req.user.email] || [];
+  if (!list.includes(id)) list.push(id);
+  favorites[req.user.email] = list;
+  stats.favs++; persistAll();
+  res.json({ ids: list });
+});
+app.delete("/api/favorites/:id", authMiddleware, (req, res) => {
+  const list = (favorites[req.user.email] || []).filter(x => x !== req.params.id);
+  favorites[req.user.email] = list;
+  persistAll();
+  res.json({ ids: list });
+});
+
+app.get("/api/history", authMiddleware, (req, res) => {
+  res.json({ items: history[req.user.email] || [] });
+});
+app.post("/api/history", authMiddleware, (req, res) => {
+  const q = (req.body && req.body.q || "").trim();
+  if (!q) return res.status(400).json({ error: "missing_q" });
+  const list = history[req.user.email] || [];
+  list.unshift({ q, at: Date.now() });
+  history[req.user.email] = list.slice(0, 30);
+  persistAll();
+  res.json({ items: history[req.user.email] });
+});
+
+/* Partage (stat uniquement) */
+app.post("/api/share", (req, res) => {
+  stats.shares++; persistAll();
+  res.json({ ok: true });
+});
+
+/* Effacer les données d'un compte */
+app.delete("/api/account/data", authMiddleware, (req, res) => {
+  delete favorites[req.user.email];
+  delete history[req.user.email];
+  persistAll();
+  res.json({ ok: true });
+});
+
+/* ---------------------------------------------------------------
+   7. Notifications (diffusion à tous les utilisateurs)
+   --------------------------------------------------------------- */
+app.get("/api/notifications", (req, res) => {
+  res.json({ items: notifications.slice(-50).reverse() });
+});
+
+/* ---------------------------------------------------------------
+   8. Statistiques anonymisées (lecture publique, agrégées)
+   --------------------------------------------------------------- */
+app.get("/api/stats", (req, res) => {
+  res.json(stats);
+});
+
+/* ================================================================
+   9. Panneau d'administration — réservé à ADMIN_EMAIL
+   ================================================================ */
+const admin = express.Router();
+admin.use(authMiddleware, adminOnly);
+
+/* -- Produits -- */
+admin.get("/products", (req, res) => res.json({ items: products }));
+
+admin.post("/products", (req, res) => {
+  const b = req.body || {};
+  const id = b.id || ("p" + crypto.randomBytes(4).toString("hex"));
+  if (products.some(p => p.id === id)) return res.status(409).json({ error: "id_exists" });
+  const product = {
+    id,
+    cat: b.cat || "autres",
+    brand: b.brand || "",
+    name: b.name || "",
+    tags: b.tags || [],
+    specs: b.specs || [],
+    image: b.image || "",
+    offers: b.offers || [],
+    createdAt: Date.now()
+  };
+  products.push(product);
+  persistAll();
+  res.status(201).json({ item: product });
+});
+
+admin.put("/products/:id", (req, res) => {
+  const idx = products.findIndex(p => p.id === req.params.id);
+  if (idx === -1) return res.status(404).json({ error: "not_found" });
+  products[idx] = { ...products[idx], ...req.body, id: products[idx].id };
+  persistAll();
+  res.json({ item: products[idx] });
+});
+
+admin.delete("/products/:id", (req, res) => {
+  const before = products.length;
+  products = products.filter(p => p.id !== req.params.id);
+  persistAll();
+  res.json({ ok: true, deleted: before - products.length });
+});
+
+/* Import en masse : liens, un par ligne → produits pré-remplis */
+admin.post("/products/bulk-import", (req, res) => {
+  const links = (req.body && req.body.links) || [];
+  const created = links.filter(Boolean).map(url => {
+    const id = "p" + crypto.randomBytes(4).toString("hex");
+    const product = {
+      id, cat: "autres", brand: "", name: guessNameFromUrl(url),
+      tags: [], specs: [], image: "",
+      offers: [{ m: detectMerchantFromUrl(url), price: 0, cur: "FCFA", stock: true, ship: -1, h: 0, link: url, updatedAt: Date.now() }],
+      createdAt: Date.now()
+    };
+    products.push(product);
+    return product;
+  });
+  persistAll();
+  res.status(201).json({ items: created });
+});
+
+function guessNameFromUrl(url) {
+  try {
+    const u = new URL(url);
+    const parts = u.pathname.split("/").filter(Boolean);
+    const slug = parts.length ? parts[parts.length - 1] : u.hostname;
+    return decodeURIComponent(slug)
+      .replace(/\.(html?|php|aspx)$/i, "")
+      .replace(/[-_+]+/g, " ")
+      .replace(/\b(dp|p|product|produit|ref|item|id)\b[\w-]*\b/gi, "")
+      .replace(/\b\d{6,}\b/g, "")
+      .replace(/\s+/g, " ").trim() || "";
+  } catch (e) { return ""; }
+}
+function detectMerchantFromUrl(url) {
+  const u = (url || "").toLowerCase();
+  const MAP = [["jumia", "jumia"], ["shein", "shein"], ["amazon", "amazon"], ["aliexpress", "aliexpress"],
+    ["temu", "temu"], ["ebay", "ebay"], ["wish", "wish"], ["konga", "konga"], ["alibaba", "alibaba"]];
+  for (const [k, id] of MAP) if (u.includes(k)) return id;
+  return "autre";
+}
+
+/* -- Affiliation (par boutique) -- */
+admin.get("/affiliate", (req, res) => res.json({ merchants: affiliate }));
+admin.put("/affiliate/:merchantId", (req, res) => {
+  const id = req.params.merchantId;
+  const cur = affiliate[id] || { name: id, affiliate: false, template: "" };
+  affiliate[id] = {
+    name: req.body.name != null ? req.body.name : cur.name,
+    affiliate: req.body.affiliate != null ? !!req.body.affiliate : cur.affiliate,
+    template: req.body.template != null ? req.body.template : cur.template
+  };
+  persistAll();
+  res.json({ merchant: affiliate[id] });
+});
+
+/* -- Clés API -- */
+admin.get("/keys", (req, res) => res.json({ items: apiKeys }));
+admin.post("/keys", (req, res) => {
+  const label = (req.body && req.body.label || "").trim();
+  const value = (req.body && req.body.value || "").trim();
+  if (!label || !value) return res.status(400).json({ error: "missing_fields" });
+  const item = { id: crypto.randomBytes(4).toString("hex"), label, key: value, createdAt: Date.now() };
+  apiKeys.push(item);
+  persistAll();
+  res.status(201).json({ item });
+});
+admin.delete("/keys/:id", (req, res) => {
+  apiKeys = apiKeys.filter(k => k.id !== req.params.id);
+  persistAll();
+  res.json({ ok: true });
+});
+
+/* -- Notifications (diffusion à tous) -- */
+admin.get("/notifications", (req, res) => res.json({ items: notifications }));
+admin.post("/notifications", (req, res) => {
+  const title = (req.body && req.body.title || "").trim();
+  const body = (req.body && req.body.body || "").trim();
+  if (!title) return res.status(400).json({ error: "missing_title" });
+  const item = { id: crypto.randomBytes(4).toString("hex"), title, body, createdAt: Date.now() };
+  notifications.push(item);
+  persistAll();
+  res.status(201).json({ item });
+});
+admin.delete("/notifications/:id", (req, res) => {
+  notifications = notifications.filter(n => n.id !== req.params.id);
+  persistAll();
+  res.json({ ok: true });
+});
+
+/* -- Console (état général, pour diagnostic rapide) -- */
+admin.get("/console", (req, res) => {
+  res.json({
+    productsCount: products.length,
+    usersCount: Object.keys(users).length,
+    keysCount: apiKeys.length,
+    notificationsCount: notifications.length,
+    stats
+  });
+});
+
+app.use("/api/admin", admin);
+
+/* ---------------------------------------------------------------
+   10. Gestion des erreurs
+   --------------------------------------------------------------- */
+app.use((req, res) => res.status(404).json({ error: "route_not_found" }));
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(500).json({ error: "server_error" });
+});
+
+app.listen(PORT, () => {
+  console.log("DealFinder AI backend démarré sur le port " + PORT);
+});
