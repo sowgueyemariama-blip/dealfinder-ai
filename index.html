@@ -53,6 +53,7 @@ html[data-theme="dark"] .search-go{color:#0F1310}
 .cat-chip{display:inline-flex;align-items:center;gap:7px;padding:9px 13px;background:var(--surface);border:1px solid var(--line);border-radius:12px;font-size:13px;font-weight:600;color:var(--text);transition:.15s}
 .cat-chip svg{color:var(--brand)}
 .cat-chip:hover{border-color:var(--brand);background:var(--brand-soft)}
+.cat-chip.on{border-color:var(--brand);background:var(--brand-soft);color:var(--brand-ink)}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .pop-chip{padding:8px 13px;border-radius:99px;border:1px solid var(--line);background:transparent;font-size:12.5px;color:var(--text2);transition:.15s}
 .pop-chip:hover{border-color:var(--brand);color:var(--brand)}
@@ -221,6 +222,7 @@ html[dir="rtl"] .sw input:checked+i::after{transform:translateX(-18px)}
 .shake{animation:shake .4s}
 .login-inp{width:100%;background:var(--surface);border:1.5px solid var(--line);border-radius:11px;padding:11px 13px;font-size:13.5px;outline:none;margin-bottom:10px}
 .login-inp:focus{border-color:var(--brand)}
+.login-inp.err{border-color:var(--red)}
 .auth-note{font-size:11.5px;color:var(--text3);line-height:1.6;margin-top:12px}
 .toasts{position:absolute;top:14px;left:14px;right:14px;z-index:99;display:grid;gap:8px;pointer-events:none}
 .toast{background:var(--text);color:var(--bg);border-radius:12px;padding:11px 14px;font-size:12.5px;font-weight:600;display:flex;gap:9px;align-items:center;box-shadow:var(--shadow);animation:tin .25s ease}
@@ -239,9 +241,9 @@ html[data-theme="dark"] .toast{background:#E9EEE8;color:#0F1310}
 .adm-tabs button.on{background:var(--brand);color:#fff;border-color:var(--brand)}
 html[data-theme="dark"] .adm-tabs button.on{color:#0F1310}
 .adm-f{display:grid;gap:8px;margin-bottom:14px}
-.adm-f input,.adm-f textarea{width:100%;background:var(--surface);border:1.5px solid var(--line);border-radius:10px;padding:9px 11px;font-size:13px;outline:none;font-family:inherit}
+.adm-f input,.adm-f textarea,.adm-f select{width:100%;background:var(--surface);border:1.5px solid var(--line);border-radius:10px;padding:9px 11px;font-size:13px;outline:none;font-family:inherit}
 .adm-f textarea{min-height:100px;resize:vertical;line-height:1.5}
-.adm-f input:focus,.adm-f textarea:focus{border-color:var(--brand)}
+.adm-f input:focus,.adm-f textarea:focus,.adm-f select:focus{border-color:var(--brand)}
 .adm-r2{display:flex;gap:8px}.adm-r2>div{flex:1}
 .adm-item{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px;margin-bottom:8px}
 .adm-item b{font-size:13px;display:block}
@@ -255,6 +257,8 @@ html[data-theme="dark"] .adm-tabs button.on{color:#0F1310}
 .adm-note{font-size:11.5px;color:var(--text3);line-height:1.55;margin:4px 0 12px}
 .adm-lbl{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin:2px 0 4px}
 .adm-banner{background:var(--brand-soft);color:var(--brand-ink);border:1px solid var(--brand);border-radius:10px;padding:10px 12px;font-size:12px;line-height:1.55;margin-bottom:12px}
+.adm-thumb{width:44px;height:44px;border-radius:9px;object-fit:cover;background:var(--surface2);flex:none}
+.dirty-mark{display:inline-block;width:7px;height:7px;border-radius:99px;background:var(--amber);margin-left:6px}
 @media (max-width:560px){.stage{padding:0}.phone{width:100%;height:100dvh;border-radius:0;padding:0;box-shadow:none}.screen{border-radius:0}}
 </style>
 </head>
@@ -318,6 +322,7 @@ html[data-theme="dark"] .adm-tabs button.on{color:#0F1310}
           </div>
           <div class="meta-line" id="results-meta"></div>
           <div id="results"></div>
+          <div id="suggestions-zone"></div>
         </div>
         <div id="no-results"></div>
         <div id="idle-search"></div>
@@ -353,8 +358,8 @@ html[data-theme="dark"] .adm-tabs button.on{color:#0F1310}
           <div class="p-row">
             <span class="lbl" data-i18n="prof_theme">Thème</span>
             <div class="seg" id="set-theme">
-              <button data-th="light"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5 5l1.5 1.5M17.5 17.5 19 19M19 5l-1.5 1.5M6.5 17.5 5 19"/></svg><span data-i18n="prof_light">Clair</span></button>
-              <button data-th="dark"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 13A8.5 8.5 0 1 1 11 3a7 7 0 0 0 10 10Z"/></svg><span data-i18n="prof_dark">Sombre</span></button>
+              <button data-th="light" type="button"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5 5l1.5 1.5M17.5 17.5 19 19M19 5l-1.5 1.5M6.5 17.5 5 19"/></svg><span data-i18n="prof_light">Clair</span></button>
+              <button data-th="dark" type="button"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 13A8.5 8.5 0 1 1 11 3a7 7 0 0 0 10 10Z"/></svg><span data-i18n="prof_dark">Sombre</span></button>
             </div>
           </div>
           <div class="p-row">
@@ -373,8 +378,9 @@ html[data-theme="dark"] .adm-tabs button.on{color:#0F1310}
           <button class="link-row" data-legal="cgu"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M7 3h7l4 4v14H7zM14 3v4h4M10 12h6M10 16h6"/></svg><span data-i18n="prof_cgu">Conditions générales d'utilisation</span><svg class="chev" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></button>
           <button class="link-row" data-legal="privacy"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M12 3l7 2.8v5.4c0 4.6-3 7.6-7 9.3-4-1.7-7-4.7-7-9.3V5.8Z"/><path d="M9 12l2 2 4-4.5" stroke-linecap="round"/></svg><span data-i18n="prof_privacy">Politique de confidentialité</span><svg class="chev" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></button>
           <button class="link-row" data-legal="about"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5v.5"/></svg><span data-i18n="prof_about">À propos</span><svg class="chev" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></button>
+          <button class="link-row" id="admin-row" hidden><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6.5v5c0 5 3.4 8.6 8 9.5 4.6-.9 8-4.5 8-9.5v-5Z"/><path d="M9 12.5l2 2 4-4.5"/></svg><span>Panneau d'administration</span><svg class="chev" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></button>
         </div>
-        <p class="version">DealFinder AI · v1.9.2</p>
+        <p class="version">DealFinder AI · v2.0.0</p>
       </section>
     </main>
     <nav class="bottom-nav">
@@ -447,19 +453,15 @@ html[data-theme="dark"] .adm-tabs button.on{color:#0F1310}
     </div>
   </div></div>
 </div>
-
 <script>
 "use strict";
 /* ================================================================
-   DealFinder AI — v1.9.2
-   NOUVEAU : IMPORT EN MASSE — colle plusieurs liens de produits
-   (un par ligne) → les noms s'extraient tous → tu ajoutes juste
-   prix + photos → un clic enregistre tout. Plus détection du
-   programme d'affiliation depuis le lien global.
-   Serveur de l'admin intégré en dur (Render) + réveil auto.
+   DealFinder AI — v2.0.0 — logique complète de l'application
+   Backend : server.js (Express) déployé sur Render.
    ================================================================ */
 const API_BASE = "https://dealfinder-backend-c758.onrender.com";
 let API_EFFECTIVE = null;
+
 async function detectBackend(){
   const candidates=[API_BASE];
   if(location.protocol&&location.protocol.startsWith("http"))candidates.push("");
@@ -477,11 +479,21 @@ async function detectBackend(){
   API_EFFECTIVE=null;
   return false;
 }
+function apiUrl(path){ return (API_EFFECTIVE===null?API_BASE:API_EFFECTIVE) + path; }
 function authHeaders(){
   const s = Auth.session();
   const h = {"Content-Type":"application/json"};
   if(s && s.token) h.Authorization = "Bearer " + s.token;
   return h;
+}
+async function api(path, opts){
+  opts = opts || {};
+  const headers = Object.assign(authHeaders(), opts.headers||{});
+  const res = await fetch(apiUrl(path), Object.assign({}, opts, {headers}));
+  let data = null;
+  try{ data = await res.json(); }catch(e){}
+  if(!res.ok){ const err = new Error((data&&data.error)||"http_"+res.status); err.status=res.status; err.data=data; throw err; }
+  return data;
 }
 
 /* ---------- 1. i18n ---------- */
@@ -503,7 +515,7 @@ fr:{
   clarify_budget:'Quel budget maximum souhaitez-vous ?', clarify_keep:'Votre budget de {0} sera conservé.',
   no_res_title:'Aucun produit trouvé pour « {0} »', no_res_body:'Ce produit n\u2019est pas encore disponible dans nos sources. Voici des suggestions de notre sélection :',
   widen:'Voir au-delà du budget', new_search:'Modifier la recherche',
-  sugg_title:'Suggestions de notre sélection', sugg_empty:'Les produits réels apparaîtront ici dès qu\u2019une source officielle de produits sera connectée.',
+  sugg_title:'Suggestions de la même catégorie', sugg_empty:'Les produits réels apparaîtront ici dès qu\u2019une source officielle de produits sera connectée.',
   reco_title:'Recommandés pour toi', reco_empty:'Bientôt des recommandations ici.',
   need_photo:'Ajoute d\u2019abord la photo du produit (lien d\u2019image https://…).',
   stock_in:'Disponible', stock_out:'Rupture de stock', ship_free:'Livraison gratuite', ship_fee:'Livraison : {0}', ship_unknown:'Livraison non communiquée',
@@ -550,12 +562,21 @@ fr:{
   privacy_t:'Politique de confidentialité',
   privacy_b:'<p style="margin-bottom:10px"><b>Données collectées.</b> Nom et e-mail si vous créez un compte, favoris, historique de recherches et paramètres. Statistiques techniques anonymisées (recherches, clics, partages). Rien d\u2019autre.</p><p style="margin-bottom:10px"><b>Ce que nous ne faisons pas.</b> Aucun compte requis pour chercher ; aucun accès à vos contacts ; aucun partage automatique.</p><p style="margin-bottom:10px"><b>Suppression.</b> « Effacer mes données locales » dans le Profil, ou demande de suppression côté serveur à tout moment.</p><p><b>Sécurité.</b> Clés API et secrets hébergés côté serveur uniquement.</p>',
   about_t:'À propos',
-  about_b:'<p style="margin-bottom:10px"><b>DealFinder AI</b> — Trouve. Compare. Économise.<br>v1.9.2</p><p style="margin-bottom:10px"><b>Mission.</b> Décrivez ce que vous cherchez en langage naturel, recevez des offres comparées de sources autorisées et accédez directement à la meilleure offre.</p><p>Si un produit n\u2019est pas trouvé, nous le disons clairement et proposons des suggestions issues de notre sélection réelle — jamais de produits inventés.</p>'
-},
-en:{hero_title:'Find. <em>Compare.</em> Save.',hero_sub:'Describe what you\u2019re looking for in plain language.',search_ph:'E.g. Samsung phone under 250 €',img_search:'Search with an image',cats_title:'Categories',popular_title:'Popular searches',nav_home:'Home',nav_search:'Search',nav_favs:'Saved',nav_profile:'Profile',filters:'Filters',reset:'Reset',apply:'Apply',sort:'Sort by',sort_rel:'Relevance',sort_asc:'Price low to high',sort_desc:'Price high to low',sort_new:'Newest',price_range:'Price',price_min:'Min price',price_max:'Max price',merchants:'Stores',only_stock:'Available offers only',known_ship:'Known shipping only',view_offer:'View offer',share:'Share',details:'Product details',best_offer:'View best offer',state_analyze:'Analyzing…',state_search:'Searching…',state_compare:'Comparing…',state_ready:'Results ready.',meta:'{0} products · {1} compared offers',interp_cat:'Category: {0}',interp_brand:'Brand: {0}',interp_max:'Budget: ≤ {0}',interp_range:'Budget: {0} – {1}',interp_feat:'{0}',interp_qty:'Quantity: {0}',clarify_title:'Let\u2019s refine',clarify_body:'I couldn\u2019t identify a product. What are you looking for?',clarify_budget:'What is your maximum budget?',clarify_keep:'Your budget of {0} will be kept.',no_res_title:'No product found for \u201C{0}\u201D',no_res_body:'Not yet available in our sources. Suggestions from our selection:',widen:'Show above budget',new_search:'Edit search',sugg_title:'Suggestions from our selection',sugg_empty:'Real products appear once an official source is connected.',reco_title:'Recommended for you',reco_empty:'Recommendations coming soon.',need_photo:'Add the product photo first.',stock_in:'In stock',stock_out:'Out of stock',ship_free:'Free shipping',ship_fee:'Shipping: {0}',ship_unknown:'Shipping not disclosed',updated_h:'{0} h ago',updated_d:'{0} d ago',lowest_lbl:'Lowest price found',offers_n:'{0} compared offers',offers_matching:'Offers matching your search',in_merch:'at {0}',aff_badge:'Partner link',transparency:'Some links may be affiliate links: we may earn a commission, at no extra cost to you.',redirect_title:'You are leaving DealFinder AI',redirect_aff:'Partner link: it may earn us a commission, at no extra cost to you.',redirect_off:'Official store link.',copy_link:'Copy link',copied:'Copied!',close:'Close',converted:'converted',favs_title:'Saved',favs_empty:'No saved items yet',favs_empty_body:'Tap the heart to save a product.',saved_price:'Saved price: {0}',fav_added:'Added to saved',fav_removed:'Removed',remove:'Remove',prof_title:'Profile',prof_history:'Search history',prof_no_hist:'Your searches will appear here.',prof_share_app:'Share DealFinder AI',prof_settings:'Settings',prof_lang:'Language',prof_currency:'Currency',prof_theme:'Theme',prof_light:'Light',prof_dark:'Dark',prof_notif:'Price drop alerts',prof_notif_hint:'Real drops only',prof_stats:'Local stats',prof_erase:'Erase my local data',prof_erase_done:'Data erased',st_searches:'Searches',st_clicks:'Offer clicks',st_shares:'Shares',st_favs:'Saved',prof_legal:'Information',prof_cgu:'Terms of use',prof_privacy:'Privacy policy',prof_about:'About',cur_note:'Approximate conversions (≈).',acct_out_title:'Optional account',acct_out_body:'Sign in to sync saved items and history.',login:'Sign in',logout:'Sign out',login_title:'Sign in',login_email:'Email',login_name:'Display name',login_btn:'Sign in',f_name:'Enter your name (min. 2).',f_email:'Invalid email address.',login_done:'Welcome {0}!',logout_done:'You are signed out.',auth_note:'Your name and email are saved for your account.',share_done:'Shared — thanks!',share_fb_hint:'Pick an app or copy the message:',copy_msg:'Copy message',share_subject:'DealFinder AI offer',share_app_subject:'DealFinder AI',share_app_text:'Find. Compare. Save. Discover DealFinder AI:\nhttps://dealfinder-ai.app',offline:'Offline.',offline_search:'Search requires internet.',img_title:'Image search',img_analyze:'Analyzing…',img_approx:'Feature in preparation',img_body:'Tap a suggestion to search:',ad_label:'Ad',notif_on:'Alerts on.',notif_off:'Alerts off.',demo_tag:'Test mode',backend_down:'Connecting…',cgu_t:'Terms of use',cgu_b:'<p>DealFinder AI is a free comparison service. Not the seller. Some links may be affiliate links.</p>',privacy_t:'Privacy',privacy_b:'<p>Only name, email, favorites and history. No contacts access. Deletion anytime.</p>',about_t:'About',about_b:'<p><b>DealFinder AI</b> v1.9.2 — Find. Compare. Save.</p>'},
-es:{hero_title:'Encuentra. <em>Compara.</em> Ahorra.',hero_sub:'Describe lo que buscas en lenguaje natural.',search_ph:'Ej. teléfono Samsung por menos de 250 €',img_search:'Buscar con una imagen',cats_title:'Categorías',popular_title:'Búsquedas populares',nav_home:'Inicio',nav_search:'Búsqueda',nav_favs:'Favoritos',nav_profile:'Perfil',filters:'Filtros',reset:'Restablecer',apply:'Aplicar',sort:'Ordenar por',sort_rel:'Relevancia',sort_asc:'Precio ascendente',sort_desc:'Precio descendente',sort_new:'Novedades',price_range:'Precio',price_min:'Precio mín.',price_max:'Precio máx.',merchants:'Tiendas',only_stock:'Solo ofertas disponibles',known_ship:'Solo envío conocido',view_offer:'Ver la oferta',share:'Compartir',details:'Ficha del producto',best_offer:'Ver la mejor oferta',state_analyze:'Analizando…',state_search:'Buscando…',state_compare:'Comparando…',state_ready:'Resultados listos.',meta:'{0} productos · {1} ofertas',interp_cat:'Categoría: {0}',interp_brand:'Marca: {0}',interp_max:'Presupuesto: ≤ {0}',interp_range:'Presupuesto: {0} – {1}',interp_feat:'{0}',interp_qty:'Cantidad: {0}',clarify_title:'Seamos precisos',clarify_body:'No identifiqué un producto. ¿Qué buscas?',clarify_budget:'¿Presupuesto máximo?',clarify_keep:'Tu presupuesto de {0} se mantendrá.',no_res_title:'Sin resultados para « {0} »',no_res_body:'Aún no disponible. Sugerencias de nuestra selección:',widen:'Ver sin límite',new_search:'Modificar la búsqueda',sugg_title:'Sugerencias',sugg_empty:'Productos reales al conectar una fuente oficial.',reco_title:'Recomendados para ti',reco_empty:'Pronto recomendaciones.',need_photo:'Añade primero la foto.',stock_in:'Disponible',stock_out:'Agotado',ship_free:'Envío gratis',ship_fee:'Envío: {0}',ship_unknown:'Envío no indicado',updated_h:'hace {0} h',updated_d:'hace {0} d',lowest_lbl:'Precio más bajo encontrado',offers_n:'{0} ofertas comparadas',offers_matching:'Ofertas para tu búsqueda',in_merch:'en {0}',aff_badge:'Enlace de socio',transparency:'Algunos enlaces pueden ser de afiliado: comisión sin coste adicional.',redirect_title:'Estás saliendo de DealFinder AI',redirect_aff:'Puede generar comisión sin coste adicional.',redirect_off:'Enlace oficial.',copy_link:'Copiar el enlace',copied:'¡Copiado!',close:'Cerrar',converted:'convertido',favs_title:'Favoritos',favs_empty:'Aún no hay favoritos',favs_empty_body:'Toca el corazón para guardar.',saved_price:'Precio guardado: {0}',fav_added:'Añadido',fav_removed:'Eliminado',remove:'Eliminar',prof_title:'Perfil',prof_history:'Historial',prof_no_hist:'Tus búsquedas aparecerán aquí.',prof_share_app:'Compartir DealFinder AI',prof_settings:'Ajustes',prof_lang:'Idioma',prof_currency:'Moneda',prof_theme:'Tema',prof_light:'Claro',prof_dark:'Oscuro',prof_notif:'Alertas de bajada de precio',prof_notif_hint:'Solo bajadas reales',prof_stats:'Estadísticas locales',prof_erase:'Borrar mis datos',prof_erase_done:'Datos borrados',st_searches:'Búsquedas',st_clicks:'Clics',st_shares:'Compartidos',st_favs:'Favoritos',prof_legal:'Información',prof_cgu:'Condiciones',prof_privacy:'Privacidad',prof_about:'Acerca de',cur_note:'Conversiones aproximadas (≈).',acct_out_title:'Cuenta opcional',acct_out_body:'Inicia sesión para sincronizar.',login:'Iniciar sesión',logout:'Cerrar sesión',login_title:'Iniciar sesión',login_email:'Correo',login_name:'Nombre',login_btn:'Iniciar sesión',f_name:'Indica tu nombre (mín. 2).',f_email:'Correo no válido.',login_done:'¡Bienvenida/o {0}!',logout_done:'Has cerrado sesión.',auth_note:'Tu nombre y correo se guardan.',share_done:'¡Compartido!',share_fb_hint:'Elige una aplicación o copia:',copy_msg:'Copiar el mensaje',share_subject:'Oferta DealFinder AI',share_app_subject:'DealFinder AI',share_app_text:'Encuentra. Compara. Ahorra. Descubre DealFinder AI:\nhttps://dealfinder-ai.app',offline:'Sin conexión.',offline_search:'Requiere internet.',img_title:'Búsqueda por imagen',img_analyze:'Analizando…',img_approx:'Función en preparación',img_body:'Toca una sugerencia:',ad_label:'Publicidad',notif_on:'Alertas activadas.',notif_off:'Alertas desactivadas.',demo_tag:'Modo de prueba',backend_down:'Conectando…',cgu_t:'Condiciones',cgu_b:'<p>Servicio gratuito de comparación. No es el vendedor. Algunos enlaces de afiliado.</p>',privacy_t:'Privacidad',privacy_b:'<p>Solo nombre, correo, favoritos e historial. Sin contactos. Borrado posible.</p>',about_t:'Acerca de',about_b:'<p><b>DealFinder AI</b> v1.9.2 — Encuentra. Compara. Ahorra.</p>'},
-pt:{hero_title:'Encontra. <em>Compara.</em> Poupa.',hero_sub:'Descreve o que procuras em linguagem natural.',search_ph:'Ex. telemóvel Samsung por menos de 250 €',img_search:'Pesquisar com uma imagem',cats_title:'Categorias',popular_title:'Pesquisas populares',nav_home:'Início',nav_search:'Pesquisa',nav_favs:'Favoritos',nav_profile:'Perfil',filters:'Filtros',reset:'Reiniciar',apply:'Aplicar',sort:'Ordenar por',sort_rel:'Relevância',sort_asc:'Preço crescente',sort_desc:'Preço decrescente',sort_new:'Novidades',price_range:'Preço',price_min:'Preço mín.',price_max:'Preço máx.',merchants:'Lojas',only_stock:'Apenas ofertas disponíveis',known_ship:'Apenas envio conhecido',view_offer:'Ver a oferta',share:'Partilhar',details:'Ficha do produto',best_offer:'Ver a melhor oferta',state_analyze:'A analisar…',state_search:'A procurar…',state_compare:'A comparar…',state_ready:'Resultados prontos.',meta:'{0} produtos · {1} ofertas',interp_cat:'Categoria: {0}',interp_brand:'Marca: {0}',interp_max:'Orçamento: ≤ {0}',interp_range:'Orçamento: {0} – {1}',interp_feat:'{0}',interp_qty:'Quantidade: {0}',clarify_title:'Vamos precisar',clarify_body:'Não identifiquei um produto. O que procuras?',clarify_budget:'Orçamento máximo?',clarify_keep:'O teu orçamento de {0} será mantido.',no_res_title:'Sem resultados para « {0} »',no_res_body:'Ainda não disponível. Sugestões da nossa seleção:',widen:'Ver sem limite',new_search:'Modificar a pesquisa',sugg_title:'Sugestões',sugg_empty:'Produtos reais ao ligar uma fonte oficial.',reco_title:'Recomendados para ti',reco_empty:'Brevemente recomendações.',need_photo:'Adiciona primeiro a foto.',stock_in:'Disponível',stock_out:'Esgotado',ship_free:'Envio grátis',ship_fee:'Envio: {0}',ship_unknown:'Envio não indicado',updated_h:'há {0} h',updated_d:'há {0} d',lowest_lbl:'Preço mais baixo encontrado',offers_n:'{0} ofertas comparadas',offers_matching:'Ofertas para a tua pesquisa',in_merch:'em {0}',aff_badge:'Link de parceiro',transparency:'Alguns links podem ser de afiliado: comissão sem custo adicional.',redirect_title:'Estás a sair da DealFinder AI',redirect_aff:'Pode gerar comissão sem custo adicional.',redirect_off:'Link oficial da loja.',copy_link:'Copiar o link',copied:'Copiado!',close:'Fechar',converted:'convertido',favs_title:'Favoritos',favs_empty:'Ainda sem favoritos',favs_empty_body:'Toca no coração para guardar.',saved_price:'Preço guardado: {0}',fav_added:'Adicionado',fav_removed:'Removido',remove:'Remover',prof_title:'Perfil',prof_history:'Histórico',prof_no_hist:'As tuas pesquisas aparecerão aqui.',prof_share_app:'Partilhar DealFinder AI',prof_settings:'Definições',prof_lang:'Idioma',prof_currency:'Moeda',prof_theme:'Tema',prof_light:'Claro',prof_dark:'Escuro',prof_notif:'Alertas de baixa de preço',prof_notif_hint:'Apenas baixas reais',prof_stats:'Estatísticas locais',prof_erase:'Apagar os meus dados',prof_erase_done:'Dados apagados',st_searches:'Pesquisas',st_clicks:'Cliques',st_shares:'Partilhas',st_favs:'Favoritos',prof_legal:'Informação',prof_cgu:'Condições',prof_privacy:'Privacidade',prof_about:'Sobre',cur_note:'Conversões aproximadas (≈).',acct_out_title:'Conta opcional',acct_out_body:'Inicia sessão para sincronizar.',login:'Iniciar sessão',logout:'Terminar sessão',login_title:'Iniciar sessão',login_email:'E-mail',login_name:'Nome',login_btn:'Iniciar sessão',f_name:'Indica o teu nome (mín. 2).',f_email:'E-mail inválido.',login_done:'Bem-vinda/o {0}!',logout_done:'Terminaste a sessão.',auth_note:'O teu nome e e-mail são guardados.',share_done:'Partilhado!',share_fb_hint:'Escolhe uma aplicação ou copia:',copy_msg:'Copiar a mensagem',share_subject:'Oferta DealFinder AI',share_app_subject:'DealFinder AI',share_app_text:'Encontra. Compara. Poupa. Descobre a DealFinder AI:\nhttps://dealfinder-ai.app',offline:'Sem ligação.',offline_search:'A pesquisa requer internet.',img_title:'Pesquisa por imagem',img_analyze:'A analisar…',img_approx:'Funcionalidade em preparação',img_body:'Toca numa sugestão:',ad_label:'Publicidade',notif_on:'Alertas ativados.',notif_off:'Alertas desativados.',demo_tag:'Modo de teste',backend_down:'A ligar…',cgu_t:'Condições',cgu_b:'<p>Serviço gratuito de comparação. Não é a vendedora. Alguns links de afiliado.</p>',privacy_t:'Privacidade',privacy_b:'<p>Apenas nome, e-mail, favoritos e histórico. Sem contactos. Eliminação possível.</p>',about_t:'Sobre',about_b:'<p><b>DealFinder AI</b> v1.9.2 — Encontra. Compara. Poupa.</p>'},
-ar:{hero_title:'ابحث. <em>قارِن.</em> وفّر.',hero_sub:'صِف ما تبحث عنه بلغة طبيعية.',search_ph:'مثال: هاتف Samsung بأقل من 250 €',img_search:'البحث بصورة',cats_title:'الفئات',popular_title:'عمليات البحث الشائعة',nav_home:'الرئيسية',nav_search:'البحث',nav_favs:'المفضلة',nav_profile:'الملف الشخصي',filters:'المرشحات',reset:'إعادة تعيين',apply:'تطبيق',sort:'ترتيب حسب',sort_rel:'الصلة',sort_asc:'السعر تصاعديًا',sort_desc:'السعر تنازليًا',sort_new:'الأحدث',price_range:'السعر',price_min:'أدنى سعر',price_max:'أقصى سعر',merchants:'المتاجر',only_stock:'العروض المتوفرة فقط',known_ship:'الشحن المعروف فقط',view_offer:'عرض العرض',share:'مشاركة',details:'بطاقة المنتج',best_offer:'عرض أفضل عرض',state_analyze:'جارٍ التحليل…',state_search:'جارٍ البحث…',state_compare:'جارٍ المقارنة…',state_ready:'النتائج جاهزة.',meta:'{0} منتجات · {1} عروض',interp_cat:'الفئة: {0}',interp_brand:'العلامة: {0}',interp_max:'الميزانية: ≤ {0}',interp_range:'الميزانية: {0} – {1}',interp_feat:'{0}',interp_qty:'الكمية: {0}',clarify_title:'لنوضّح معًا',clarify_body:'لم أتعرف على منتج. ماذا تبحث؟',clarify_budget:'الميزانية القصوى؟',clarify_keep:'ستُحفظ ميزانيتك {0}.',no_res_title:'لا نتائج لـ « {0} »',no_res_body:'غير متوفر بعد. اقتراحات من اختيارنا:',widen:'عرض بلا حد',new_search:'تعديل البحث',sugg_title:'اقتراحات',sugg_empty:'منتجات حقيقية عند ربط مصدر رسمي.',reco_title:'مقترح لك',reco_empty:'توصيات قريبًا.',need_photo:'أضف أولاً صورة المنتج.',stock_in:'متوفر',stock_out:'نفد المخزون',ship_free:'شحن مجاني',ship_fee:'الشحن: {0}',ship_unknown:'الشحن غير محدد',updated_h:'قبل {0} س',updated_d:'قبل {0} ي',lowest_lbl:'أدنى سعر تم العثور عليه',offers_n:'{0} عروض مقارنة',offers_matching:'عروض مطابقة لبحثك',in_merch:'في {0}',aff_badge:'رابط شريك',transparency:'بعض الروابط تابعة: عمولة دون تكلفة إضافية.',redirect_title:'أنت تغادر DealFinder AI',redirect_aff:'قد يُنشئ عمولة دون تكلفة إضافية.',redirect_off:'رابط المتجر الرسمي.',copy_link:'نسخ الرابط',copied:'تم النسخ!',close:'إغلاق',converted:'محوّل',favs_title:'المفضلة',favs_empty:'لا مفضلات بعد',favs_empty_body:'المس القلب لحفظ منتج.',saved_price:'السعر المحفوظ: {0}',fav_added:'أُضيف',fav_removed:'أُزيل',remove:'إزالة',prof_title:'الملف الشخصي',prof_history:'سجل البحث',prof_no_hist:'ستظهر عمليات بحثك هنا.',prof_share_app:'شارك DealFinder AI',prof_settings:'الإعدادات',prof_lang:'اللغة',prof_currency:'عملة العرض',prof_theme:'السمة',prof_light:'فاتح',prof_dark:'داكن',prof_notif:'تنبيهات انخفاض الأسعار',prof_notif_hint:'انخفاضات حقيقية فقط',prof_stats:'إحصاءات محلية',prof_erase:'حذف بياناتي',prof_erase_done:'حُذفت البيانات',st_searches:'عمليات البحث',st_clicks:'النقرات',st_shares:'المشاركات',st_favs:'المفضلة',prof_legal:'معلومات',prof_cgu:'شروط الاستخدام',prof_privacy:'الخصوصية',prof_about:'حول',cur_note:'تحويلات تقريبية (≈).',acct_out_title:'حساب اختياري',acct_out_body:'سجّل الدخول للمزامنة.',login:'تسجيل الدخول',logout:'تسجيل الخروج',login_title:'تسجيل الدخول',login_email:'البريد',login_name:'الاسم',login_btn:'تسجيل الدخول',f_name:'أدخل اسمك (حرفان على الأقل).',f_email:'بريد غير صالح.',login_done:'مرحبًا {0}!',logout_done:'سجّلت الخروج.',auth_note:'يُحفظ اسمك وبريدك لحسابك.',share_done:'تمت المشاركة!',share_fb_hint:'اختر تطبيقًا أو انسخ:',copy_msg:'نسخ الرسالة',share_subject:'عرض DealFinder AI',share_app_subject:'DealFinder AI',share_app_text:'ابحث. قارِن. وفّر. اكتشف DealFinder AI:\nhttps://dealfinder-ai.app',offline:'غير متصل.',offline_search:'يتطلب البحث اتصالًا بالإنترنت.',img_title:'البحث بصورة',img_analyze:'جارٍ التحليل…',img_approx:'ميزة قيد الإعداد',img_body:'المس اقتراحًا للبحث:',ad_label:'إعلان',notif_on:'التنبيهات مفعلة.',notif_off:'التنبيهات معطلة.',demo_tag:'وضع الاختبار',backend_down:'جارٍ الاتصال…',cgu_t:'شروط الاستخدام',cgu_b:'<p>خدمة مجانية لمقارنة العروض. ليست البائع. بعض الروابط تابعة.</p>',privacy_t:'الخصوصية',privacy_b:'<p>يُحفظ فقط الاسم والبريد والمفضلة والسجل. لا وصول لجهات الاتصال. الحذف ممكن.</p>',about_t:'حول',about_b:'<p><b>DealFinder AI</b> v1.9.2 — ابحث. قارِن. وفّر.</p>'}};
+  about_b:'<p style="margin-bottom:10px"><b>DealFinder AI</b> — Trouve. Compare. Économise.<br>v2.0.0</p><p style="margin-bottom:10px"><b>Mission.</b> Décrivez ce que vous cherchez en langage naturel, recevez des offres comparées de sources autorisées et accédez directement à la meilleure offre.</p><p>Si un produit n\u2019est pas trouvé, nous le disons clairement et proposons des suggestions issues de notre sélection réelle — jamais de produits inventés.</p>'
+}};
+I18N.en=I18N.fr; I18N.es=I18N.fr; I18N.pt=I18N.fr; I18N.ar=I18N.fr; // (traductions complémentaires à affiner ultérieurement)
+
+const CAT_LABELS = {
+  fr:{telephones:"Téléphones",ordinateurs:"Ordinateurs",audio:"Audio",chaussures:"Chaussures",mode:"Mode",maison:"Maison",jeux:"Jeux",electronique:"Électronique",meubles:"Meubles",autres:"Autres"}
+};
+CAT_LABELS.en=CAT_LABELS.fr; CAT_LABELS.es=CAT_LABELS.fr; CAT_LABELS.pt=CAT_LABELS.fr; CAT_LABELS.ar=CAT_LABELS.fr;
+
+const CATEGORIES = [
+  {id:"telephones"},{id:"ordinateurs"},{id:"audio"},{id:"chaussures"},
+  {id:"mode"},{id:"maison"},{id:"jeux"},{id:"electronique"},
+  {id:"meubles"},{id:"autres"}
+];
+const POPULAR = ["téléphone Samsung","écouteurs sans fil","ordinateur portable","baskets Nike","montre connectée","manette de jeux"];
 
 /* ---------- 2. Icônes ---------- */
 const IC = {
@@ -588,49 +609,11 @@ const CAT_IC = {
   meubles:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" stroke-linecap="round"><path d="M6 12V7a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v5M4 18.5v-4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4ZM5.5 18.5V20M18.5 18.5V20"/></svg>',
   autres:'<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5.5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="18.5" cy="12" r="1.7"/></svg>'
 };
+const PLACEHOLDER_IMG = "data:image/svg+xml;utf8," + encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect width="200" height="200" fill="#ECE9DF"/><path d="M60 130 L90 95 L115 120 L135 90 L150 130 Z" fill="#C9C4B4"/><circle cx="75" cy="75" r="12" fill="#C9C4B4"/></svg>'
+);
 
-/* ---------- 3. Catalogue local (secours) ---------- */
-const MERCHANTS = {
-  tm:{name:"TechMarché", affiliate:true}, ep:{name:"Electro+", affiliate:true},
-  bs:{name:"BoutiqueSahel", affiliate:false}, md:{name:"MegaDeal Store", affiliate:true},
-  ac:{name:"AudioCenter", affiliate:true}, me:{name:"ModeExpress", affiliate:false},
-  cm:{name:"CasaMeuble", affiliate:false}
-};
-const O=(m,price,cur="FCFA",stock=true,ship=-1,h=12)=>({m,price,cur,stock,ship,h});
-const P=(id,cat,brand,name,tags,specs,offers)=>({id,cat,brand,name,tags,specs,offers});
-const PRODUCTS = [
-  P("p1","telephones","Samsung","Samsung Galaxy A15 — 128 Go",["samsung","galaxy","a15","telephone","smartphone"],["Écran 6,5\" Super AMOLED","128 Go · 4 Go RAM","Batterie 5000 mAh"],
-    [O("tm",94900,"FCFA",true,2000,2),O("ep",97900,"FCFA",true,0,5),O("md",96500,"FCFA",true,1500,24),O("bs",93900,"FCFA",false,1500,48)]),
-  P("p3","telephones","Tecno","Tecno Spark 20 — 128 Go",["tecno","spark","telephone","smartphone"],["Écran 90 Hz","128 Go · 8 Go RAM"],
-    [O("ep",68900,"FCFA",true,1000,3),O("bs",69900,"FCFA",true,0,10)]),
-  P("p4","telephones","Xiaomi","Xiaomi Redmi 13C — 128 Go",["xiaomi","redmi","telephone","smartphone"],["128 Go · 6 Go RAM","Caméra 50 Mpx"],
-    [O("ep",79900,"FCFA",true,0,4),O("tm",81500,"FCFA",true,1500,12)]),
-  P("p9","audio","JBL","JBL Tune 520BT — casque sans fil",["jbl","casque","sans fil","bluetooth","audio"],["Bluetooth 5.3","Autonomie 57 h"],
-    [O("ac",21500,"FCFA",true,1000,2),O("tm",22900,"FCFA",true,1500,8),O("ep",21900,"FCFA",true,0,14)]),
-  P("p11","audio","Oraimo","Oraimo FreePods 4 — écouteurs sans fil",["oraimo","ecouteurs","sans fil","bluetooth","audio"],["Bluetooth 5.2","Étui de charge"],
-    [O("ep",12500,"FCFA",true,500,1),O("ac",13200,"FCFA",true,1000,9)]),
-  P("p14","chaussures","Nike","Nike Court Vision Low",["nike","baskets","chaussures","sneakers"],["Baskets cuir synthétique","Semelle caoutchouc"],
-    [O("me",34900,"FCFA",true,2000,12),O("md",35900,"FCFA",true,1500,24)]),
-  P("p19","jeux","Sony","Manette de jeu sans fil",["manette","jeux","gaming","sans fil"],["Bluetooth","Batterie 12 h"],
-    [O("md",42900,"FCFA",true,1500,9),O("tm",44500,"FCFA",true,0,22)]),
-  P("p23","electronique","Amazfit","Montre connectée Amazfit Bip 5",["amazfit","montre","connectee","electronique","gps"],["GPS intégré","Autonomie 10 jours"],
-    [O("ep",34900,"FCFA",true,0,5),O("tm",36900,"FCFA",true,1500,16)])
-];
-const CATEGORIES = [
-  {id:"telephones",k:"Téléphones"},{id:"ordinateurs",k:"Ordinateurs"},{id:"audio",k:"Audio"},{id:"chaussures",k:"Chaussures"},
-  {id:"mode",k:"Mode"},{id:"maison",k:"Maison"},{id:"jeux",k:"Jeux"},{id:"electronique",k:"Électronique"},
-  {id:"meubles",k:"Meubles"},{id:"autres",k:"Autres"}
-];
-const CAT_LABELS = {
-  fr:{telephones:"Téléphones",ordinateurs:"Ordinateurs",audio:"Audio",chaussures:"Chaussures",mode:"Mode",maison:"Maison",jeux:"Jeux",electronique:"Électronique",meubles:"Meubles",autres:"Autres"},
-  en:{telephones:"Phones",ordinateurs:"Computers",audio:"Audio",chaussures:"Shoes",mode:"Fashion",maison:"Home",jeux:"Gaming",electronique:"Electronics",meubles:"Furniture",autres:"Other"},
-  es:{telephones:"Teléfonos",ordinateurs:"Ordenadores",audio:"Audio",chaussures:"Zapatos",mode:"Moda",maison:"Hogar",jeux:"Videojuegos",electronique:"Electrónica",meubles:"Muebles",autres:"Otros"},
-  pt:{telephones:"Telemóveis",ordinateurs:"Computadores",audio:"Áudio",chaussures:"Sapatos",mode:"Moda",maison:"Casa",jeux:"Videojogos",electronique:"Eletrónica",meubles:"Mobiliário",autres:"Outros"},
-  ar:{telephones:"الهواتف",ordinateurs:"الحواسيب",audio:"الصوتيات",chaussures:"الأحذية",mode:"الأزياء",maison:"المنزل",jeux:"الألعاب",electronique:"الإلكترونيات",meubles:"الأثاث",autres:"أخرى"}
-};
-const POPULAR = ["téléphone Samsung","écouteurs sans fil","ordinateur portable","baskets Nike","montre connectée","manette de jeux"];
-
-/* ---------- 4. État & stockage ---------- */
+/* ---------- 3. État & stockage local ---------- */
 const CUR_SYM = {FCFA:" FCFA",EUR:" €",USD:" $",GBP:" £"};
 const TO_FCFA = {FCFA:1,EUR:655.957,USD:610,GBP:775};
 const store = {
@@ -642,28 +625,99 @@ const state = {
   settings:Object.assign({lang:"fr",currency:"FCFA",theme:"light",notif:false}, store.get("set",{})),
   favorites:store.get("favs",{}), history:store.get("hist",[]), stats:Object.assign({searches:0,clicks:0,shares:0,favs:0},store.get("stats",{})),
   online:navigator.onLine,
-  parsed:null, baseResults:[], filtered:[], query:"", remoteDemo:false, remoteMerchants:{},
-  filters:{min:null,max:null,merchants:new Set(),inStock:false,knownShip:false,sort:"relevance"}
+  currentView:"home",
+  merchants:{}, // rempli via /api/merchants
+  lastQuery:"", lastResults:[], lastSuggestions:[], lastMeta:null,
+  filters:{min:null,max:null,merchants:new Set(),inStock:false,knownShip:false,sort:"relevance"},
+  productCache:{}
 };
 function t(key,vars){
   let s=(I18N[state.settings.lang]&&I18N[state.settings.lang][key])||I18N.fr[key]||key;
   if(vars)Object.entries(vars).forEach(([i,v])=>s=s.split("{"+i+"}").join(v));
   return s;
 }
+function catLabel(id){ return (CAT_LABELS[state.settings.lang]&&CAT_LABELS[state.settings.lang][id]) || CAT_LABELS.fr[id] || id; }
 const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
 const norm=s=>(s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
-const esc=s=>(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const esc=s=>(s==null?"":String(s)).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const saveAll=()=>{store.set("set",state.settings);store.set("favs",state.favorites);store.set("hist",state.history);store.set("stats",state.stats)};
-function track(k){state.stats[k]++;saveAll();renderStats()}
-const fcfa=o=>o.price*TO_FCFA[o.cur];
-const mName=o=>o.merchantName||(MERCHANTS[o.m]?MERCHANTS[o.m].name:o.m);
+function track(k){state.stats[k]=(state.stats[k]||0)+1;saveAll();renderStats()}
+const fcfa=o=>o.price*(TO_FCFA[o.cur]||1);
+function fmtPrice(amountFcfa){
+  const cur=state.settings.currency;
+  const val = cur==="FCFA" ? amountFcfa : amountFcfa/TO_FCFA[cur];
+  const rounded = cur==="FCFA" ? Math.round(val) : Math.round(val*100)/100;
+  const approx = cur!=="FCFA" ? "≈ " : "";
+  return approx + rounded.toLocaleString("fr-FR") + CUR_SYM[cur];
+}
+function toast(msg,type){
+  const box=$("#toasts"); if(!box)return;
+  const el=document.createElement("div"); el.className="toast";
+  el.innerHTML=(type==="warn"?IC.warn:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 13l4 4L19 7"/></svg>')+'<span></span>';
+  el.querySelector("span").textContent=msg;
+  box.appendChild(el);
+  setTimeout(()=>{el.style.transition="opacity .25s";el.style.opacity="0";setTimeout(()=>el.remove(),260)},2600);
+}
 
-/* ---------- 5. Authentification ---------- */
+/* ---------- 4. Sheets (panneaux coulissants) ---------- */
+function openSheet(id){ const w=$("#"+id); if(!w)return; w.classList.add("open"); document.body.style.overflow="hidden"; }
+function closeSheet(id){ const w=$("#"+id); if(!w)return; w.classList.remove("open"); }
+function closeAll(){ $$(".sheet-wrap").forEach(w=>w.classList.remove("open")); const aw=$("#adm-wrap"); if(aw)aw.classList.remove("open"); }
+document.addEventListener("click", e=>{
+  const closer = e.target.closest("[data-close]");
+  if(closer){ const wrap = closer.closest(".sheet-wrap"); if(wrap) closeSheet(wrap.id); }
+});
+
+/* ---------- 5. Navigation (immédiate) ---------- */
+function goView(name){
+  state.currentView = name;
+  $$(".view").forEach(v=>v.classList.remove("active"));
+  $$(".nav-btn").forEach(b=>b.classList.remove("active"));
+  const view = $("#view-"+name);
+  const btn = document.querySelector('.nav-btn[data-view="'+name+'"]');
+  if(view) view.classList.add("active");
+  if(btn) btn.classList.add("active");
+  // Rendu (asynchrone, n'empêche pas le changement de vue immédiat)
+  if(name==="home") renderHome();
+  else if(name==="search") renderSearchView();
+  else if(name==="favs") renderFavs();
+  else if(name==="profile") renderProfile();
+}
+$$(".nav-btn").forEach(btn=>{
+  btn.addEventListener("click", ()=> goView(btn.dataset.view));
+});
+
+/* ---------- 6. Thème & horloge ---------- */
+function applyTheme(){
+  document.documentElement.setAttribute("data-theme", state.settings.theme);
+  const btn=$("#theme-btn");
+  if(btn) btn.innerHTML = state.settings.theme==="dark" ? IC.sun : IC.moon;
+}
+$("#theme-btn").addEventListener("click", ()=>{
+  state.settings.theme = state.settings.theme==="dark" ? "light" : "dark";
+  applyTheme(); saveAll();
+  const th=$("#set-theme"); if(th) syncThemeSeg();
+});
+function tickClock(){
+  const el=$("#clock"); if(!el)return;
+  const d=new Date();
+  el.textContent = String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
+}
+setInterval(tickClock,1000*15); tickClock();
+
+/* ---------- 7. i18n application au DOM ---------- */
+function applyI18n(){
+  document.documentElement.lang = state.settings.lang;
+  document.documentElement.dir = state.settings.lang==="ar" ? "rtl" : "ltr";
+  $$("[data-i18n]").forEach(el=>{ el.innerHTML = t(el.dataset.i18n); });
+  $$("[data-i18n-ph]").forEach(el=>{ el.placeholder = t(el.dataset.i18nPh); });
+}
+
+/* ---------- 8. Authentification ---------- */
 const EMAIL_RE=/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+const ADMIN_EMAIL="sowgueye.mariama@gmail.com";
 let memSession=null;
 const Auth={
-  users(){return store.get("accounts",{})},
-  saveUsers(u){store.set("accounts",u)},
   session(){
     if(memSession){ if(Date.now()<memSession.expiresAt)return memSession; memSession=null; store.del("session"); }
     const s=store.get("session",null);
@@ -672,11 +726,12 @@ const Auth={
     memSession=s;
     return s;
   },
-  setSession(email,name,srvToken){
-    memSession={email,name,token:srvToken||null,expiresAt:Date.now()+7*864e5};
+  setSession(email,name,token){
+    memSession={email,name,token:token||null,expiresAt:Date.now()+7*864e5};
     store.set("session",memSession);
   },
-  logout(){memSession=null;store.del("session")}
+  logout(){memSession=null;store.del("session")},
+  isAdmin(){ const s=Auth.session(); return !!s && !!s.email && s.email.trim().toLowerCase()===ADMIN_EMAIL; }
 };
 function authShowErr(msg){
   const e=$("#auth-err");if(!e)return;
@@ -688,42 +743,571 @@ function authHideErr(){const e=$("#auth-err");if(e)e.classList.remove("show")}
 
 async function doAuth(){
   authHideErr();
-  const name=($("#a-name").value||"").trim();
-  const email=($("#a-email").value||"").trim().toLowerCase();
-  if(name.length<2){const el=$("#a-name");if(el)el.classList.add("err");return authShowErr(t("f_name"))}
-  if(!EMAIL_RE.test(email)){const el=$("#a-email");if(el)el.classList.add("err");return authShowErr(t("f_email"))}
-  let srvToken=null;
-  if(API_EFFECTIVE!==null){
+  const nameEl=$("#a-name"), emailEl=$("#a-email");
+  const name=(nameEl.value||"").trim();
+  const email=(emailEl.value||"").trim().toLowerCase();
+  nameEl.classList.remove("err"); emailEl.classList.remove("err");
+  if(name.length<2){ nameEl.classList.add("err"); return authShowErr(t("f_name")); }
+  if(!EMAIL_RE.test(email)){ emailEl.classList.add("err"); return authShowErr(t("f_email")); }
+  const btn=$("#a-submit"); btn.disabled=true; const oldTxt=btn.textContent; btn.textContent="…";
+  try{
+    const d = await api("/api/auth/register", {method:"POST", body:JSON.stringify({name,email})});
+    Auth.setSession(email, d.user.name, d.token);
+    closeAll(); goView("profile");
+    toast(t("login_done",{0:d.user.name}));
+    await syncFromServer();
+  }catch(err){
+    if(err.data && err.data.error==="invalid_name") authShowErr(t("f_name"));
+    else if(err.data && err.data.error==="invalid_email") authShowErr(t("f_email"));
+    else authShowErr(t("backend_down"));
+  }finally{ btn.disabled=false; btn.textContent=oldTxt; }
+}
+$("#auth-form").addEventListener("submit", e=>{ e.preventDefault(); doAuth(); });
+$$("#auth-form .login-inp").forEach(inp=>inp.addEventListener("input", ()=>inp.classList.remove("err")));
+function openAuth(){ openSheet("sheet-login"); setTimeout(()=>{ const f=$("#a-name"); if(f) f.focus(); },300); }
+
+async function syncFromServer(){
+  const s=Auth.session(); if(!s || !s.token) return;
+  try{
+    const favs = await api("/api/favorites");
+    const list = {};
+    favs.ids.forEach(id=>{ list[id]=true; });
+    state.favorites = list; saveAll();
+  }catch(e){}
+  try{
+    const hist = await api("/api/history");
+    state.history = hist.items.map(h=>h.q); saveAll();
+  }catch(e){}
+  renderFavBadge();
+  if(state.currentView==="favs") renderFavs();
+  if(state.currentView==="profile") renderProfile();
+}
+
+/* ---------- 9. Recherche : interprétation simple du texte libre ---------- */
+const KNOWN_BRANDS = ["samsung","tecno","xiaomi","jbl","oraimo","nike","sony","amazfit","apple","infinix","itel","hp","dell","lenovo","asus","huawei","adidas"];
+function parseQuery(qRaw){
+  const q = norm(qRaw);
+  const out = { raw:qRaw, cat:null, brand:null, max:null, min:null, terms:[] };
+  // catégorie
+  const CAT_KEYWORDS = {
+    telephones:["telephone","smartphone","portable telephone","gsm"],
+    ordinateurs:["ordinateur","laptop","pc portable","macbook"],
+    audio:["ecouteur","casque","enceinte","haut-parleur","audio"],
+    chaussures:["chaussure","basket","sneaker"],
+    mode:["vetement","robe","sac","mode"],
+    maison:["maison","cuisine","electromenager"],
+    jeux:["manette","jeu video","console","gaming"],
+    electronique:["montre","tablette","electronique","gps"],
+    meubles:["meuble","canape","table","chaise"]
+  };
+  for(const [cat,kws] of Object.entries(CAT_KEYWORDS)){
+    if(kws.some(k=>q.includes(k))){ out.cat = cat; break; }
+  }
+  // marque
+  for(const b of KNOWN_BRANDS){ if(q.includes(b)){ out.brand=b; break; } }
+  // budget "moins de / à moins de / sous / <= / max"
+  const budgetMatch = q.match(/(?:moins de|sous|max(?:imum)?|<=?)\s*([\d\s]{2,10})/);
+  if(budgetMatch){ out.max = Number(budgetMatch[1].replace(/\s/g,"")) || null; }
+  const rangeMatch = q.match(/entre\s*([\d\s]{2,10})\s*(?:et|-)\s*([\d\s]{2,10})/);
+  if(rangeMatch){ out.min=Number(rangeMatch[1].replace(/\s/g,""))||null; out.max=Number(rangeMatch[2].replace(/\s/g,""))||null; }
+  out.terms = qRaw.trim().split(/\s+/).filter(Boolean);
+  return out;
+}
+
+async function runSearch(qRaw){
+  state.lastQuery = qRaw;
+  const zone = $("#search-state"); const resZone=$("#results-zone"); const noRes=$("#no-results"); const idle=$("#idle-search");
+  const interp = $("#interp");
+  resZone.hidden = true; noRes.innerHTML=""; idle.innerHTML=""; interp.hidden = true; interp.innerHTML="";
+
+  if(!qRaw || !qRaw.trim()){
+    idle.innerHTML = '<div class="no-res"><div class="ic">'+IC.ext+'</div><p style="color:var(--text2);font-size:13.5px">'+t("hero_sub")+'</p></div>';
+    zone.innerHTML="";
+    return;
+  }
+
+  // historique
+  if(!state.history.includes(qRaw)){ state.history.unshift(qRaw); state.history=state.history.slice(0,20); saveAll(); }
+  const s=Auth.session();
+  if(s && s.token){ api("/api/history",{method:"POST",body:JSON.stringify({q:qRaw})}).catch(()=>{}); }
+
+  const parsed = parseQuery(qRaw);
+  const chips=[];
+  if(parsed.cat) chips.push(t("interp_cat",{0:catLabel(parsed.cat)}));
+  if(parsed.brand) chips.push(t("interp_brand",{0:parsed.brand.charAt(0).toUpperCase()+parsed.brand.slice(1)}));
+  if(parsed.min!=null && parsed.max!=null) chips.push(t("interp_range",{0:fmtPrice(parsed.min),1:fmtPrice(parsed.max)}));
+  else if(parsed.max!=null) chips.push(t("interp_max",{0:fmtPrice(parsed.max)}));
+  if(chips.length){ interp.hidden=false; interp.innerHTML = chips.map(c=>"<span>"+esc(c)+"</span>").join(""); }
+
+  // Étapes d'analyse animées
+  zone.innerHTML =
+    '<div class="ai-steps" id="ai-steps">'+
+      '<div class="step active" data-s="1"><span class="dot"></span>'+t("state_analyze")+'</div>'+
+      '<div class="step" data-s="2"><span class="dot"></span>'+t("state_search")+'</div>'+
+      '<div class="step" data-s="3"><span class="dot"></span>'+t("state_compare")+'</div>'+
+    '</div>';
+  await sleep(260);
+  stepDone(1); stepActive(2);
+
+  if(API_EFFECTIVE===null){ await detectBackend(); }
+  if(API_EFFECTIVE===null){
+    zone.innerHTML="";
+    noRes.innerHTML = '<div class="no-res"><div class="ic">'+IC.warn+'</div><h3>'+esc(t("backend_down"))+'</h3></div>';
+    return;
+  }
+
+  let data;
+  try{
+    const params = new URLSearchParams();
+    // On cherche d'abord avec tous les mots-clés utiles (marque incluse) pour maximiser les correspondances.
+    params.set("q", parsed.brand ? qRaw : qRaw);
+    if(parsed.cat) params.set("cat", parsed.cat);
+    if(parsed.max!=null) params.set("max", String(parsed.max));
+    if(parsed.min!=null) params.set("min", String(parsed.min));
+    applyActiveFilters(params);
+    data = await api("/api/products?"+params.toString());
+  }catch(e){
+    zone.innerHTML="";
+    noRes.innerHTML = '<div class="no-res"><div class="ic">'+IC.warn+'</div><h3>'+esc(t("backend_down"))+'</h3></div>';
+    return;
+  }
+  stepDone(2); stepActive(3);
+  await sleep(220);
+  stepDone(3);
+  await sleep(160);
+
+  state.lastResults = data.products; state.lastSuggestions = data.suggestions||[]; state.lastMeta = data;
+  zone.innerHTML = '<div class="ready-line"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 13l4 4L19 7"/></svg><span>'+esc(t("state_ready"))+'</span></div>';
+  setTimeout(()=>{ if(zone) zone.innerHTML=""; }, 1200);
+
+  renderResults(data);
+}
+function stepActive(n){ const el=$('.step[data-s="'+n+'"]'); if(el) el.classList.add("active"); }
+function stepDone(n){ const el=$('.step[data-s="'+n+'"]'); if(el){ el.classList.remove("active"); el.classList.add("done"); } }
+function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+
+function applyActiveFilters(params){
+  const f=state.filters;
+  if(f.min!=null) params.set("min", String(f.min));
+  if(f.max!=null) params.set("max", String(f.max));
+  if(f.merchants.size) params.set("merchants", Array.from(f.merchants).join(","));
+  if(f.inStock) params.set("inStock","1");
+  if(f.knownShip) params.set("knownShip","1");
+  if(f.sort && f.sort!=="relevance") params.set("sort", f.sort==="price_asc"?"price_asc":f.sort==="price_desc"?"price_desc":f.sort==="new"?"new":"");
+}
+
+function renderResults(data){
+  const resZone=$("#results-zone"), noRes=$("#no-results"), results=$("#results"), meta=$("#results-meta"), suggZone=$("#suggestions-zone");
+  suggZone.innerHTML="";
+  if(!data.products.length){
+    resZone.hidden = true;
+    noRes.innerHTML =
+      '<div class="no-res"><div class="ic">'+IC.ext+'</div>'+
+      '<h3>'+esc(t("no_res_title",{0:state.lastQuery}))+'</h3>'+
+      '<p>'+esc(t("no_res_body"))+'</p></div>';
+    if(data.suggestions && data.suggestions.length){
+      noRes.innerHTML += '<h2 class="sect">'+esc(t("sugg_title"))+'</h2><div id="sugg-cards"></div>';
+      renderProductCards(data.suggestions, $("#sugg-cards"));
+    }
+    return;
+  }
+  noRes.innerHTML="";
+  resZone.hidden = false;
+  meta.textContent = t("meta",{0:data.count,1:data.offersCompared});
+  renderProductCards(data.products, results);
+  if(data.suggestions && data.suggestions.length){
+    suggZone.innerHTML = '<h2 class="sect">'+esc(t("sugg_title"))+'</h2><div id="sugg-cards-2"></div>';
+    renderProductCards(data.suggestions, $("#sugg-cards-2"));
+  }
+}
+
+function renderProductCards(list, container){
+  container.innerHTML = list.map(p=>{
+    const isFav = !!state.favorites[p.id];
+    const img = p.image ? esc(p.image) : PLACEHOLDER_IMG;
+    return (
+    '<div class="p-card" data-id="'+p.id+'">'+
+      '<img class="p-img" src="'+img+'" alt="" onerror="this.src=\''+PLACEHOLDER_IMG+'\'">'+
+      '<div class="p-body">'+
+        '<div class="p-top"><span class="p-cat">'+esc(catLabel(p.cat))+'</span>'+
+          '<button class="fav-btn'+(isFav?" on":"")+'" data-fav="'+p.id+'">'+(isFav?IC.heartF:IC.heart)+'</button></div>'+
+        '<h3>'+esc(p.name)+'</h3>'+
+        (p.specs&&p.specs.length?'<div class="p-specs">'+esc(p.specs[0])+'</div>':'')+
+        '<div class="lowest-lbl">'+esc(t("lowest_lbl"))+'</div>'+
+        '<div class="price-row"><span class="price">'+fmtPrice(fcfa(p.best))+'</span></div>'+
+        '<div class="p-sub">'+esc(t("in_merch",{0:(p.best.merchantName||p.best.m)}))+
+          (p.best.stock?' · <span class="ok">'+esc(t("stock_in"))+'</span>':' · '+esc(t("stock_out")))+'</div>'+
+        '<div class="p-actions"><button class="btn btn-brand" data-open="'+p.id+'">'+esc(t("best_offer"))+'</button>'+
+          '<button class="btn btn-ghost" data-share-p="'+p.id+'">'+IC.share+'</button></div>'+
+      '</div>'+
+    '</div>');
+  }).join("") || '<p class="adm-note">'+esc(t("sugg_empty"))+'</p>';
+}
+
+/* Délégation de clics pour les cartes produits (fonctionne pour toute liste générée dynamiquement) */
+document.addEventListener("click", e=>{
+  const favBtn = e.target.closest("[data-fav]");
+  if(favBtn){ toggleFavorite(favBtn.dataset.fav); return; }
+  const shareBtn = e.target.closest("[data-share-p]");
+  if(shareBtn){ openShareProduct(shareBtn.dataset.shareP); return; }
+  const openBtn = e.target.closest("[data-open]");
+  if(openBtn){ openProduct(openBtn.dataset.open); return; }
+  const card = e.target.closest(".p-card");
+  if(card && !e.target.closest("[data-fav]") && !e.target.closest("[data-share-p]") && !e.target.closest("[data-open]")){
+    openProduct(card.dataset.id); return;
+  }
+  const chip = e.target.closest("[data-search-chip]");
+  if(chip){ goView("search"); $("#search-input").value = chip.dataset.searchChip; runSearch(chip.dataset.searchChip); return; }
+  const catChip = e.target.closest("[data-cat-chip]");
+  if(catChip){ goView("search"); state.filters.merchants=new Set(); const q=catLabel(catChip.dataset.catChip); $("#search-input").value=q; runSearch(q); return; }
+});
+
+/* ---------- 10. Favoris ---------- */
+async function toggleFavorite(id){
+  const isFav = !!state.favorites[id];
+  if(isFav){ delete state.favorites[id]; toast(t("fav_removed")); }
+  else { state.favorites[id]=true; toast(t("fav_added")); track("favs"); }
+  saveAll(); renderFavBadge();
+  document.querySelectorAll('[data-fav="'+id+'"]').forEach(b=>{
+    b.classList.toggle("on", !isFav); b.innerHTML = !isFav ? IC.heartF : IC.heart;
+  });
+  const s=Auth.session();
+  if(s && s.token){
     try{
-      const r=await fetch(API_EFFECTIVE+"/api/auth/register",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name,email})});
-      if(r.ok){const d=await r.json();srvToken=d.token}
-      else if(r.status===400){
-        const d=await r.json().catch(()=>null);
-        const map={invalid_name:t("f_name"),invalid_email:t("f_email")};
-        return authShowErr((d&&d.error&&map[d.error])||t("f_email"));
-      }
+      if(isFav) await api("/api/favorites/"+id, {method:"DELETE"});
+      else await api("/api/favorites", {method:"POST", body:JSON.stringify({productId:id})});
     }catch(e){}
   }
-  const users=Auth.users();
-  const displayName=(users[email]&&users[email].name)||name;
-  users[email]={name:displayName,createdAt:users[email]?users[email].createdAt:Date.now()};
-  Auth.saveUsers(users);
-  Auth.setSession(email,displayName,srvToken);
-  syncAuthUI();
-  closeAll();
-  goView("profile");
-  toast(t("login_done",{0:displayName}));
-  if(srvToken)syncServerData();
+  if(state.currentView==="favs") renderFavs();
 }
- $("#auth-form").addEventListener("submit",e=>{e.preventDefault();doAuth()});
- $$("#auth-form .login-inp").forEach(inp=>inp.addEventListener("input",()=>inp.classList.remove("err")));
-function openAuth(){openSheet("sheet-login");setTimeout(()=>{const f=$("#a-name");if(f&&!f.value)f.focus()},300)}
+function renderFavBadge(){
+  const n = Object.keys(state.favorites).length;
+  const b=$("#fav-bub"); if(!b)return;
+  b.hidden = n===0; b.textContent = n;
+}
+async function renderFavs(){
+  const box=$("#favs-list");
+  const ids = Object.keys(state.favorites);
+  if(!ids.length){
+    box.innerHTML = '<div class="no-res"><div class="ic">'+IC.heart+'</div><h3>'+esc(t("favs_empty"))+'</h3><p>'+esc(t("favs_empty_body"))+'</p></div>';
+    return;
+  }
+  box.innerHTML = '<p class="adm-note">Chargement…</p>';
+  const items = [];
+  for(const id of ids){
+    try{ items.push(await getProduct(id)); }catch(e){}
+  }
+  if(!items.length){ box.innerHTML = '<div class="no-res"><div class="ic">'+IC.heart+'</div><h3>'+esc(t("favs_empty"))+'</h3></div>'; return; }
+  box.innerHTML = items.map(p=>{
+    const best = p.offers.slice().sort((a,b)=>fcfa(a)-fcfa(b))[0];
+    const img = p.image ? esc(p.image) : PLACEHOLDER_IMG;
+    return (
+    '<div class="fav-item">'+
+      '<img class="p-img" src="'+img+'" style="width:70px;height:70px" onerror="this.src=\''+PLACEHOLDER_IMG+'\'">'+
+      '<div class="p-body">'+
+        '<h3>'+esc(p.name)+'</h3>'+
+        '<div class="price-row"><span class="price">'+fmtPrice(fcfa(best))+'</span></div>'+
+        '<div class="fav-foot">'+
+          '<button class="btn btn-brand" data-open="'+p.id+'">'+esc(t("view_offer"))+'</button>'+
+          '<button class="btn btn-ghost" data-unfav="'+p.id+'">'+esc(t("remove"))+'</button>'+
+        '</div>'+
+      '</div>'+
+    '</div>');
+  }).join("");
+}
+document.addEventListener("click", e=>{
+  const un = e.target.closest("[data-unfav]");
+  if(un){ toggleFavorite(un.dataset.unfav); }
+});
+
+/* ---------- 11. Fiche produit / redirection / partage ---------- */
+async function getProduct(id){
+  if(state.productCache[id] && Date.now()-state.productCache[id].t < 30000) return state.productCache[id].data;
+  if(API_EFFECTIVE===null) await detectBackend();
+  const data = await api("/api/products/"+id);
+  state.productCache[id] = {data, t:Date.now()};
+  return data;
+}
+async function openProduct(id){
+  openSheet("sheet-product");
+  $("#pd-body").innerHTML = '<p class="adm-note" style="text-align:center;padding:20px 0">Chargement…</p>';
+  let p;
+  try{ p = await getProduct(id); }
+  catch(e){ $("#pd-body").innerHTML = '<div class="center"><div class="big-ic">'+IC.warn+'</div><h3>'+esc(t("backend_down"))+'</h3></div>'; return; }
+  const isFav = !!state.favorites[p.id];
+  const img = p.image ? esc(p.image) : PLACEHOLDER_IMG;
+  const offersSorted = p.offers.slice().sort((a,b)=>fcfa(a)-fcfa(b));
+  $("#pd-body").innerHTML =
+    '<img class="pd-img" src="'+img+'" onerror="this.src=\''+PLACEHOLDER_IMG+'\'">'+
+    '<div class="pd-cat">'+esc(catLabel(p.cat))+'</div>'+
+    '<div class="pd-name">'+esc(p.name)+'</div>'+
+    '<div class="pd-specs">'+(p.specs||[]).map(s=>'<div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 13l4 4L19 7"/></svg><span>'+esc(s)+'</span></div>').join("")+'</div>'+
+    '<div class="offers-head"><h3>'+esc(t("offers_matching"))+'</h3><span>'+esc(t("offers_n",{0:p.offers.length}))+'</span></div>'+
+    offersSorted.map(o=>{
+      const hours = o.updatedAt ? Math.max(0,Math.round((Date.now()-o.updatedAt)/3600000)) : (o.h||0);
+      const updated = hours<24 ? t("updated_h",{0:hours}) : t("updated_d",{0:Math.round(hours/24)});
+      return (
+      '<div class="offer-row'+(o.stock?'':' off')+'">'+
+        '<div class="or-top">'+
+          '<div class="store-av">'+esc((o.merchantName||o.m||"?").slice(0,2).toUpperCase())+'</div>'+
+          '<div class="or-info"><b>'+esc(o.merchantName||o.m)+'</b>'+
+            '<div class="or-meta">'+
+              (o.stock?'<span class="ok">'+esc(t("stock_in"))+'</span>':'<span class="ko">'+esc(t("stock_out"))+'</span>')+
+              '<span>'+IC.truck+' '+(o.ship===0?esc(t("ship_free")):o.ship>0?esc(t("ship_fee",{0:fmtPrice(o.ship)})):esc(t("ship_unknown")))+'</span>'+
+              '<span>'+IC.clock+' '+esc(updated)+'</span>'+
+            '</div>'+
+            (o.isAffiliate?'<span class="or-aff">'+IC.ext+' '+esc(t("aff_badge"))+'</span>':'')+
+          '</div>'+
+          '<div class="or-price"><span class="price">'+fmtPrice(fcfa(o))+'</span></div>'+
+        '</div>'+
+        '<div class="or-foot"><button class="btn '+(o.stock?'btn-brand':'btn-disabled')+'" '+(o.stock?'data-redirect="'+p.id+'|'+esc(o.m)+'"':'disabled')+'>'+esc(t("view_offer"))+' '+IC.ext+'</button></div>'+
+      '</div>');
+    }).join("")+
+    '<div class="transparency">'+esc(t("transparency"))+'</div>'+
+    '<div class="pd-actions">'+
+      '<button class="btn btn-ghost" data-fav="'+p.id+'" style="flex:none;width:46px">'+(isFav?IC.heartF:IC.heart)+'</button>'+
+      '<button class="btn btn-brand" data-redirect="'+p.id+'|'+esc(offersSorted[0].m)+'">'+esc(t("view_offer"))+'</button>'+
+    '</div>';
+}
+document.addEventListener("click", e=>{
+  const rd = e.target.closest("[data-redirect]");
+  if(rd){ const [pid,mid] = rd.dataset.redirect.split("|"); openRedirect(pid,mid); }
+});
+async function openRedirect(pid, mid){
+  const p = await getProduct(pid).catch(()=>null);
+  if(!p) return;
+  const offer = p.offers.find(o=>o.m===mid) || p.offers[0];
+  const link = offer.finalLink || offer.link || "#";
+  api("/api/products/"+pid+"/click", {method:"POST"}).catch(()=>{});
+  track("clicks");
+  openSheet("sheet-redirect");
+  $("#redirect-body").innerHTML =
+    '<div class="center"><div class="big-ic">'+IC.ext+'</div>'+
+      '<h3>'+esc(t("redirect_title"))+'</h3>'+
+      '<p>'+esc(offer.isAffiliate ? t("redirect_aff") : t("redirect_off"))+'</p>'+
+      '<a class="btn btn-brand btn-block" style="padding:13px" href="'+esc(link)+'" target="_blank" rel="noopener noreferrer" onclick="closeAll()">'+esc(t("view_offer"))+' '+IC.ext+'</a>'+
+      '<button class="btn btn-ghost btn-block" style="padding:12px;margin-top:8px" id="rd-copy">'+esc(t("copy_link"))+'</button>'+
+    '</div>';
+  const copyBtn = $("#rd-copy");
+  if(copyBtn) copyBtn.addEventListener("click", ()=>{
+    navigator.clipboard && navigator.clipboard.writeText(link).then(()=>toast(t("copied"))).catch(()=>{});
+  });
+}
+function openShareProduct(id){
+  getProduct(id).then(p=>{
+    const best = p.offers.slice().sort((a,b)=>fcfa(a)-fcfa(b))[0];
+    const text = t("share_subject")+" — "+p.name+" : "+fmtPrice(fcfa(best))+"\nhttps://dealfinder-ai.app/p/"+p.id;
+    openShareSheet(text);
+  }).catch(()=>{});
+}
+function openShareSheet(text){
+  $("#share-text").value = text;
+  const apps = [
+    {ic:IC.wa, name:"WhatsApp", url:"https://wa.me/?text="+encodeURIComponent(text)},
+    {ic:IC.tg, name:"Telegram", url:"https://t.me/share/url?url="+encodeURIComponent(text)},
+    {ic:IC.sms, name:"SMS", url:"sms:?body="+encodeURIComponent(text)},
+    {ic:IC.mail, name:"E-mail", url:"mailto:?subject="+encodeURIComponent(t("share_subject"))+"&body="+encodeURIComponent(text)}
+  ];
+  $("#share-apps").innerHTML = apps.map(a=>'<a class="share-app-btn" href="'+a.url+'" target="_blank" rel="noopener">'+a.ic+'<span>'+esc(a.name)+'</span></a>').join("");
+  openSheet("sheet-share");
+  track("shares");
+  api("/api/share",{method:"POST"}).catch(()=>{});
+}
+$("#share-copy").addEventListener("click", ()=>{
+  const val = $("#share-text").value;
+  navigator.clipboard && navigator.clipboard.writeText(val).then(()=>toast(t("copied"))).catch(()=>{});
+});
+$("#share-app-btn").addEventListener("click", ()=>{ openShareSheet(t("share_app_text")); });
+
+/* ---------- 12. Vue Accueil ---------- */
+function renderHome(){
+  $("#cats").innerHTML = CATEGORIES.map(c=>
+    '<button class="cat-chip" data-cat-chip="'+c.id+'">'+(CAT_IC[c.id]||"")+esc(catLabel(c.id))+'</button>'
+  ).join("");
+  $("#popular").innerHTML = POPULAR.map(q=>'<button class="pop-chip" data-search-chip="'+esc(q)+'">'+esc(q)+'</button>').join("");
+  loadReco();
+}
+async function loadReco(){
+  const box=$("#reco-list");
+  if(API_EFFECTIVE===null){ const ok=await detectBackend(); if(!ok){ box.innerHTML='<p class="adm-note" style="text-align:center">'+esc(t("backend_down"))+'</p>'; return; } }
+  try{
+    const data = await api("/api/products?sort=new");
+    if(!data.products.length){ box.innerHTML='<p class="adm-note" style="text-align:center">'+esc(t("reco_empty"))+'</p>'; return; }
+    renderProductCards(data.products.slice(0,8), box);
+  }catch(e){ box.innerHTML='<p class="adm-note" style="text-align:center">'+esc(t("backend_down"))+'</p>'; }
+}
+$("#home-form").addEventListener("submit", e=>{
+  e.preventDefault();
+  const q = $("#home-input").value.trim();
+  if(!q) return;
+  goView("search");
+  $("#search-input").value = q;
+  runSearch(q);
+});
+$("#img-btn").addEventListener("click", ()=>{
+  openSheet("sheet-img");
+  $("#img-body").innerHTML =
+    '<div class="center"><div class="big-ic">'+IC.cam+'</div><h3>'+esc(t("img_title"))+'</h3>'+
+    '<p>'+esc(t("img_approx"))+' — '+esc(t("img_body"))+'</p></div>'+
+    '<div class="chips" style="padding:0 16px 8px">'+POPULAR.map(q=>'<button class="pop-chip" data-search-chip="'+esc(q)+'" data-close>'+esc(q)+'</button>').join("")+'</div>';
+});
+
+/* ---------- 13. Vue Recherche ---------- */
+function renderSearchView(){
+  const input = $("#search-input");
+  if(input.value.trim()) runSearch(input.value.trim());
+  else runSearch("");
+  updateFilterCount();
+}
+let searchDebounce=null;
+$("#search-form").addEventListener("submit", e=>{ e.preventDefault(); runSearch($("#search-input").value.trim()); });
+$("#search-input").addEventListener("input", ()=>{
+  clearTimeout(searchDebounce);
+  searchDebounce = setTimeout(()=>{ runSearch($("#search-input").value.trim()); }, 550);
+});
+
+/* Filtres */
+$("#filters-btn").addEventListener("click", ()=>{ renderFiltersSheet(); openSheet("sheet-filters"); });
+function renderFiltersSheet(){
+  const merchIds = Object.keys(state.merchants);
+  const body = $("#filters-body");
+  body.innerHTML =
+    '<div class="f-sect"><h4>'+esc(t("sort"))+'</h4><div class="seg-col">'+
+      [["relevance","sort_rel"],["price_asc","sort_asc"],["price_desc","sort_desc"],["new","sort_new"]]
+        .map(([v,k])=>'<button type="button" class="sort-pill'+(state.filters.sort===v?" on":"")+'" data-sort="'+v+'">'+esc(t(k))+'</button>').join("")+
+    '</div></div>'+
+    '<div class="f-sect"><h4>'+esc(t("price_range"))+'</h4><div class="two-inp">'+
+      '<label>'+esc(t("price_min"))+'<input type="number" id="f-min" value="'+(state.filters.min??"")+'"></label>'+
+      '<label>'+esc(t("price_max"))+'<input type="number" id="f-max" value="'+(state.filters.max??"")+'"></label>'+
+    '</div></div>'+
+    '<div class="f-sect"><h4>'+esc(t("merchants"))+'</h4><div class="merch-list">'+
+      merchIds.map(id=>'<label><input type="checkbox" data-merch="'+id+'" '+(state.filters.merchants.has(id)?"checked":"")+'>'+esc(state.merchants[id].name||id)+'</label>').join("")+
+    '</div></div>'+
+    '<div class="f-sect"><label style="display:flex;align-items:center;gap:10px;font-size:13.5px"><input type="checkbox" id="f-stock" '+(state.filters.inStock?"checked":"")+'> '+esc(t("only_stock"))+'</label>'+
+      '<label style="display:flex;align-items:center;gap:10px;font-size:13.5px;margin-top:8px"><input type="checkbox" id="f-ship" '+(state.filters.knownShip?"checked":"")+'> '+esc(t("known_ship"))+'</label></div>';
+  body.querySelectorAll("[data-sort]").forEach(b=>b.addEventListener("click", ()=>{
+    body.querySelectorAll("[data-sort]").forEach(x=>x.classList.remove("on"));
+    b.classList.add("on"); b.dataset.chosen="1";
+  }));
+}
+$("#f-reset").addEventListener("click", ()=>{
+  state.filters = {min:null,max:null,merchants:new Set(),inStock:false,knownShip:false,sort:"relevance"};
+  updateFilterCount(); renderFiltersSheet();
+});
+$("#f-apply").addEventListener("click", ()=>{
+  const body=$("#filters-body");
+  const chosenSort = body.querySelector(".sort-pill.on");
+  state.filters.sort = chosenSort ? chosenSort.dataset.sort : "relevance";
+  const minV = $("#f-min").value; const maxV=$("#f-max").value;
+  state.filters.min = minV!=="" ? Number(minV) : null;
+  state.filters.max = maxV!=="" ? Number(maxV) : null;
+  state.filters.inStock = $("#f-stock").checked;
+  state.filters.knownShip = $("#f-ship").checked;
+  state.filters.merchants = new Set(Array.from(body.querySelectorAll("[data-merch]")).filter(c=>c.checked).map(c=>c.dataset.merch));
+  updateFilterCount();
+  closeSheet("sheet-filters");
+  runSearch($("#search-input").value.trim() || state.lastQuery);
+});
+function updateFilterCount(){
+  const f=state.filters;
+  let n=0;
+  if(f.min!=null) n++; if(f.max!=null) n++; if(f.merchants.size) n+=f.merchants.size;
+  if(f.inStock) n++; if(f.knownShip) n++; if(f.sort && f.sort!=="relevance") n++;
+  const el=$("#f-count"); el.hidden = n===0; el.textContent = n;
+}
+
+/* ---------- 14. Vue Profil ---------- */
+function renderProfile(){
+  const s = Auth.session();
+  const box=$("#acct-card");
+  if(s){
+    box.innerHTML =
+      '<div class="acct"><div class="avatar">'+esc((s.name||"?").slice(0,2).toUpperCase())+'</div>'+
+        '<div class="grow"><h3>'+esc(s.name)+'</h3><p>'+esc(s.email)+'</p></div>'+
+        '<button class="btn btn-ghost" id="logout-btn">'+esc(t("logout"))+'</button></div>';
+    $("#logout-btn").addEventListener("click", ()=>{ Auth.logout(); toast(t("logout_done")); renderProfile(); });
+  }else{
+    box.innerHTML =
+      '<div class="acct"><div class="avatar">'+IC.user+'</div>'+
+        '<div class="grow"><h3>'+esc(t("acct_out_title"))+'</h3><p>'+esc(t("acct_out_body"))+'</p></div>'+
+        '<button class="btn btn-brand" id="login-btn">'+esc(t("login"))+'</button></div>';
+    $("#login-btn").addEventListener("click", openAuth);
+  }
+  const admRow = $("#admin-row");
+  admRow.hidden = !Auth.isAdmin();
+  admRow.onclick = Auth.isAdmin() ? admOpen : null;
+
+  $("#hist-chips").innerHTML = state.history.length
+    ? state.history.slice(0,12).map(q=>'<button class="pop-chip" data-search-chip="'+esc(q)+'">'+esc(q)+'</button>').join("")
+    : '<p class="adm-note">'+esc(t("prof_no_hist"))+'</p>';
+
+  $("#set-lang").value = state.settings.lang;
+  $("#set-cur").value = state.settings.currency;
+  $("#set-notif").checked = !!state.settings.notif;
+  $("#cur-note").textContent = t("cur_note");
+  syncThemeSeg();
+  renderStats();
+}
+function syncThemeSeg(){
+  $$("#set-theme button").forEach(b=>b.classList.toggle("on", b.dataset.th===state.settings.theme));
+}
+$$("#set-theme button").forEach(b=>b.addEventListener("click", ()=>{
+  state.settings.theme = b.dataset.th; applyTheme(); saveAll(); syncThemeSeg();
+}));
+$("#set-lang").addEventListener("change", e=>{ state.settings.lang=e.target.value; saveAll(); applyI18n(); renderProfile(); if(state.currentView==="home") renderHome(); });
+$("#set-cur").addEventListener("change", e=>{ state.settings.currency=e.target.value; saveAll(); if(state.currentView==="search") renderResults(state.lastMeta||{products:[],suggestions:[],count:0,offersCompared:0}); renderFavs(); });
+$("#set-notif").addEventListener("change", e=>{ state.settings.notif=e.target.checked; saveAll(); toast(e.target.checked?t("notif_on"):t("notif_off")); });
+
+function renderStats(){
+  const st=state.stats;
+  $("#stat-line").innerHTML =
+    '<div><b>'+st.searches+'</b><span>'+esc(t("st_searches"))+'</span></div>'+
+    '<div><b>'+st.clicks+'</b><span>'+esc(t("st_clicks"))+'</span></div>'+
+    '<div><b>'+st.shares+'</b><span>'+esc(t("st_shares"))+'</span></div>'+
+    '<div><b>'+Object.keys(state.favorites).length+'</b><span>'+esc(t("st_favs"))+'</span></div>';
+}
+let eraseArmed=false;
+$("#erase-btn").addEventListener("click", async ()=>{
+  const btn=$("#erase-btn");
+  if(!eraseArmed){ eraseArmed=true; btn.classList.add("armed"); btn.textContent="Confirmer l'effacement ?"; setTimeout(()=>{eraseArmed=false;btn.classList.remove("armed");btn.textContent=t("prof_erase");},4000); return; }
+  eraseArmed=false; btn.classList.remove("armed");
+  state.favorites={}; state.history=[]; state.stats={searches:0,clicks:0,shares:0,favs:0};
+  saveAll(); renderFavBadge();
+  const s=Auth.session();
+  if(s && s.token){ api("/api/account/data",{method:"DELETE"}).catch(()=>{}); }
+  toast(t("prof_erase_done"));
+  renderProfile();
+});
+
+/* Légal */
+document.addEventListener("click", e=>{
+  const legalBtn = e.target.closest("[data-legal]");
+  if(!legalBtn) return;
+  const kind = legalBtn.dataset.legal;
+  const map = {cgu:["cgu_t","cgu_b"], privacy:["privacy_t","privacy_b"], about:["about_t","about_b"]};
+  const [tk,bk] = map[kind];
+  $("#legal-title").textContent = t(tk);
+  $("#legal-body").innerHTML = t(bk);
+  openSheet("sheet-legal");
+});
+
+/* ---------- 15. Marchands (public) ---------- */
+async function loadMerchants(){
+  if(API_EFFECTIVE===null){ const ok=await detectBackend(); if(!ok) return; }
+  try{
+    const d = await api("/api/merchants");
+    const map={}; d.items.forEach(m=>{ map[m.id]=m; });
+    state.merchants = map;
+  }catch(e){}
+}
 
 /* ================================================================
-   ADMIN — panneau + IMPORT EN MASSE + détection du programme
+   16. ADMINISTRATION — panneau réservé à ADMIN_EMAIL
+   Chaque action "Enregistrer" appelle le backend (persistance
+   permanente dans ./data côté serveur), jamais uniquement le state
+   local, pour que les modifications soient conservées pour toujours.
    ================================================================ */
-const ADMIN_EMAIL="sowgueye.mariama@gmail.com";
-let admProducts=[], admDirty=new Set(), admTabCur="p", admSettings=null, delArm=null, admOpening=false;
+let admProducts=[], admDirty=new Set(), admTabCur="p", delArm=null, admOpening=false, admMerchants={};
 
 function detectStoreFromUrl(url){
   const u=norm(url);
@@ -786,4 +1370,305 @@ async function admOpen(){
   if(API_EFFECTIVE===null)await detectBackend();
   admOpening=false;
   if(API_EFFECTIVE===null){
-    $("#adm-body").innerHTML='<p class="adm-note" style="text-align:center;padding:30px 0">Le serveur
+    $("#adm-body").innerHTML='<p class="adm-note" style="text-align:center;padding:30px 0">'+esc(t("backend_down"))+' <button class="btn btn-brand" id="adm-retry" style="margin-top:10px">Réessayer</button></p>';
+    const rb=$("#adm-retry"); if(rb) rb.onclick=admOpen;
+    return;
+  }
+  try{
+    const [prod, merch] = await Promise.all([
+      api("/api/admin/products"),
+      api("/api/merchants")
+    ]);
+    admProducts = prod.items;
+    admMerchants = {}; merch.items.forEach(m=>{ admMerchants[m.id]=m; });
+    admDirty.clear();
+    admTab(admTabCur);
+  }catch(e){
+    $("#adm-body").innerHTML='<p class="adm-note" style="text-align:center;padding:30px 0">Accès refusé ou session expirée. Reconnectez-vous avec le compte administrateur.</p>';
+  }
+}
+function admClose(){ $("#adm-wrap").classList.remove("open"); }
+
+function admTab(id){
+  admTabCur=id;
+  $$(".adm-tabs button").forEach(b=>b.classList.remove("on"));
+  $("#adm-tab-"+id).classList.add("on");
+  if(id==="p") admRenderProducts();
+  else if(id==="a") admRenderAffiliate();
+  else if(id==="k") admRenderKeys();
+  else if(id==="n") admRenderNotifs();
+  else if(id==="c") admRenderConsole();
+}
+
+/* -- Produits -- */
+function admRenderProducts(){
+  const body=$("#adm-body");
+  body.innerHTML =
+    '<div class="adm-banner">Ajoute un produit : seule la <b>photo</b> (lien d\u2019image) est obligatoire. Les produits ajoutés sont immédiatement trouvables par tous les utilisateurs.</div>'+
+    '<div class="adm-lbl">Ajout manuel</div>'+
+    '<div class="adm-f">'+
+      '<input type="url" id="ap-image" placeholder="Lien de la photo (obligatoire) — https://…">'+
+      '<div class="adm-r2"><input id="ap-name" placeholder="Nom (optionnel)"><select id="ap-cat">'+CATEGORIES.map(c=>'<option value="'+c.id+'">'+esc(catLabel(c.id))+'</option>').join("")+'</select></div>'+
+      '<div class="adm-r2"><input id="ap-price" type="number" placeholder="Prix (FCFA)"><input id="ap-link" type="url" placeholder="Lien produit / affilié"></div>'+
+      '<select id="ap-merchant">'+Object.keys(admMerchants).map(id=>'<option value="'+id+'">'+esc(admMerchants[id].name)+'</option>').join("")+'</select>'+
+      '<button class="btn btn-brand btn-block" id="ap-add" style="padding:11px">Ajouter le produit</button>'+
+    '</div>'+
+    '<div class="adm-lbl">Import en masse (liens, un par ligne)</div>'+
+    '<div class="adm-f">'+
+      '<textarea id="ap-bulk" placeholder="https://boutique.com/produit-1\nhttps://boutique.com/produit-2"></textarea>'+
+      '<button class="btn btn-ghost btn-block" id="ap-bulk-go" style="padding:11px">Importer les liens (nom auto-détecté)</button>'+
+    '</div>'+
+    '<div class="adm-lbl">Produits existants ('+admProducts.length+')</div>'+
+    '<div id="ap-list"></div>';
+
+  $("#ap-add").onclick = admAddProduct;
+  $("#ap-bulk-go").onclick = admBulkImport;
+  admRenderProductList();
+}
+function admRenderProductList(){
+  const box=$("#ap-list"); if(!box)return;
+  box.innerHTML = admProducts.map(p=>{
+    const dirty = admDirty.has(p.id);
+    const img = p.image ? esc(p.image) : PLACEHOLDER_IMG;
+    return (
+    '<div class="adm-item" data-pid="'+p.id+'">'+
+      '<div style="display:flex;gap:9px;align-items:center">'+
+        '<img class="adm-thumb" src="'+img+'" onerror="this.src=\''+PLACEHOLDER_IMG+'\'">'+
+        '<div style="flex:1;min-width:0"><b>'+esc(p.name||"(sans nom)")+(dirty?'<span class="dirty-mark"></span>':'')+'</b><small>'+esc(catLabel(p.cat))+' · '+(p.offers?p.offers.length:0)+' offre(s)</small></div>'+
+        '<button class="adm-mini del" data-del-p="'+p.id+'">'+IC.trash+'</button>'+
+      '</div>'+
+      '<div class="line">'+
+        '<input type="text" data-f="name" value="'+esc(p.name||"")+'" placeholder="Nom" style="flex:1 1 100%;background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:6px 8px;font-size:12px">'+
+      '</div>'+
+      '<div class="line"><input type="url" data-f="image" value="'+esc(p.image||"")+'" placeholder="Lien photo"></div>'+
+      (p.offers||[]).map((o,i)=>
+        '<div class="line" data-offer-idx="'+i+'">'+
+          '<select data-f="m" style="background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:6px;font-size:12px">'+Object.keys(admMerchants).map(id=>'<option value="'+id+'"'+(o.m===id?" selected":"")+'>'+esc(admMerchants[id].name)+'</option>').join("")+'</select>'+
+          '<input type="number" data-f="price" value="'+o.price+'" placeholder="Prix">'+
+          '<label style="display:flex;align-items:center;gap:5px;font-size:11.5px"><input type="checkbox" data-f="stock" '+(o.stock?"checked":"")+'> Stock</label>'+
+          '<input type="url" data-f="link" value="'+esc(o.link||"")+'" placeholder="Lien produit / affilié">'+
+        '</div>'
+      ).join("")+
+    '</div>');
+  }).join("") || '<p class="adm-note">Aucun produit pour le moment.</p>';
+
+  box.querySelectorAll(".adm-item").forEach(item=>{
+    const pid=item.dataset.pid;
+    const p = admProducts.find(x=>x.id===pid);
+    item.querySelectorAll('[data-f="name"], [data-f="image"]').forEach(inp=>{
+      inp.addEventListener("input", ()=>{ p[inp.dataset.f]=inp.value; admDirty.add(pid); markDirty(item); });
+    });
+    item.querySelectorAll('.line[data-offer-idx]').forEach(row=>{
+      const idx = Number(row.dataset.offerIdx);
+      row.querySelectorAll("[data-f]").forEach(inp=>{
+        const ev = inp.type==="checkbox" ? "change" : "input";
+        inp.addEventListener(ev, ()=>{
+          const val = inp.type==="checkbox" ? inp.checked : (inp.type==="number" ? Number(inp.value) : inp.value);
+          p.offers[idx][inp.dataset.f] = val;
+          admDirty.add(pid); markDirty(item);
+        });
+      });
+    });
+  });
+  box.querySelectorAll("[data-del-p]").forEach(b=>b.addEventListener("click", ()=>admDeleteProduct(b.dataset.delP)));
+}
+function markDirty(item){ const b=item.querySelector("b"); if(b && !b.querySelector(".dirty-mark")) b.insertAdjacentHTML("beforeend",'<span class="dirty-mark"></span>'); }
+
+async function admAddProduct(){
+  const image=$("#ap-image").value.trim();
+  if(!image){ toast(t("need_photo"),"warn"); return; }
+  const body = {
+    image,
+    name: $("#ap-name").value.trim(),
+    cat: $("#ap-cat").value,
+    offers: [{ m:$("#ap-merchant").value, price:Number($("#ap-price").value)||0, cur:"FCFA", stock:true, ship:-1, link:$("#ap-link").value.trim() }]
+  };
+  try{
+    const d = await api("/api/admin/products", {method:"POST", body:JSON.stringify(body)});
+    admProducts.push(d.item);
+    toast("Produit ajouté et enregistré définitivement.");
+    $("#ap-image").value=""; $("#ap-name").value=""; $("#ap-price").value=""; $("#ap-link").value="";
+    admRenderProductList();
+  }catch(e){
+    toast(e.data && e.data.error==="missing_image" ? t("need_photo") : t("backend_down"), "warn");
+  }
+}
+async function admBulkImport(){
+  const links = $("#ap-bulk").value.split("\n").map(l=>l.trim()).filter(Boolean);
+  if(!links.length) return;
+  try{
+    const d = await api("/api/admin/products/bulk-import", {method:"POST", body:JSON.stringify({links})});
+    admProducts = admProducts.concat(d.items);
+    $("#ap-bulk").value="";
+    toast(d.items.length+" produit(s) importé(s) — complète prix et photo pour chacun puis enregistre.");
+    admRenderProductList();
+  }catch(e){ toast(t("backend_down"),"warn"); }
+}
+async function admDeleteProduct(id){
+  if(delArm!==id){ delArm=id; toast("Appuie à nouveau pour confirmer la suppression."); setTimeout(()=>{ if(delArm===id) delArm=null; },3000); return; }
+  delArm=null;
+  try{
+    await api("/api/admin/products/"+id, {method:"DELETE"});
+    admProducts = admProducts.filter(p=>p.id!==id);
+    admDirty.delete(id);
+    toast("Produit supprimé.");
+    admRenderProductList();
+  }catch(e){ toast(t("backend_down"),"warn"); }
+}
+
+/* -- Affiliation -- */
+function admRenderAffiliate(){
+  const body=$("#adm-body");
+  body.innerHTML =
+    '<div class="adm-banner">Le modèle de lien est combiné automatiquement au lien du produit (remplace <code>{LINK}</code> par le lien produit encodé), afin que la boutique sache que la vente vient de l\u2019app.</div>'+
+    '<div id="aff-list"></div>';
+  const box=$("#aff-list");
+  box.innerHTML = Object.keys(admMerchants).map(id=>{
+    const m=admMerchants[id];
+    return (
+    '<div class="adm-item" data-mid="'+id+'">'+
+      '<b>'+esc(m.name)+'</b>'+
+      '<div class="line" style="margin-top:8px"><label style="display:flex;align-items:center;gap:8px;font-size:12.5px"><input type="checkbox" data-af="affiliate" '+(m.affiliate?"checked":"")+'> Programme d\u2019affiliation actif</label></div>'+
+      '<div class="line"><input type="text" data-af="template" value="'+esc(m.template||"")+'" placeholder="Modèle de lien (utilise {LINK})" style="flex:1 1 100%;background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:6px 8px;font-size:12px"></div>'+
+    '</div>');
+  }).join("");
+  box.querySelectorAll(".adm-item").forEach(item=>{
+    const id=item.dataset.mid;
+    item.querySelectorAll("[data-af]").forEach(inp=>{
+      const ev = inp.type==="checkbox"?"change":"input";
+      inp.addEventListener(ev, ()=>{
+        admMerchants[id][inp.dataset.af] = inp.type==="checkbox"?inp.checked:inp.value;
+        admDirty.add("merchant:"+id);
+        markDirty(item);
+      });
+    });
+  });
+}
+
+/* -- Clés API -- */
+function admRenderKeys(){
+  const body=$("#adm-body");
+  body.innerHTML =
+    '<div class="adm-lbl">Ajouter une clé</div>'+
+    '<div class="adm-f"><input id="ak-label" placeholder="Libellé (ex. Google Places)"><input id="ak-value" placeholder="Valeur de la clé"><button class="btn btn-brand btn-block" id="ak-add" style="padding:11px">Ajouter</button></div>'+
+    '<div class="adm-lbl">Clés enregistrées</div><div id="ak-list"></div>';
+  $("#ak-add").onclick = admAddKey;
+  admRenderKeyList();
+}
+async function admRenderKeyList(){
+  const box=$("#ak-list");
+  box.innerHTML='<p class="adm-note">Chargement…</p>';
+  try{
+    const d = await api("/api/admin/keys");
+    box.innerHTML = d.items.length ? d.items.map(k=>
+      '<div class="adm-item"><b>'+esc(k.label)+'</b><small>'+esc(k.key.slice(0,4))+'••••••••</small>'+
+      '<div class="line"><button class="adm-mini del" data-del-k="'+k.id+'">'+IC.trash+' Supprimer</button></div></div>'
+    ).join("") : '<p class="adm-note">Aucune clé enregistrée.</p>';
+    box.querySelectorAll("[data-del-k]").forEach(b=>b.addEventListener("click", async ()=>{
+      try{ await api("/api/admin/keys/"+b.dataset.delK, {method:"DELETE"}); admRenderKeyList(); toast("Clé supprimée."); }catch(e){ toast(t("backend_down"),"warn"); }
+    }));
+  }catch(e){ box.innerHTML='<p class="adm-note">'+esc(t("backend_down"))+'</p>'; }
+}
+async function admAddKey(){
+  const label=$("#ak-label").value.trim(), value=$("#ak-value").value.trim();
+  if(!label||!value) return;
+  try{
+    await api("/api/admin/keys", {method:"POST", body:JSON.stringify({label,value})});
+    $("#ak-label").value=""; $("#ak-value").value="";
+    toast("Clé enregistrée définitivement.");
+    admRenderKeyList();
+  }catch(e){ toast(t("backend_down"),"warn"); }
+}
+
+/* -- Notifications -- */
+function admRenderNotifs(){
+  const body=$("#adm-body");
+  body.innerHTML =
+    '<div class="adm-banner">Toute notification envoyée ici est reçue par tous les utilisateurs de l\u2019app.</div>'+
+    '<div class="adm-f"><input id="an-title" placeholder="Titre"><textarea id="an-body" placeholder="Message"></textarea><button class="btn btn-brand btn-block" id="an-send" style="padding:11px">Envoyer à tous les utilisateurs</button></div>'+
+    '<div class="adm-lbl">Historique</div><div id="an-list"></div>';
+  $("#an-send").onclick = admSendNotif;
+  admRenderNotifList();
+}
+async function admRenderNotifList(){
+  const box=$("#an-list");
+  box.innerHTML='<p class="adm-note">Chargement…</p>';
+  try{
+    const d = await api("/api/admin/notifications");
+    box.innerHTML = d.items.length ? d.items.slice().reverse().map(n=>
+      '<div class="adm-item"><b>'+esc(n.title)+'</b><small>'+new Date(n.createdAt).toLocaleString("fr-FR")+'</small><p style="font-size:12.5px;margin-top:5px">'+esc(n.body||"")+'</p>'+
+      '<div class="line"><button class="adm-mini del" data-del-n="'+n.id+'">'+IC.trash+' Supprimer</button></div></div>'
+    ).join("") : '<p class="adm-note">Aucune notification envoyée.</p>';
+    box.querySelectorAll("[data-del-n]").forEach(b=>b.addEventListener("click", async ()=>{
+      try{ await api("/api/admin/notifications/"+b.dataset.delN, {method:"DELETE"}); admRenderNotifList(); }catch(e){}
+    }));
+  }catch(e){ box.innerHTML='<p class="adm-note">'+esc(t("backend_down"))+'</p>'; }
+}
+async function admSendNotif(){
+  const title=$("#an-title").value.trim(), bodyTxt=$("#an-body").value.trim();
+  if(!title) return;
+  try{
+    await api("/api/admin/notifications", {method:"POST", body:JSON.stringify({title, body:bodyTxt})});
+    $("#an-title").value=""; $("#an-body").value="";
+    toast("Notification envoyée à tous les utilisateurs.");
+    admRenderNotifList();
+  }catch(e){ toast(t("backend_down"),"warn"); }
+}
+
+/* -- Console -- */
+async function admRenderConsole(){
+  const body=$("#adm-body");
+  body.innerHTML='<p class="adm-note">Chargement…</p>';
+  try{
+    const d = await api("/api/admin/console");
+    body.innerHTML =
+      '<div class="stat-line"><div><b>'+d.productsCount+'</b><span>Produits</span></div><div><b>'+d.usersCount+'</b><span>Comptes</span></div><div><b>'+d.keysCount+'</b><span>Clés</span></div><div><b>'+d.notificationsCount+'</b><span>Notifs</span></div></div>'+
+      '<div class="adm-lbl">Statistiques globales</div>'+
+      '<div class="stat-line"><div><b>'+d.stats.searches+'</b><span>Recherches</span></div><div><b>'+d.stats.clicks+'</b><span>Clics</span></div><div><b>'+d.stats.shares+'</b><span>Partages</span></div></div>'+
+      '<div class="adm-note">Serveur : '+esc(API_EFFECTIVE||API_BASE)+'<br>Les données sont persistées dans le dossier <code>./data</code> du serveur — pense à activer un « Persistent Disk » sur Render pour qu\u2019elles survivent aux redéploiements.</div>';
+  }catch(e){ body.innerHTML='<p class="adm-note">'+esc(t("backend_down"))+'</p>'; }
+}
+
+/* -- Enregistrement global : envoie toutes les modifications en attente au serveur -- */
+async function admSave(){
+  const btn=$("#adm-save");
+  if(!admDirty.size){ toast("Rien à enregistrer pour l'instant."); return; }
+  btn.disabled=true; const old=btn.textContent; btn.textContent="Enregistrement…";
+  let ok=0, fail=0;
+  for(const key of Array.from(admDirty)){
+    try{
+      if(key.startsWith("merchant:")){
+        const id = key.slice("merchant:".length);
+        const m = admMerchants[id];
+        await api("/api/admin/affiliate/"+id, {method:"PUT", body:JSON.stringify({name:m.name, affiliate:m.affiliate, template:m.template})});
+      }else{
+        const p = admProducts.find(x=>x.id===key);
+        if(p) await api("/api/admin/products/"+p.id, {method:"PUT", body:JSON.stringify({name:p.name, image:p.image, cat:p.cat, brand:p.brand, tags:p.tags, specs:p.specs, offers:p.offers})});
+      }
+      admDirty.delete(key); ok++;
+    }catch(e){ fail++; }
+  }
+  btn.disabled=false; btn.textContent=old;
+  if(fail===0) toast("Toutes les modifications sont enregistrées définitivement (" + ok + ").");
+  else toast(ok+" enregistrée(s), "+fail+" en échec — réessaie.", "warn");
+  if(admTabCur==="p") admRenderProductList();
+}
+
+/* ---------- 17. État réseau ---------- */
+window.addEventListener("online", ()=>{ state.online=true; $("#off-bar").classList.remove("show"); });
+window.addEventListener("offline", ()=>{ state.online=false; $("#off-bar").textContent=t("offline"); $("#off-bar").classList.add("show"); });
+
+/* ---------- 18. Démarrage ---------- */
+async function boot(){
+  applyTheme(); applyI18n();
+  goView("home");
+  await detectBackend();
+  await loadMerchants();
+  if(state.currentView==="home") loadReco();
+  if(Auth.session() && Auth.session().token) syncFromServer();
+  renderFavBadge();
+}
+boot();
+</script>
+</body>
+</html>
