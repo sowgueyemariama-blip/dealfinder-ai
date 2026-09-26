@@ -3,6 +3,10 @@
    DealFinder AI — server.js
    Backend Express pour l'app frontend (index.html) déployée sur Render.
    Persistance : fichiers JSON dans ./data (simple, sans base externe).
+   IMPORTANT (Render) : ce dossier ./data doit être sur un "Persistent
+   Disk" (Render > Disks) sinon son contenu est réinitialisé à chaque
+   redéploiement/redémarrage du service — ce n'est pas un bug du code,
+   c'est le comportement du système de fichiers éphémère du plan gratuit.
    ================================================================ */
 
 const express = require("express");
@@ -230,13 +234,54 @@ app.get("/api/products", (req, res) => {
   else if (sort === "price_desc") list.sort((a, b) => fcfa(bestOffer(b)) - fcfa(bestOffer(a)));
   else if (sort === "new") list.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 
-  const out = list.map(p => ({
-    id: p.id, cat: p.cat, brand: p.brand, name: p.name, image: p.image,
-    specs: p.specs, offersCount: p.offers.length, best: bestOffer(p)
-  }));
+  const out = list.map(p => decorate(p));
 
-  stats.searches++; persistAll();
-  res.json({ count: out.length, offersCompared: list.reduce((s, p) => s + p.offers.length, 0), products: out });
+  // Suggestions "même catégorie" — toujours fournies pour compléter les résultats
+  // (utile côté client quand une recherche stricte ne renvoie rien ou peu de résultats).
+  let suggestions = [];
+  if (cat) {
+    suggestions = products
+      .filter(p => p.cat === cat && !out.some(o => o.id === p.id))
+      .slice(0, 8)
+      .map(p => decorate(p));
+  } else if (out.length) {
+    const topCat = out[0].cat;
+    suggestions = products
+      .filter(p => p.cat === topCat && !out.some(o => o.id === p.id))
+      .slice(0, 8)
+      .map(p => decorate(p));
+  } else {
+    // Rien trouvé du tout : on propose un échantillon récent, toutes catégories.
+    suggestions = products.slice(-8).reverse().map(p => decorate(p));
+  }
+
+  if (q) { stats.searches++; persistAll(); }
+  res.json({
+    count: out.length,
+    offersCompared: list.reduce((s, p) => s + p.offers.length, 0),
+    products: out,
+    suggestions
+  });
+});
+
+function decorate(p) {
+  const best = bestOffer(p);
+  return {
+    id: p.id, cat: p.cat, brand: p.brand, name: p.name, image: p.image,
+    specs: p.specs, offersCount: p.offers.length,
+    best: {
+      ...best,
+      merchantName: (affiliate[best.m] && affiliate[best.m].name) || best.m,
+      isAffiliate: !!(affiliate[best.m] && affiliate[best.m].affiliate)
+    }
+  };
+}
+
+/* Liste publique des marchands (pour filtres et affichage) */
+app.get("/api/merchants", (req, res) => {
+  res.json({
+    items: Object.keys(affiliate).map(id => ({ id, name: affiliate[id].name, affiliate: affiliate[id].affiliate }))
+  });
 });
 
 app.get("/api/products/:id", (req, res) => {
@@ -342,13 +387,16 @@ admin.get("/products", (req, res) => res.json({ items: products }));
 
 admin.post("/products", (req, res) => {
   const b = req.body || {};
+  if (!b.image || !String(b.image).trim()) {
+    return res.status(400).json({ error: "missing_image" }); // seule la photo est obligatoire
+  }
   const id = b.id || ("p" + crypto.randomBytes(4).toString("hex"));
   if (products.some(p => p.id === id)) return res.status(409).json({ error: "id_exists" });
   const product = {
     id,
     cat: b.cat || "autres",
     brand: b.brand || "",
-    name: b.name || "",
+    name: b.name || "Produit sans nom",
     tags: b.tags || [],
     specs: b.specs || [],
     image: b.image || "",
