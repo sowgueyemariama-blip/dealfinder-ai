@@ -17,7 +17,7 @@ const path = require("path");
 
 const app = express();
 app.use(cors());
-app.use(express.json({ limit: "2mb" }));
+app.use(express.json({ limit: "12mb" })); // photos envoyées en base64 depuis l'admin
 
 const PORT = process.env.PORT || 3000;
 const ADMIN_EMAIL = "sowgueye.mariama@gmail.com";
@@ -203,32 +203,67 @@ app.get("/api/categories", (req, res) => {
   res.json(Object.keys(cats).map(id => ({ id, count: cats[id] })));
 });
 
+/* Normalisation : minuscules + suppression des accents, pour un matching fiable
+   quel que soit l'orthographe utilisé ("Téléphone" doit retrouver "telephone"). */
+function norm(s) {
+  return String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+const STOPWORDS = new Set(["de","du","des","le","la","les","un","une","et","à","a","au","aux","pour","avec","sur","en","ce","ces","cette"]);
+function tokenize(q) {
+  return norm(q).split(/[^a-z0-9]+/).filter(t => t.length >= 2 && !STOPWORDS.has(t));
+}
+function productHaystack(p) {
+  return norm([p.name, p.brand, p.cat, ...(p.tags || []), ...(p.specs || [])].join(" "));
+}
+/* Score de correspondance : plus il y a de mots de la recherche retrouvés
+   (en sous-chaîne, dans le nom/marque/tags/specs), plus le produit est pertinent.
+   Un match sur le nom complet ou un mot entier du nom compte double. */
+function matchScore(p, tokens) {
+  if (!tokens.length) return 0;
+  const hay = productHaystack(p);
+  const nameWords = norm(p.name).split(/[^a-z0-9]+/).filter(Boolean);
+  let score = 0;
+  for (const tok of tokens) {
+    if (hay.includes(tok)) score += 1;
+    if (nameWords.includes(tok)) score += 1;
+  }
+  return score;
+}
+
 app.get("/api/products", (req, res) => {
   const { q, cat, brand, min, max, merchants, inStock, knownShip, sort } = req.query;
-  let list = products.slice();
+  const tokens = q ? tokenize(q) : [];
 
-  if (q) {
-    const nq = String(q).toLowerCase();
-    list = list.filter(p =>
-      p.name.toLowerCase().includes(nq) ||
-      p.brand.toLowerCase().includes(nq) ||
-      (p.tags || []).some(t => t.toLowerCase().includes(nq))
-    );
+  function baseFilter(list) {
+    if (cat) list = list.filter(p => p.cat === cat);
+    if (brand) list = list.filter(p => norm(p.brand) === norm(String(brand)));
+    if (merchants) {
+      const set = new Set(String(merchants).split(","));
+      list = list.filter(p => p.offers.some(o => set.has(o.m)));
+    }
+    if (inStock === "1" || inStock === "true") list = list.filter(p => p.offers.some(o => o.stock));
+    if (knownShip === "1" || knownShip === "true") list = list.filter(p => p.offers.some(o => o.ship >= 0));
+    if (min) list = list.filter(p => fcfa(bestOffer(p)) >= Number(min));
+    if (max) list = list.filter(p => fcfa(bestOffer(p)) <= Number(max));
+    return list;
   }
-  if (cat) list = list.filter(p => p.cat === cat);
-  if (brand) list = list.filter(p => p.brand.toLowerCase() === String(brand).toLowerCase());
-  if (merchants) {
-    const set = new Set(String(merchants).split(","));
-    list = list.filter(p => p.offers.some(o => set.has(o.m)));
+
+  // Étape 1 : correspondance par mots-clés (tolérante aux accents/casse), la plus précise.
+  let list = baseFilter(products.slice());
+  let usedFallback = false;
+  if (tokens.length) {
+    const scored = list.map(p => ({ p, s: matchScore(p, tokens) })).filter(x => x.s > 0);
+    if (scored.length) {
+      scored.sort((a, b) => b.s - a.s);
+      list = scored.map(x => x.p);
+    } else {
+      // Étape 2 : aucun mot ne correspond exactement — on élargit à la catégorie/marque
+      // déduite de la recherche, pour ne jamais renvoyer "aucun résultat" à tort.
+      usedFallback = true;
+      list = baseFilter(products.slice());
+      if (!cat && !brand) list = []; // vraiment rien à proposer comme base large
+    }
   }
-  if (inStock === "1" || inStock === "true") {
-    list = list.filter(p => p.offers.some(o => o.stock));
-  }
-  if (knownShip === "1" || knownShip === "true") {
-    list = list.filter(p => p.offers.some(o => o.ship >= 0));
-  }
-  if (min) list = list.filter(p => fcfa(bestOffer(p)) >= Number(min));
-  if (max) list = list.filter(p => fcfa(bestOffer(p)) <= Number(max));
 
   if (sort === "price_asc") list.sort((a, b) => fcfa(bestOffer(a)) - fcfa(bestOffer(b)));
   else if (sort === "price_desc") list.sort((a, b) => fcfa(bestOffer(b)) - fcfa(bestOffer(a)));
@@ -236,27 +271,21 @@ app.get("/api/products", (req, res) => {
 
   const out = list.map(p => decorate(p));
 
-  // Suggestions "même catégorie" — toujours fournies pour compléter les résultats
-  // (utile côté client quand une recherche stricte ne renvoie rien ou peu de résultats).
+  // Suggestions "même catégorie" — toujours fournies pour compléter les résultats.
   let suggestions = [];
-  if (cat) {
+  const suggCat = cat || (out.length ? out[0].cat : null);
+  if (suggCat) {
     suggestions = products
-      .filter(p => p.cat === cat && !out.some(o => o.id === p.id))
+      .filter(p => p.cat === suggCat && !out.some(o => o.id === p.id))
       .slice(0, 8)
       .map(p => decorate(p));
-  } else if (out.length) {
-    const topCat = out[0].cat;
-    suggestions = products
-      .filter(p => p.cat === topCat && !out.some(o => o.id === p.id))
-      .slice(0, 8)
-      .map(p => decorate(p));
-  } else {
-    // Rien trouvé du tout : on propose un échantillon récent, toutes catégories.
+  } else if (!out.length) {
     suggestions = products.slice(-8).reverse().map(p => decorate(p));
   }
 
   if (q) { stats.searches++; persistAll(); }
   res.json({
+    usedFallback,
     count: out.length,
     offersCompared: list.reduce((s, p) => s + p.offers.length, 0),
     products: out,
