@@ -378,8 +378,7 @@ html[data-theme="dark"] .adm-tabs button.on{color:#0F1310}
           <button class="link-row" data-legal="cgu"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M7 3h7l4 4v14H7zM14 3v4h4M10 12h6M10 16h6"/></svg><span data-i18n="prof_cgu">Conditions générales d'utilisation</span><svg class="chev" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></button>
           <button class="link-row" data-legal="privacy"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M12 3l7 2.8v5.4c0 4.6-3 7.6-7 9.3-4-1.7-7-4.7-7-9.3V5.8Z"/><path d="M9 12l2 2 4-4.5" stroke-linecap="round"/></svg><span data-i18n="prof_privacy">Politique de confidentialité</span><svg class="chev" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></button>
           <button class="link-row" data-legal="about"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5v.5"/></svg><span data-i18n="prof_about">À propos</span><svg class="chev" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></button>
-          <button class="link-row" id="admin-row" hidden><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6.5v5c0 5 3.4 8.6 8 9.5 4.6-.9 8-4.5 8-9.5v-5Z"/><path d="M9 12.5l2 2 4-4.5"/></svg><span>Panneau d'administration</span><svg class="chev" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></button>
-        </div>
+                  </div>
         <p class="version">DealFinder AI · v2.0.0</p>
       </section>
     </main>
@@ -486,14 +485,18 @@ function authHeaders(){
   if(s && s.token) h.Authorization = "Bearer " + s.token;
   return h;
 }
-async function api(path, opts){
+async function api(path, opts, timeoutMs){
   opts = opts || {};
   const headers = Object.assign(authHeaders(), opts.headers||{});
-  const res = await fetch(apiUrl(path), Object.assign({}, opts, {headers}));
-  let data = null;
-  try{ data = await res.json(); }catch(e){}
-  if(!res.ok){ const err = new Error((data&&data.error)||"http_"+res.status); err.status=res.status; err.data=data; throw err; }
-  return data;
+  const ctrl = new AbortController();
+  const to = timeoutMs ? setTimeout(()=>ctrl.abort(), timeoutMs) : null;
+  try{
+    const res = await fetch(apiUrl(path), Object.assign({}, opts, {headers, signal: ctrl.signal}));
+    let data = null;
+    try{ data = await res.json(); }catch(e){}
+    if(!res.ok){ const err = new Error((data&&data.error)||"http_"+res.status); err.status=res.status; err.data=data; throw err; }
+    return data;
+  } finally { if(to) clearTimeout(to); }
 }
 
 /* ---------- 1. i18n ---------- */
@@ -749,12 +752,22 @@ async function doAuth(){
   nameEl.classList.remove("err"); emailEl.classList.remove("err");
   if(name.length<2){ nameEl.classList.add("err"); return authShowErr(t("f_name")); }
   if(!EMAIL_RE.test(email)){ emailEl.classList.add("err"); return authShowErr(t("f_email")); }
-  const btn=$("#a-submit"); btn.disabled=true; const oldTxt=btn.textContent; btn.textContent="…";
+  const btn=$("#a-submit"); btn.disabled=true; const oldTxt=btn.textContent;
+  if(API_EFFECTIVE===null){
+    btn.textContent="Connexion au serveur…";
+    await detectBackend();
+  }
+  if(API_EFFECTIVE===null){
+    btn.disabled=false; btn.textContent=oldTxt;
+    return authShowErr(t("backend_down"));
+  }
+  btn.textContent="…";
   try{
-    const d = await api("/api/auth/register", {method:"POST", body:JSON.stringify({name,email})});
+    const d = await api("/api/auth/register", {method:"POST", body:JSON.stringify({name,email})}, 30000);
     Auth.setSession(email, d.user.name, d.token);
-    closeAll(); goView("profile");
+    closeAll();
     toast(t("login_done",{0:d.user.name}));
+    goView("profile");
     await syncFromServer();
   }catch(err){
     if(err.data && err.data.error==="invalid_name") authShowErr(t("f_name"));
@@ -1225,7 +1238,7 @@ function renderProfile(){
       '<div class="acct"><div class="avatar">'+esc((s.name||"?").slice(0,2).toUpperCase())+'</div>'+
         '<div class="grow"><h3>'+esc(s.name)+'</h3><p>'+esc(s.email)+'</p></div>'+
         '<button class="btn btn-ghost" id="logout-btn">'+esc(t("logout"))+'</button></div>';
-    $("#logout-btn").addEventListener("click", ()=>{ Auth.logout(); toast(t("logout_done")); renderProfile(); });
+    $("#logout-btn").addEventListener("click", ()=>{ Auth.logout(); admAutoOpened=false; toast(t("logout_done")); renderProfile(); });
   }else{
     box.innerHTML =
       '<div class="acct"><div class="avatar">'+IC.user+'</div>'+
@@ -1233,9 +1246,11 @@ function renderProfile(){
         '<button class="btn btn-brand" id="login-btn">'+esc(t("login"))+'</button></div>';
     $("#login-btn").addEventListener("click", openAuth);
   }
-  const admRow = $("#admin-row");
-  admRow.hidden = !Auth.isAdmin();
-  admRow.onclick = Auth.isAdmin() ? admOpen : null;
+  // Le panneau d'administration n'a aucune trace visible dans l'app :
+  // il s'ouvre automatiquement, une seule fois par connexion, uniquement
+  // si le compte connecté est sowgueye.mariama@gmail.com. Pour tout
+  // autre compte, rien n'indique même son existence.
+  if(Auth.isAdmin() && !admAutoOpened){ admAutoOpened = true; admOpen(); }
 
   $("#hist-chips").innerHTML = state.history.length
     ? state.history.slice(0,12).map(q=>'<button class="pop-chip" data-search-chip="'+esc(q)+'">'+esc(q)+'</button>').join("")
@@ -1307,7 +1322,7 @@ async function loadMerchants(){
    permanente dans ./data côté serveur), jamais uniquement le state
    local, pour que les modifications soient conservées pour toujours.
    ================================================================ */
-let admProducts=[], admDirty=new Set(), admTabCur="p", delArm=null, admOpening=false, admMerchants={};
+let admProducts=[], admDirty=new Set(), admTabCur="p", admMerchants={}, delArm=null, admOpening=false, admAutoOpened=false, admNewPhotoData=null;
 
 function detectStoreFromUrl(url){
   const u=norm(url);
@@ -1403,12 +1418,17 @@ function admTab(id){
 /* -- Produits -- */
 function admRenderProducts(){
   const body=$("#adm-body");
+  admNewPhotoData = null;
   body.innerHTML =
-    '<div class="adm-banner">Ajoute un produit : seule la <b>photo</b> (lien d\u2019image) est obligatoire. Les produits ajoutés sont immédiatement trouvables par tous les utilisateurs.</div>'+
+    '<div class="adm-banner">Ajoute un produit : prends ou choisis directement la <b>photo</b> du produit — obligatoire. Les produits ajoutés sont immédiatement trouvables par tous les utilisateurs.</div>'+
     '<div class="adm-lbl">Ajout manuel</div>'+
     '<div class="adm-f">'+
-      '<input type="url" id="ap-image" placeholder="Lien de la photo (obligatoire) — https://…">'+
-      '<div class="adm-r2"><input id="ap-name" placeholder="Nom (optionnel)"><select id="ap-cat">'+CATEGORIES.map(c=>'<option value="'+c.id+'">'+esc(catLabel(c.id))+'</option>').join("")+'</select></div>'+
+      '<div style="display:flex;gap:10px;align-items:center">'+
+        '<img id="ap-preview" class="adm-thumb" style="width:64px;height:64px" src="'+PLACEHOLDER_IMG+'">'+
+        '<label class="btn btn-ghost" style="flex:1;text-align:center;cursor:pointer;padding:11px" for="ap-photo">📷 Choisir la photo du produit</label>'+
+        '<input type="file" id="ap-photo" accept="image/*" hidden>'+
+      '</div>'+
+      '<div class="adm-r2"><input id="ap-name" placeholder="Nom du produit (écris ce que tu veux)"><input id="ap-cat" placeholder="Catégorie (écris ce que tu veux)"></div>'+
       '<div class="adm-r2"><input id="ap-price" type="number" placeholder="Prix (FCFA)"><input id="ap-link" type="url" placeholder="Lien produit / affilié"></div>'+
       '<select id="ap-merchant">'+Object.keys(admMerchants).map(id=>'<option value="'+id+'">'+esc(admMerchants[id].name)+'</option>').join("")+'</select>'+
       '<button class="btn btn-brand btn-block" id="ap-add" style="padding:11px">Ajouter le produit</button>'+
@@ -1416,14 +1436,36 @@ function admRenderProducts(){
     '<div class="adm-lbl">Import en masse (liens, un par ligne)</div>'+
     '<div class="adm-f">'+
       '<textarea id="ap-bulk" placeholder="https://boutique.com/produit-1\nhttps://boutique.com/produit-2"></textarea>'+
-      '<button class="btn btn-ghost btn-block" id="ap-bulk-go" style="padding:11px">Importer les liens (nom auto-détecté)</button>'+
+      '<button class="btn btn-ghost btn-block" id="ap-bulk-go" style="padding:11px">Importer les liens (nom auto-détecté, photo à ajouter ensuite)</button>'+
     '</div>'+
     '<div class="adm-lbl">Produits existants ('+admProducts.length+')</div>'+
     '<div id="ap-list"></div>';
 
+  $("#ap-photo").addEventListener("change", onPickPhoto);
   $("#ap-add").onclick = admAddProduct;
   $("#ap-bulk-go").onclick = admBulkImport;
   admRenderProductList();
+}
+/* Lit le fichier choisi, le redimensionne (max 900px) et le convertit en
+   image intégrée (data URL) — s'affiche immédiatement, aucun lien requis. */
+function onPickPhoto(e){
+  const file = e.target.files && e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    const img = new Image();
+    img.onload = ()=>{
+      const maxSide = 900;
+      let w=img.width, h=img.height;
+      if(w>maxSide || h>maxSide){ const ratio=Math.min(maxSide/w, maxSide/h); w=Math.round(w*ratio); h=Math.round(h*ratio); }
+      const canvas=document.createElement("canvas"); canvas.width=w; canvas.height=h;
+      canvas.getContext("2d").drawImage(img,0,0,w,h);
+      admNewPhotoData = canvas.toDataURL("image/jpeg", 0.85);
+      const prev=$("#ap-preview"); if(prev) prev.src = admNewPhotoData;
+    };
+    img.src = reader.result;
+  };
+  reader.readAsDataURL(file);
 }
 function admRenderProductList(){
   const box=$("#ap-list"); if(!box)return;
@@ -1475,19 +1517,20 @@ function admRenderProductList(){
 function markDirty(item){ const b=item.querySelector("b"); if(b && !b.querySelector(".dirty-mark")) b.insertAdjacentHTML("beforeend",'<span class="dirty-mark"></span>'); }
 
 async function admAddProduct(){
-  const image=$("#ap-image").value.trim();
-  if(!image){ toast(t("need_photo"),"warn"); return; }
+  if(!admNewPhotoData){ toast(t("need_photo"),"warn"); return; }
+  const catRaw = $("#ap-cat").value.trim();
   const body = {
-    image,
+    image: admNewPhotoData,
     name: $("#ap-name").value.trim(),
-    cat: $("#ap-cat").value,
+    cat: catRaw || "Autres",
     offers: [{ m:$("#ap-merchant").value, price:Number($("#ap-price").value)||0, cur:"FCFA", stock:true, ship:-1, link:$("#ap-link").value.trim() }]
   };
   try{
     const d = await api("/api/admin/products", {method:"POST", body:JSON.stringify(body)});
     admProducts.push(d.item);
     toast("Produit ajouté et enregistré définitivement.");
-    $("#ap-image").value=""; $("#ap-name").value=""; $("#ap-price").value=""; $("#ap-link").value="";
+    admNewPhotoData=null; $("#ap-preview").src=PLACEHOLDER_IMG; $("#ap-photo").value="";
+    $("#ap-name").value=""; $("#ap-cat").value=""; $("#ap-price").value=""; $("#ap-link").value="";
     admRenderProductList();
   }catch(e){
     toast(e.data && e.data.error==="missing_image" ? t("need_photo") : t("backend_down"), "warn");
