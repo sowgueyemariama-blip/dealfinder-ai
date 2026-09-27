@@ -378,6 +378,7 @@ html[data-theme="dark"] .adm-tabs button.on{color:#0F1310}
           <button class="link-row" data-legal="cgu"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M7 3h7l4 4v14H7zM14 3v4h4M10 12h6M10 16h6"/></svg><span data-i18n="prof_cgu">Conditions générales d'utilisation</span><svg class="chev" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></button>
           <button class="link-row" data-legal="privacy"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M12 3l7 2.8v5.4c0 4.6-3 7.6-7 9.3-4-1.7-7-4.7-7-9.3V5.8Z"/><path d="M9 12l2 2 4-4.5" stroke-linecap="round"/></svg><span data-i18n="prof_privacy">Politique de confidentialité</span><svg class="chev" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></button>
           <button class="link-row" data-legal="about"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5v.5"/></svg><span data-i18n="prof_about">À propos</span><svg class="chev" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></button>
+          <button class="link-row" id="admin-row" hidden><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6.5v5c0 5 3.4 8.6 8 9.5 4.6-.9 8-4.5 8-9.5v-5Z"/><path d="M9 12.5l2 2 4-4.5"/></svg><span>Panneau d'administration</span><svg class="chev" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></button>
                   </div>
         <p class="version">DealFinder AI · v2.0.0</p>
       </section>
@@ -1049,7 +1050,7 @@ async function openProduct(id){
   catch(e){ $("#pd-body").innerHTML = '<div class="center"><div class="big-ic">'+IC.warn+'</div><h3>'+esc(t("backend_down"))+'</h3></div>'; return; }
   const isFav = !!state.favorites[p.id];
   const img = p.image ? esc(p.image) : PLACEHOLDER_IMG;
-  const offersSorted = p.offers.slice().sort((a,b)=>fcfa(a)-fcfa(b));
+  const offersSorted = p.offers.map((o,i)=>({...o, _idx:i})).sort((a,b)=>fcfa(a)-fcfa(b));
   $("#pd-body").innerHTML =
     '<img class="pd-img" src="'+img+'" onerror="this.src=\''+PLACEHOLDER_IMG+'\'">'+
     '<div class="pd-cat">'+esc(catLabel(p.cat))+'</div>'+
@@ -1059,11 +1060,12 @@ async function openProduct(id){
     offersSorted.map(o=>{
       const hours = o.updatedAt ? Math.max(0,Math.round((Date.now()-o.updatedAt)/3600000)) : (o.h||0);
       const updated = hours<24 ? t("updated_h",{0:hours}) : t("updated_d",{0:Math.round(hours/24)});
+      const storeName = o.merchantName || o.store || "?";
       return (
       '<div class="offer-row'+(o.stock?'':' off')+'">'+
         '<div class="or-top">'+
-          '<div class="store-av">'+esc((o.merchantName||o.m||"?").slice(0,2).toUpperCase())+'</div>'+
-          '<div class="or-info"><b>'+esc(o.merchantName||o.m)+'</b>'+
+          '<div class="store-av">'+esc(storeName.slice(0,2).toUpperCase())+'</div>'+
+          '<div class="or-info"><b>'+esc(storeName)+'</b>'+
             '<div class="or-meta">'+
               (o.stock?'<span class="ok">'+esc(t("stock_in"))+'</span>':'<span class="ko">'+esc(t("stock_out"))+'</span>')+
               '<span>'+IC.truck+' '+(o.ship===0?esc(t("ship_free")):o.ship>0?esc(t("ship_fee",{0:fmtPrice(o.ship)})):esc(t("ship_unknown")))+'</span>'+
@@ -1073,23 +1075,23 @@ async function openProduct(id){
           '</div>'+
           '<div class="or-price"><span class="price">'+fmtPrice(fcfa(o))+'</span></div>'+
         '</div>'+
-        '<div class="or-foot"><button class="btn '+(o.stock?'btn-brand':'btn-disabled')+'" '+(o.stock?'data-redirect="'+p.id+'|'+esc(o.m)+'"':'disabled')+'>'+esc(t("view_offer"))+' '+IC.ext+'</button></div>'+
+        '<div class="or-foot"><button class="btn '+(o.stock?'btn-brand':'btn-disabled')+'" '+(o.stock?'data-redirect="'+p.id+'|'+o._idx+'"':'disabled')+'>'+esc(t("view_offer"))+' '+IC.ext+'</button></div>'+
       '</div>');
     }).join("")+
     '<div class="transparency">'+esc(t("transparency"))+'</div>'+
     '<div class="pd-actions">'+
       '<button class="btn btn-ghost" data-fav="'+p.id+'" style="flex:none;width:46px">'+(isFav?IC.heartF:IC.heart)+'</button>'+
-      '<button class="btn btn-brand" data-redirect="'+p.id+'|'+esc(offersSorted[0].m)+'">'+esc(t("view_offer"))+'</button>'+
+      '<button class="btn btn-brand" data-redirect="'+p.id+'|'+offersSorted[0]._idx+'">'+esc(t("view_offer"))+'</button>'+
     '</div>';
 }
 document.addEventListener("click", e=>{
   const rd = e.target.closest("[data-redirect]");
-  if(rd){ const [pid,mid] = rd.dataset.redirect.split("|"); openRedirect(pid,mid); }
+  if(rd){ const [pid,idx] = rd.dataset.redirect.split("|"); openRedirect(pid,Number(idx)); }
 });
-async function openRedirect(pid, mid){
+async function openRedirect(pid, idx){
   const p = await getProduct(pid).catch(()=>null);
   if(!p) return;
-  const offer = p.offers.find(o=>o.m===mid) || p.offers[0];
+  const offer = p.offers[idx] || p.offers[0];
   const link = offer.finalLink || offer.link || "#";
   api("/api/products/"+pid+"/click", {method:"POST"}).catch(()=>{});
   track("clicks");
@@ -1238,7 +1240,7 @@ function renderProfile(){
       '<div class="acct"><div class="avatar">'+esc((s.name||"?").slice(0,2).toUpperCase())+'</div>'+
         '<div class="grow"><h3>'+esc(s.name)+'</h3><p>'+esc(s.email)+'</p></div>'+
         '<button class="btn btn-ghost" id="logout-btn">'+esc(t("logout"))+'</button></div>';
-    $("#logout-btn").addEventListener("click", ()=>{ Auth.logout(); admAutoOpened=false; toast(t("logout_done")); renderProfile(); });
+    $("#logout-btn").addEventListener("click", ()=>{ Auth.logout(); toast(t("logout_done")); renderProfile(); });
   }else{
     box.innerHTML =
       '<div class="acct"><div class="avatar">'+IC.user+'</div>'+
@@ -1246,11 +1248,12 @@ function renderProfile(){
         '<button class="btn btn-brand" id="login-btn">'+esc(t("login"))+'</button></div>';
     $("#login-btn").addEventListener("click", openAuth);
   }
-  // Le panneau d'administration n'a aucune trace visible dans l'app :
-  // il s'ouvre automatiquement, une seule fois par connexion, uniquement
-  // si le compte connecté est sowgueye.mariama@gmail.com. Pour tout
-  // autre compte, rien n'indique même son existence.
-  if(Auth.isAdmin() && !admAutoOpened){ admAutoOpened = true; admOpen(); }
+  // Le panneau d'administration n'a AUCUNE trace pour les autres comptes :
+  // ce bouton n'apparaît que si le compte connecté est bien
+  // sowgueye.mariama@gmail.com — pour tout le monde d'autre, "hidden" reste actif.
+  const admRow = $("#admin-row");
+  admRow.hidden = !Auth.isAdmin();
+  admRow.onclick = Auth.isAdmin() ? admOpen : null;
 
   $("#hist-chips").innerHTML = state.history.length
     ? state.history.slice(0,12).map(q=>'<button class="pop-chip" data-search-chip="'+esc(q)+'">'+esc(q)+'</button>').join("")
@@ -1322,7 +1325,7 @@ async function loadMerchants(){
    permanente dans ./data côté serveur), jamais uniquement le state
    local, pour que les modifications soient conservées pour toujours.
    ================================================================ */
-let admProducts=[], admDirty=new Set(), admTabCur="p", admMerchants={}, delArm=null, admOpening=false, admAutoOpened=false, admNewPhotoData=null;
+let admProducts=[], admDirty=new Set(), admTabCur="p", admMerchants=[], delArm=null, admOpening=false, admNewPhotoData=null;
 
 function detectStoreFromUrl(url){
   const u=norm(url);
@@ -1390,12 +1393,12 @@ async function admOpen(){
     return;
   }
   try{
-    const [prod, merch] = await Promise.all([
+    const [prod, aff] = await Promise.all([
       api("/api/admin/products"),
-      api("/api/merchants")
+      api("/api/admin/affiliate")
     ]);
     admProducts = prod.items;
-    admMerchants = {}; merch.items.forEach(m=>{ admMerchants[m.id]=m; });
+    admMerchants = aff.items; // [{id, name, template}]
     admDirty.clear();
     admTab(admTabCur);
   }catch(e){
@@ -1430,7 +1433,7 @@ function admRenderProducts(){
       '</div>'+
       '<div class="adm-r2"><input id="ap-name" placeholder="Nom du produit (écris ce que tu veux)"><input id="ap-cat" placeholder="Catégorie (écris ce que tu veux)"></div>'+
       '<div class="adm-r2"><input id="ap-price" type="number" placeholder="Prix (FCFA)"><input id="ap-link" type="url" placeholder="Lien produit / affilié"></div>'+
-      '<select id="ap-merchant">'+Object.keys(admMerchants).map(id=>'<option value="'+id+'">'+esc(admMerchants[id].name)+'</option>').join("")+'</select>'+
+      '<input id="ap-store" placeholder="Nom de la boutique (écris ce que tu veux)">'+
       '<button class="btn btn-brand btn-block" id="ap-add" style="padding:11px">Ajouter le produit</button>'+
     '</div>'+
     '<div class="adm-lbl">Import en masse (liens, un par ligne)</div>'+
@@ -1485,7 +1488,7 @@ function admRenderProductList(){
       '<div class="line"><input type="url" data-f="image" value="'+esc(p.image||"")+'" placeholder="Lien photo"></div>'+
       (p.offers||[]).map((o,i)=>
         '<div class="line" data-offer-idx="'+i+'">'+
-          '<select data-f="m" style="background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:6px;font-size:12px">'+Object.keys(admMerchants).map(id=>'<option value="'+id+'"'+(o.m===id?" selected":"")+'>'+esc(admMerchants[id].name)+'</option>').join("")+'</select>'+
+          '<input type="text" data-f="store" value="'+esc(o.store||"")+'" placeholder="Nom boutique" style="background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:6px 8px;font-size:12px;width:120px">'+
           '<input type="number" data-f="price" value="'+o.price+'" placeholder="Prix">'+
           '<label style="display:flex;align-items:center;gap:5px;font-size:11.5px"><input type="checkbox" data-f="stock" '+(o.stock?"checked":"")+'> Stock</label>'+
           '<input type="url" data-f="link" value="'+esc(o.link||"")+'" placeholder="Lien produit / affilié">'+
@@ -1518,22 +1521,27 @@ function markDirty(item){ const b=item.querySelector("b"); if(b && !b.querySelec
 
 async function admAddProduct(){
   if(!admNewPhotoData){ toast(t("need_photo"),"warn"); return; }
+  const store = $("#ap-store").value.trim();
+  if(!store){ toast("Écris le nom de la boutique.","warn"); return; }
   const catRaw = $("#ap-cat").value.trim();
   const body = {
     image: admNewPhotoData,
     name: $("#ap-name").value.trim(),
     cat: catRaw || "Autres",
-    offers: [{ m:$("#ap-merchant").value, price:Number($("#ap-price").value)||0, cur:"FCFA", stock:true, ship:-1, link:$("#ap-link").value.trim() }]
+    offers: [{ store, price:Number($("#ap-price").value)||0, cur:"FCFA", stock:true, ship:-1, link:$("#ap-link").value.trim() }]
   };
   try{
     const d = await api("/api/admin/products", {method:"POST", body:JSON.stringify(body)});
     admProducts.push(d.item);
     toast("Produit ajouté et enregistré définitivement.");
     admNewPhotoData=null; $("#ap-preview").src=PLACEHOLDER_IMG; $("#ap-photo").value="";
-    $("#ap-name").value=""; $("#ap-cat").value=""; $("#ap-price").value=""; $("#ap-link").value="";
+    $("#ap-name").value=""; $("#ap-cat").value=""; $("#ap-price").value=""; $("#ap-link").value=""; $("#ap-store").value="";
     admRenderProductList();
   }catch(e){
-    toast(e.data && e.data.error==="missing_image" ? t("need_photo") : t("backend_down"), "warn");
+    const msg = e.data && e.data.error==="missing_image" ? t("need_photo")
+      : e.data && e.data.error==="missing_store" ? "Écris le nom de la boutique."
+      : t("backend_down");
+    toast(msg, "warn");
   }
 }
 async function admBulkImport(){
@@ -1559,33 +1567,59 @@ async function admDeleteProduct(id){
   }catch(e){ toast(t("backend_down"),"warn"); }
 }
 
-/* -- Affiliation -- */
+/* -- Affiliation : formulaire minimal, nom de la boutique + lien, rien d'imposé -- */
 function admRenderAffiliate(){
   const body=$("#adm-body");
   body.innerHTML =
-    '<div class="adm-banner">Le modèle de lien est combiné automatiquement au lien du produit (remplace <code>{LINK}</code> par le lien produit encodé), afin que la boutique sache que la vente vient de l\u2019app.</div>'+
+    '<div class="adm-banner">Ajoute une boutique : juste son nom et le lien d\u2019affiliation. Le lien produit y sera automatiquement combiné (remplace <code>{LINK}</code> par le lien produit encodé) pour que la boutique sache que la vente vient de l\u2019app.</div>'+
+    '<div class="adm-f">'+
+      '<input id="af-name" placeholder="Nom de la boutique">'+
+      '<input id="af-template" placeholder="Lien d\u2019affiliation (utilise {LINK} si besoin)">'+
+      '<button class="btn btn-brand btn-block" id="af-add" style="padding:11px">Ajouter la boutique</button>'+
+    '</div>'+
+    '<div class="adm-lbl">Boutiques ajoutées</div>'+
     '<div id="aff-list"></div>';
-  const box=$("#aff-list");
-  box.innerHTML = Object.keys(admMerchants).map(id=>{
-    const m=admMerchants[id];
+  $("#af-add").onclick = admAddAffiliate;
+  admRenderAffiliateList();
+}
+function admRenderAffiliateList(){
+  const box=$("#aff-list"); if(!box)return;
+  box.innerHTML = admMerchants.map(m=>{
+    const dirty = admDirty.has("merchant:"+m.id);
     return (
-    '<div class="adm-item" data-mid="'+id+'">'+
-      '<b>'+esc(m.name)+'</b>'+
-      '<div class="line" style="margin-top:8px"><label style="display:flex;align-items:center;gap:8px;font-size:12.5px"><input type="checkbox" data-af="affiliate" '+(m.affiliate?"checked":"")+'> Programme d\u2019affiliation actif</label></div>'+
-      '<div class="line"><input type="text" data-af="template" value="'+esc(m.template||"")+'" placeholder="Modèle de lien (utilise {LINK})" style="flex:1 1 100%;background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:6px 8px;font-size:12px"></div>'+
+    '<div class="adm-item" data-mid="'+m.id+'">'+
+      '<div style="display:flex;align-items:center;gap:8px"><b style="flex:1">'+esc(m.name)+(dirty?'<span class="dirty-mark"></span>':'')+'</b><button class="adm-mini del" data-del-aff="'+m.id+'">'+IC.trash+'</button></div>'+
+      '<div class="line"><input type="text" data-af="name" value="'+esc(m.name)+'" placeholder="Nom de la boutique" style="flex:1 1 100%;background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:6px 8px;font-size:12px"></div>'+
+      '<div class="line"><input type="text" data-af="template" value="'+esc(m.template||"")+'" placeholder="Lien d\u2019affiliation" style="flex:1 1 100%;background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:6px 8px;font-size:12px"></div>'+
     '</div>');
-  }).join("");
+  }).join("") || '<p class="adm-note">Aucune boutique ajoutée pour le moment.</p>';
   box.querySelectorAll(".adm-item").forEach(item=>{
     const id=item.dataset.mid;
+    const m = admMerchants.find(x=>x.id===id);
     item.querySelectorAll("[data-af]").forEach(inp=>{
-      const ev = inp.type==="checkbox"?"change":"input";
-      inp.addEventListener(ev, ()=>{
-        admMerchants[id][inp.dataset.af] = inp.type==="checkbox"?inp.checked:inp.value;
+      inp.addEventListener("input", ()=>{
+        m[inp.dataset.af]=inp.value;
         admDirty.add("merchant:"+id);
         markDirty(item);
       });
     });
   });
+  box.querySelectorAll("[data-del-aff]").forEach(b=>b.addEventListener("click", async ()=>{
+    try{ await api("/api/admin/affiliate/"+b.dataset.delAff, {method:"DELETE"}); admMerchants=admMerchants.filter(x=>x.id!==b.dataset.delAff); admDirty.delete("merchant:"+b.dataset.delAff); toast("Boutique supprimée."); admRenderAffiliateList(); }
+    catch(e){ toast(t("backend_down"),"warn"); }
+  }));
+}
+async function admAddAffiliate(){
+  const name = $("#af-name").value.trim();
+  const template = $("#af-template").value.trim();
+  if(!name){ toast("Écris le nom de la boutique.","warn"); return; }
+  try{
+    const d = await api("/api/admin/affiliate", {method:"POST", body:JSON.stringify({name, template})});
+    admMerchants.push(d.item);
+    $("#af-name").value=""; $("#af-template").value="";
+    toast("Boutique ajoutée et enregistrée définitivement.");
+    admRenderAffiliateList();
+  }catch(e){ toast(t("backend_down"),"warn"); }
 }
 
 /* -- Clés API -- */
@@ -1682,8 +1716,8 @@ async function admSave(){
     try{
       if(key.startsWith("merchant:")){
         const id = key.slice("merchant:".length);
-        const m = admMerchants[id];
-        await api("/api/admin/affiliate/"+id, {method:"PUT", body:JSON.stringify({name:m.name, affiliate:m.affiliate, template:m.template})});
+        const m = admMerchants.find(x=>x.id===id);
+        if(m) await api("/api/admin/affiliate/"+id, {method:"PUT", body:JSON.stringify({name:m.name, template:m.template})});
       }else{
         const p = admProducts.find(x=>x.id===key);
         if(p) await api("/api/admin/products/"+p.id, {method:"PUT", body:JSON.stringify({name:p.name, image:p.image, cat:p.cat, brand:p.brand, tags:p.tags, specs:p.specs, offers:p.offers})});
@@ -1695,6 +1729,7 @@ async function admSave(){
   if(fail===0) toast("Toutes les modifications sont enregistrées définitivement (" + ok + ").");
   else toast(ok+" enregistrée(s), "+fail+" en échec — réessaie.", "warn");
   if(admTabCur==="p") admRenderProductList();
+  else if(admTabCur==="a") admRenderAffiliateList();
 }
 
 /* ---------- 17. État réseau ---------- */
