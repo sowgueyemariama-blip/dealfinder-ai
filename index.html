@@ -745,7 +745,7 @@ function authShowErr(msg){
 }
 function authHideErr(){const e=$("#auth-err");if(e)e.classList.remove("show")}
 
-async function doAuth(){
+function doAuth(){
   authHideErr();
   const nameEl=$("#a-name"), emailEl=$("#a-email");
   const name=(nameEl.value||"").trim();
@@ -753,28 +753,34 @@ async function doAuth(){
   nameEl.classList.remove("err"); emailEl.classList.remove("err");
   if(name.length<2){ nameEl.classList.add("err"); return authShowErr(t("f_name")); }
   if(!EMAIL_RE.test(email)){ emailEl.classList.add("err"); return authShowErr(t("f_email")); }
-  const btn=$("#a-submit"); btn.disabled=true; const oldTxt=btn.textContent;
-  if(API_EFFECTIVE===null){
-    btn.textContent="Connexion au serveur…";
-    await detectBackend();
+
+  // Connexion immédiate et locale : pas de mot de passe, donc la connexion
+  // ne dépend jamais du serveur pour réussir — on peut se (dé)connecter
+  // n'importe quand, même hors ligne ou pendant que Render se réveille.
+  Auth.setSession(email, name, null);
+  closeAll();
+  toast(t("login_done",{0:name}));
+  goView("profile");
+
+  // Synchronisation avec le serveur en arrière-plan (favoris/historique) —
+  // silencieuse, sans jamais afficher d'erreur ni bloquer la connexion.
+  syncAccountInBackground(name, email);
+}
+async function syncAccountInBackground(name, email){
+  for(let attempt=0; attempt<6; attempt++){
+    try{
+      if(API_EFFECTIVE===null) await detectBackend();
+      if(API_EFFECTIVE===null) throw new Error("offline");
+      const d = await api("/api/auth/register", {method:"POST", body:JSON.stringify({name,email})}, 45000);
+      const s = Auth.session();
+      if(s && s.email===email){ Auth.setSession(email, d.user.name, d.token); }
+      await syncFromServer();
+      return;
+    }catch(e){ await sleep(5000); }
   }
-  if(API_EFFECTIVE===null){
-    btn.disabled=false; btn.textContent=oldTxt;
-    return authShowErr(t("backend_down"));
-  }
-  btn.textContent="…";
-  try{
-    const d = await api("/api/auth/register", {method:"POST", body:JSON.stringify({name,email})}, 30000);
-    Auth.setSession(email, d.user.name, d.token);
-    closeAll();
-    toast(t("login_done",{0:d.user.name}));
-    goView("profile");
-    await syncFromServer();
-  }catch(err){
-    if(err.data && err.data.error==="invalid_name") authShowErr(t("f_name"));
-    else if(err.data && err.data.error==="invalid_email") authShowErr(t("f_email"));
-    else authShowErr(t("backend_down"));
-  }finally{ btn.disabled=false; btn.textContent=oldTxt; }
+  // Après plusieurs essais silencieux : la personne reste connectée localement
+  // (favoris/historique marchent déjà en local) ; seule la synchronisation
+  // multi-appareil sera simplement retentée à la prochaine ouverture de l'app.
 }
 $("#auth-form").addEventListener("submit", e=>{ e.preventDefault(); doAuth(); });
 $$("#auth-form .login-inp").forEach(inp=>inp.addEventListener("input", ()=>inp.classList.remove("err")));
